@@ -48,7 +48,7 @@ function KeyTakeaways(props: any) {
                 alignItems: 'center'
             }}>
                 <View style={{
-                    backgroundColor: '#EA4D60',
+                    backgroundColor: '#F2C740',
                     borderRadius: 4,
                     padding: 2,
                     marginRight: 8,

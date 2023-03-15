@@ -124,7 +124,7 @@ function Comment(props: any) {
                     paddingTop: 4,
                     paddingBottom: 4,
                     paddingLeft: 16,
-                    borderLeftColor: '#EA4D60',
+                    borderLeftColor: '#F2C740',
                     borderLeftWidth: 2,
                 }]}
                 onPress={() => {
@@ -311,7 +311,7 @@ const mdstyles: MarkdownStyles = {
         marginTop: 0,
     },
     link: {
-        color: '#EA4D60',
+        color: '#F2C740',
         marginTop: 0,
 
     },

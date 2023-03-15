@@ -169,7 +169,7 @@ function Bar(props: any) {
                                 props.setMode({ tag: 'Normal' });
                             }}>
                                 <Animated.View style={animatedStyles} >
-                                    <IconX size={28} color='#C2C2C2' style={{
+                                    <IconX size={28} stroke={1.4} color='#C2C2C2' style={{
                                         padding: 4,
                                         marginRight: props.mode.tag == 'Comment' ? 16 : 0,
                                     }} />
@@ -196,7 +196,7 @@ function Bar(props: any) {
                                 _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                 setText('');
                             }}
-                            selectionColor='#EA4D60'
+                            selectionColor='#F2C740'
                         />}
 
                         {/* {props.mode.tag == 'Normal' && <IconSearch size={24} color='#C2C2C2' />} */}
@@ -229,9 +229,9 @@ function Bar(props: any) {
                             }}>
                                 <View>
                                     {
-                                        Platform.OS == 'ios' ? <IconBrandSafari size={28} color='#C2C2C2' stroke={1.8} style={{
+                                        Platform.OS == 'ios' ? <IconBrandSafari size={28} color='#C2C2C2' stroke={1.2} style={{
                                             padding: 4,
-                                        }} /> : <IconArrowUpRightCircle size={28} color='#C2C2C2' stroke={1.8} style={{
+                                        }} /> : <IconArrowUpRightCircle size={28} color='#C2C2C2' stroke={1.2} style={{
                                             padding: 4,
                                         }} />
                                     }
