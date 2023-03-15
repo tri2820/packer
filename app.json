@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "packer",
+    "name": "Packer",
     "slug": "packer",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -15,7 +15,8 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tri2820.packer"
     },
     "android": {
       "adaptiveIcon": {
@@ -25,6 +26,11 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "99a4fb77-5ba1-404f-8f20-f9680db3e4dc"
+      }
     }
   }
 }
