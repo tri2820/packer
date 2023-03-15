@@ -1,0 +1,228 @@
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
+import Animated, { FadeInDown, FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { constants } from '../utils';
+import { IconArrowAutofitHeight, IconActivity } from 'tabler-icons-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import Comment from './Comment';
+import * as Haptics from 'expo-haptics';
+import MoreDiscussionsButton from './MoreDiscussionsButton';
+import PostHeader from './PostHeader';
+import CommentSection from './CommentSection';
+import { INIT_DATE, supabaseClient } from '../supabaseClient';
+import VideoPlayer from './VideoPlayer';
+import KeyTakeaways from './KeyTakeaways';
+
+
+function Post(props: any) {
+    const [comments, setComments] = useState<any[]>([]);
+    const [refreshing, setRefreshing] = useState(false);
+    const [timeScrolledOn, setTimeScrolledOn] = useState(0);
+    const [firstLoadResult, setFirstLoadResult] = useState<'waiting' | 'success' | 'failure'>('waiting');
+    const [videoPlaying, setVideoPlaying] = useState(false);
+    const [waitingForCommentLoading, setWaitingForCommentLoading] = useState(false);
+    const [count, setCount] = useState(0);
+    const [page, setPage] = useState(0);
+    const insets = useSafeAreaInsets();
+    const ref = useRef<any>(null);
+
+    useEffect(() => {
+        setWaitingForCommentLoading(false)
+    }, [page])
+
+    const loadComments = async () => {
+        console.log('debug requesting comments from post');
+        const { data, error } = await supabaseClient
+            .from('comments')
+            .select()
+            .lt('created_at', INIT_DATE)
+            .order('created_at', { ascending: false })
+            .eq('post_id', props.post.id)
+            .is('parent_id', null)
+            .range(page, page + 5);
+
+        if (error) {
+            console.log('debug error query comments from post', error)
+            return 'failure';
+        }
+        setComments(comments.concat(data));
+        setPage(page + 6);
+        return 'success'
+    }
+
+    const getCount = async () => {
+        const { count, error } = await supabaseClient
+            .from('comments')
+            .select('*', { count: 'exact', head: true })
+            .lt('created_at', INIT_DATE)
+            .eq('post_id', props.post.id)
+            .is('parent_id', null)
+
+        if (error) {
+            console.log('debug error getting count from post', error)
+            return;
+        }
+
+        setCount(count ? count : 0)
+    }
+
+    useEffect(() => {
+        if (props.activePostIndex != props.index) return;
+        setTimeScrolledOn(timeScrolledOn + 1);
+    }, [props.activePostIndex])
+
+    useEffect(() => {
+        if (timeScrolledOn != 1) return;
+        (async () => {
+            const result = await loadComments();
+            setFirstLoadResult(result)
+        })()
+        getCount();
+    }, [timeScrolledOn])
+
+    const onRefresh = React.useCallback(() => {
+        props.setMode({ tag: 'Normal' });
+    }, []);
+
+    useEffect(() => {
+        if (props.activePostIndex == props.index) {
+            setVideoPlaying(true);
+            return;
+        }
+        setVideoPlaying(false);
+    }, [props.activePostIndex])
+
+    useEffect(() => {
+        if (props.activePostIndex != props.index) return;
+        if (props.mode.tag == 'Normal') {
+            ref.current?.scrollToOffset({ offset: -insets.top });
+            return;
+        }
+
+        if (props.mode.tag == 'Comment') {
+            comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+            return;
+        }
+    }, [props.mode])
+
+    const renderItem = ({ item, index }: any) => <View style={{
+        paddingHorizontal: 16
+    }}>
+        <Comment
+            startLoading={props.activePostIndex == props.index}
+            comment={item}
+            level={0}
+            setMode={props.setMode}
+        />
+    </View>
+
+    const keyExtractor = (item: any) => item.id
+
+    return (
+        <View style={{
+            backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
+            height: props.height
+        }}>
+            <FlatList
+                listKey={props.post.id}
+                ref={ref}
+                contentInset={{ top: insets.top }}
+                automaticallyAdjustContentInsets={false}
+                scrollEnabled={props.mode.tag == 'Comment'}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['transparent']}
+                        progressBackgroundColor='transparent'
+                        tintColor={'transparent'}
+                    />
+                }
+
+                onScroll={(event) => {
+                    // Hack because onEndReached doesn't work
+                    const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+                    const y = event.nativeEvent.contentOffset.y;
+                    if (y < end * 0.9) return;
+                    // console.log('debug over 0.9');
+                    if (waitingForCommentLoading) {
+                        // console.log('debug waitingForCommentLoading');
+                        return;
+                    }
+                    if (comments.length >= count) {
+                        // console.log('debug have all comments already');
+                        return;
+                    }
+
+                    console.log('debug loading');
+                    setWaitingForCommentLoading(true);
+                    loadComments();
+                }}
+
+                data={props.mode.tag == 'Normal' ? comments.slice(0, 5) : comments}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                ListHeaderComponent={<View>
+                    <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
+                    <View style={{
+                        paddingHorizontal: 16
+                    }}>
+                        <PostHeader post={props.post} setMode={props.setMode} />
+                        <KeyTakeaways content={props.post.keytakeaways} />
+                        {
+                            (firstLoadResult != 'waiting' && comments.length == 0) &&
+                            <Animated.View style={{
+                                flex: 1,
+                                flexDirection: 'row',
+                                marginLeft: 'auto',
+                                marginRight: 'auto',
+                            }}
+                                entering={FadeInUp}
+                            >
+                                <IconActivity size={16} color='#A3A3A3' stroke={1.8} />
+                                <Text style={{
+                                    color: '#A3A3A3',
+                                    marginLeft: 4,
+                                    marginRight: 16 + 4
+                                }}
+
+                                >
+                                    {firstLoadResult == 'success' ? "It's empty here" : "Dang, error querying comments"}
+                                </Text>
+                            </Animated.View>
+                        }
+                    </View>
+                </View>}
+            />
+
+            {
+                props.mode.tag == 'Normal' && <View style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                }}>
+                    <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.5)']} style={{
+                        width: '100%',
+                        paddingBottom: 8,
+                        paddingTop: 64,
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }} >
+                        {
+                            comments.length > 0 && <MoreDiscussionsButton onPress={() => {
+                                props.setMode({ tag: 'Comment' })
+                            }} />
+                        }
+                    </LinearGradient>
+                </View>
+            }
+
+        </View>
+    );
+}
+
+export default Post;
