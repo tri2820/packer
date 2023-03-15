@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeInDown, FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants } from '../utils';
 import { IconArrowAutofitHeight, IconActivity } from 'tabler-icons-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import Comment from './Comment';
+import Comment, { MemoComment } from './Comment';
 import * as Haptics from 'expo-haptics';
 import MoreDiscussionsButton from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
@@ -20,12 +20,14 @@ import KeyTakeaways from './KeyTakeaways';
 function Post(props: any) {
     const [comments, setComments] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
-    const [timeScrolledOn, setTimeScrolledOn] = useState(0);
+    // const [timeScrolledOn, setTimeScrolledOn] = useState(0);
+    const [inited, setInited] = useState(false);
     const [firstLoadResult, setFirstLoadResult] = useState<'waiting' | 'success' | 'failure'>('waiting');
     const [videoPlaying, setVideoPlaying] = useState(false);
     const [waitingForCommentLoading, setWaitingForCommentLoading] = useState(false);
     const [count, setCount] = useState(0);
     const [page, setPage] = useState(0);
+    const [shouldActive, setShouldActive] = useState(false);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
 
@@ -70,33 +72,47 @@ function Post(props: any) {
     }
 
     useEffect(() => {
-        if (props.activePostIndex != props.index) return;
-        setTimeScrolledOn(timeScrolledOn + 1);
-    }, [props.activePostIndex])
+        setShouldActive(props.shouldActive);
+        if (inited) return;
+        if (!props.shouldActive) return;
 
-    useEffect(() => {
-        if (timeScrolledOn != 1) return;
         (async () => {
+            // Sleep
+            await new Promise(r => setTimeout(r, 300));
+            let active = undefined;
+            setShouldActive(shouldActive => {
+                active = shouldActive;
+                return shouldActive
+            })
+
+            // Not focusing -> return
+            if (!active) {
+                console.log('!! debug request', active, props.index);
+                return;
+            }
+            console.log('!! debug request', active, props.index);
+            setInited(true);
             const result = await loadComments();
-            setFirstLoadResult(result)
+            setFirstLoadResult(result);
+            getCount();
         })()
-        getCount();
-    }, [timeScrolledOn])
+
+    }, [props.shouldActive])
 
     const onRefresh = React.useCallback(() => {
         props.setMode({ tag: 'Normal' });
     }, []);
 
     useEffect(() => {
-        if (props.activePostIndex == props.index) {
+        if (props.shouldActive) {
             setVideoPlaying(true);
             return;
         }
         setVideoPlaying(false);
-    }, [props.activePostIndex])
+    }, [props.shouldActive]);
 
     useEffect(() => {
-        if (props.activePostIndex != props.index) return;
+        if (!props.shouldActive) return;
         if (props.mode.tag == 'Normal') {
             ref.current?.scrollToOffset({ offset: -insets.top });
             return;
@@ -111,8 +127,8 @@ function Post(props: any) {
     const renderItem = ({ item, index }: any) => <View style={{
         paddingHorizontal: 16
     }}>
-        <Comment
-            startLoading={props.activePostIndex == props.index}
+        <MemoComment
+            startLoading={props.shouldActive}
             comment={item}
             level={0}
             setMode={props.setMode}
@@ -120,7 +136,27 @@ function Post(props: any) {
     </View>
 
     const keyExtractor = (item: any) => item.id
+    const onScroll = (event: any) => {
+        // Hack because onEndReached doesn't work
+        const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+        const y = event.nativeEvent.contentOffset.y;
+        if (y < end * 0.9) return;
+        // console.log('debug over 0.9');
+        if (waitingForCommentLoading) {
+            // console.log('debug waitingForCommentLoading');
+            return;
+        }
+        if (comments.length >= count) {
+            // console.log('debug have all comments already');
+            return;
+        }
 
+        console.log('debug loading');
+        setWaitingForCommentLoading(true);
+        loadComments();
+    }
+
+    console.log('Post was rendered!', props.index, new Date().toLocaleTimeString())
     return (
         <View style={{
             backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
@@ -141,28 +177,11 @@ function Post(props: any) {
                         tintColor={'transparent'}
                     />
                 }
-
-                onScroll={(event) => {
-                    // Hack because onEndReached doesn't work
-                    const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-                    const y = event.nativeEvent.contentOffset.y;
-                    if (y < end * 0.9) return;
-                    // console.log('debug over 0.9');
-                    if (waitingForCommentLoading) {
-                        // console.log('debug waitingForCommentLoading');
-                        return;
-                    }
-                    if (comments.length >= count) {
-                        // console.log('debug have all comments already');
-                        return;
-                    }
-
-                    console.log('debug loading');
-                    setWaitingForCommentLoading(true);
-                    loadComments();
-                }}
-
-                data={props.mode.tag == 'Comment' && props.activePostIndex == props.index ? comments : comments.slice(0, 5)}
+                onScroll={onScroll}
+                data={
+                    // comments
+                    props.mode.tag == 'Comment' && props.shouldActive ? comments : comments.slice(0, 5)
+                }
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 ListHeaderComponent={<View>
@@ -226,3 +245,4 @@ function Post(props: any) {
 }
 
 export default Post;
+export const MemoPost = memo(Post);

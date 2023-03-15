@@ -5,8 +5,8 @@ import { FlatList } from 'react-native-gesture-handler';
 import Animated, { useDerivedValue } from 'react-native-reanimated';
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname } from '../utils';
-import Post from './Post';
+import { constants, normalizedHostname, randomColor } from '../utils';
+import Post, { MemoPost } from './Post';
 import VideoPost from './VideoPost';
 
 const androidPagingFallback = Platform.OS == 'android' && {
@@ -15,8 +15,14 @@ const androidPagingFallback = Platform.OS == 'android' && {
 }
 
 function Wall(props: any) {
-    const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
-    const renderItem = ({ index, item }: any) => <Post height={props.height} post={item} activePostIndex={props.activePostIndex} index={index} mode={props.mode} setMode={props.setMode} />
+    // const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
+    const renderItem = ({ index, item }: any) =>
+        // <View style={{
+        //     height: props.height,
+        //     width: constants.width,
+        //     backgroundColor: randomColor()
+        // }}></View>
+        <MemoPost height={props.height} post={item} shouldActive={props.activePostIndex == index} index={index} mode={props.mode} setMode={props.setMode} />
     const keyExtractor = (item: any) => item.id
     const onEndReached = () => { props.requestPost() }
     const onScroll = (event: any) => {
@@ -45,7 +51,7 @@ function Wall(props: any) {
             renderItem={renderItem}
             onEndReachedThreshold={2}
             onEndReached={onEndReached}
-            getItemLayout={getItemLayout}
+            // getItemLayout={getItemLayout}
             onScroll={onScroll}
             // removeClippedSubviews
             windowSize={7}

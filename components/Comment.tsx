@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, Platform, Linking, TouchableOpacity } from 'react-native';
 import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutLeft, FadeOutUp, Layout, SequencedTransition, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -81,6 +81,14 @@ function Comment(props: any) {
         setRequestingComments(false);
     }
 
+    const onLinkPress = (target: string) => {
+        props.setMode({
+            tag: 'App',
+            value: target,
+            insetsColor: 'rgba(0, 0, 0, 0)'
+        })
+    }
+
     useEffect(() => {
         if (!props.startLoading) return;
         if (props.level > 1) return;
@@ -88,7 +96,7 @@ function Comment(props: any) {
         if (inited) return;
         setInited(true);
 
-        // console.log('debug here', props.level);
+        console.log('debug comment request', props.level);
 
         (async () => {
             const { c, data: count } = await requestCommentsCount(props.comment.id);
@@ -98,6 +106,15 @@ function Comment(props: any) {
         })()
     }, [props.startLoading])
 
+    const switchMode = () => {
+        if (mode == 'Inline') {
+            setMode('Normal')
+            return;
+        }
+
+        setMode('Inline')
+    }
+    console.log('debug Comment was rendered', new Date().toLocaleTimeString())
     return (
         <Animated.View style={{
             // marginTop: 4,
@@ -127,14 +144,7 @@ function Comment(props: any) {
                     borderLeftColor: '#F2C740',
                     borderLeftWidth: 2,
                 }]}
-                onPress={() => {
-                    if (mode == 'Inline') {
-                        setMode('Normal')
-                        return;
-                    }
-
-                    setMode('Inline')
-                }}
+                onPress={switchMode}
             >
 
                 <View style={{
@@ -179,13 +189,7 @@ function Comment(props: any) {
                                 quote,
                                 link
                             }}
-                            onLinkPress={(target: string) => {
-                                props.setMode({
-                                    tag: 'App',
-                                    value: target,
-                                    insetsColor: 'rgba(0, 0, 0, 0)'
-                                })
-                            }}
+                            onLinkPress={onLinkPress}
                             styles={mdstyles}
                         >
                             {
@@ -206,7 +210,7 @@ function Comment(props: any) {
                             paddingLeft: props.level > 0 ? 20 : 0
                         }}
                     >
-                        <Comment
+                        <MemoComment
                             comment={c}
                             level={props.level + 1}
                             startLoading={props.startLoading}
@@ -227,9 +231,7 @@ function Comment(props: any) {
                     paddingHorizontal: 8,
                     borderRadius: 4
                 }}
-                    onPress={() => {
-                        requestComments()
-                    }}
+                    onPress={() => { requestComments() }}
                 >
                     <Text style={{
                         color: '#e6e6e6',
@@ -353,3 +355,4 @@ const mdstyles: MarkdownStyles = {
 }
 
 export default Comment;
+export const MemoComment = memo(Comment);

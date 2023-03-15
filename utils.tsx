@@ -18,6 +18,13 @@ interface App {
     readonly insetsColor: string;
 }
 
+export const randomColor = () => {
+    const randomColor = Math.floor(Math.random() * 16777215)
+        .toString(16)
+        .padStart(6, '0');
+    return `#${randomColor}`;
+};
+
 export const normalizedHostname = (hostname: string) => hostname.startsWith('www.') ? hostname.slice(4) : hostname;
 
 // export const hostnameEq = (hostname: string, x: string) => {
