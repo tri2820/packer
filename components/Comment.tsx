@@ -217,7 +217,7 @@ function Comment(props: any) {
             </View>
 
             {
-                comments.length < count && !requestingComments &&
+                comments.length < count && !requestingComments && mode == 'Normal' &&
                 <TouchableOpacity style={{
                     backgroundColor: '#2C2C2C',
                     marginTop: 4,

@@ -162,7 +162,7 @@ function Post(props: any) {
                     loadComments();
                 }}
 
-                data={props.mode.tag == 'Normal' ? comments.slice(0, 5) : comments}
+                data={props.mode.tag == 'Comment' && props.activePostIndex == props.index ? comments : comments.slice(0, 5)}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 ListHeaderComponent={<View>
