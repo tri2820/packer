@@ -3,12 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, View, TouchableOpacity, Linking, Platform } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
-import { IconX, IconLock, IconChevronLeft, IconArrowUpRightCircle, IconBrandSafari, IconSearch } from 'tabler-icons-react-native';
-import Animated, { Easing, KeyboardState, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import { IconX, IconAmpersand, IconLock, IconChevronLeft, IconArrowUpRightCircle, IconBrandSafari, IconSearch } from 'tabler-icons-react-native';
+import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, KeyboardState, useAnimatedKeyboard, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
 
 function Bar(props: any) {
     const [text, setText] = useState('');
+
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
     const MARGIN_TOP = insets.top + 100;
@@ -18,7 +19,10 @@ function Bar(props: any) {
     const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
     const offset = useSharedValue(0);
     const _offset = useSharedValue(0);
+    const [focused, setFocused] = useState(false);
 
+    // const showHint = useSharedValue(false);
+    const ref = useRef<any>(undefined);
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -43,15 +47,35 @@ function Bar(props: any) {
         return normalizedHostname(url.hostname);
     }
 
+    const _text = useDerivedValue(() => {
+        return text
+    }, [text]);
+
+
     const barStyles = useAnimatedStyle(() => {
-        if (keyboard.state.value == KeyboardState.OPENING && offset.value > -(keyboard.height.value - insets.bottom)) {
+        // ONE
+        // console.log('debug showHint.value', showHint.value == '& ');
+
+        let newValue = 0;
+        if
+            (
+            // keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING
+            // && 
+            offset.value > 0 || keyboard.state.value == KeyboardState.OPENING
+        ) {
+            // offset.value > -(keyboard.height.value - insets.bottom + (copiedText.value.startsWith('& ') ? 24 : 0))) {
             offset.value = -(keyboard.height.value - insets.bottom)
             _offset.value = -(keyboard.height.value - insets.bottom)
         }
 
+        const x = _text.value.startsWith('& ') && focused ? 24 : 0
+
         return {
             transform: [{
-                translateY: offset.value
+                translateY:
+                    // withSpring(
+                    offset.value - x
+                // - x, { mass: 0.01, overshootClamping: true })
             }]
         };
     });
@@ -68,6 +92,7 @@ function Bar(props: any) {
         .activeOffsetY([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
+            // TWO
             const keyboardOffset = -(keyboard.height.value - insets.bottom);
             if (keyboardOffset < newValue) {
                 _offset.value = keyboardOffset;
@@ -88,15 +113,18 @@ function Bar(props: any) {
         })
         .onEnd((event, success) => {
             const newOffset = _offset.value + event.velocityY / constants.pixelratio
+
             if (newOffset > minOffset / 2) {
-                _offset.value = withSpring(keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
-                offset.value = withSpring(keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
+                // THREE
+                _offset.value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0
+                offset.value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0
                 return;
             }
 
             _offset.value = withSpring(minOffset, { velocity: event.velocityY, mass: 0.15 });
             offset.value = withSpring(minOffset, { velocity: event.velocityY, mass: 0.15 });
-        });
+        })
+
 
     return (
         <>
@@ -148,13 +176,10 @@ function Bar(props: any) {
                         }} />
 
                     </View>
+
                     <Animated.View
                         style={{
                             // backgroundColor: 'red',
-                            flex: 1,
-                            flexDirection: 'row',
-                            height: props.minBarHeight - HANDLER_HEIGHT,
-                            alignItems: 'center',
                             paddingLeft: 20,
                             paddingRight: 20,
                             width: '100%',
@@ -164,82 +189,132 @@ function Bar(props: any) {
                         }}
                     >
                         {
-                            (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
-                            <TouchableOpacity onPress={() => {
-                                props.setMode({ tag: 'Normal' });
-                            }}>
-                                <Animated.View style={animatedStyles} >
-                                    <IconX size={28} stroke={1.4} color='#C2C2C2' style={{
-                                        padding: 4,
-                                        marginRight: props.mode.tag == 'Comment' ? 16 : 0,
-                                    }} />
-                                </Animated.View>
-                            </TouchableOpacity>
-                        }
-
-                        {props.mode.tag != 'App' && <TextInput
-                            value={text}
-                            onChangeText={setText}
-                            placeholder='Add a discussion'
-                            placeholderTextColor='#C2C2C2'
-                            style={{
-                                color: 'white',
-                                height: '100%',
-                                flex: 1,
-                                marginLeft: 0,
-                                marginRight: 0,
-                            }}
-                            returnKeyType='send'
-                            keyboardAppearance='dark'
-                            onSubmitEditing={() => {
-                                offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-                                _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-                                setText('');
-                            }}
-                            selectionColor='#F2C740'
-                        />}
-
-                        {/* {props.mode.tag == 'Normal' && <IconSearch size={24} color='#C2C2C2' />} */}
-
-                        {
-                            props.mode.tag == 'App' &&
-                            <View style={{
-                                // backgroundColor: 'blue',
+                            text.startsWith('& ') &&
+                            focused &&
+                            <Animated.View style={{
+                                marginTop: 4,
+                                height: 20,
                                 width: '100%',
-                                flex: 1,
-                                alignItems: 'center',
-                                // marginRight: 28 + 16
-                            }}>
+                                // backgroundColor: 'blue',
+                                // alignContent: 'center',
+                                justifyContent: 'center'
+                            }}
+                                entering={FadeInDown}
+                                exiting={FadeOutDown}
+                            >
                                 <Text style={{
                                     color: '#C2C2C2',
-                                    fontWeight: '600'
-                                }}>{
-                                        getSourceName(props.mode.value)
-                                    }
-                                </Text>
-                            </View>
+                                    fontSize: 10
+                                }}>An AI will reply you.</Text>
+                            </Animated.View>
                         }
 
-                        {
-                            props.mode.tag == 'App' &&
-                            <TouchableOpacity onPress={() => {
-                                Linking.openURL(props.mode.value).catch(error =>
-                                    console.warn('An error occurred: ', error),
-                                )
-                            }}>
-                                <View>
-                                    {
-                                        Platform.OS == 'ios' ? <IconBrandSafari size={28} color='#C2C2C2' stroke={1.2} style={{
+                        <Animated.View style={{
+                            flex: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            height: props.minBarHeight - HANDLER_HEIGHT,
+                            // backgroundColor: 'blue'
+                        }}>
+                            {
+                                (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
+                                <TouchableOpacity onPress={() => {
+                                    props.setMode({ tag: 'Normal' });
+                                }}>
+                                    <Animated.View style={animatedStyles} >
+                                        <IconX size={28} stroke={1.4} color='#C2C2C2' style={{
                                             padding: 4,
-                                        }} /> : <IconArrowUpRightCircle size={28} color='#C2C2C2' stroke={1.2} style={{
-                                            padding: 4,
+                                            marginRight: props.mode.tag == 'Comment' ? 16 : 0,
                                         }} />
-                                    }
+                                    </Animated.View>
+                                </TouchableOpacity>
+                            }
 
+                            {props.mode.tag != 'App' && <>
+                                <TextInput
+                                    onFocus={() => { setFocused(true) }}
+                                    onBlur={() => { setFocused(false) }}
+                                    ref={ref}
+                                    value={text}
+                                    onChangeText={setText}
+                                    placeholder='Add a discussion...'
+                                    placeholderTextColor='#C2C2C2'
+                                    style={{
+                                        color: '#F1F1F1',
+                                        height: '100%',
+                                        flex: 1,
+                                        marginLeft: 0,
+                                        marginRight: 0
+                                    }}
+                                    returnKeyType='send'
+                                    keyboardAppearance='dark'
+                                    onSubmitEditing={() => {
+                                        offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+                                        _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+                                        setText('');
+                                    }}
+                                    selectionColor='#F2C740'
+                                />
+
+                            </>}
+
+
+
+                            {
+                                props.mode.tag == 'Normal' &&
+                                <Pressable
+                                    onPress={() => {
+                                        setText('& '.concat(text))
+                                        ref?.current.focus()
+                                    }}
+                                >
+                                    <IconAmpersand size={24} stroke={2.4} color='#F1F1F1' />
+                                </Pressable>
+                            }
+
+                            {
+                                props.mode.tag == 'App' &&
+                                <View style={{
+                                    // backgroundColor: 'blue',
+                                    width: '100%',
+                                    flex: 1,
+                                    alignItems: 'center',
+                                    // marginRight: 28 + 16
+                                }}>
+                                    <Text style={{
+                                        color: '#C2C2C2',
+                                        fontWeight: '600'
+                                    }}>{
+                                            getSourceName(props.mode.value)
+                                        }
+                                    </Text>
                                 </View>
-                            </TouchableOpacity>
-                        }
+                            }
+
+                            {
+                                props.mode.tag == 'App' &&
+                                <TouchableOpacity onPress={() => {
+                                    Linking.openURL(props.mode.value).catch(error =>
+                                        console.warn('An error occurred: ', error),
+                                    )
+                                }}>
+                                    <View>
+                                        {
+                                            Platform.OS == 'ios' ? <IconBrandSafari size={28} color='#C2C2C2' stroke={1.2} style={{
+                                                padding: 4,
+                                            }} /> : <IconArrowUpRightCircle size={28} color='#C2C2C2' stroke={1.2} style={{
+                                                padding: 4,
+                                            }} />
+                                        }
+
+                                    </View>
+                                </TouchableOpacity>
+                            }
+                        </Animated.View>
+
                     </Animated.View>
+
+
 
                 </Animated.View>
             </GestureDetector>
