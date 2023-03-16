@@ -23,7 +23,7 @@ function Post(props: any) {
                 overflow: 'hidden',
                 flex: 1,
                 flexDirection: 'row',
-                alignItems: 'center'
+                alignItems: 'center',
             }}
                 entering={FadeInDown}
             >

@@ -151,7 +151,7 @@ function Post(props: any) {
             return;
         }
 
-        console.log('debug loading');
+        // console.log('debug loading');
         setWaitingForCommentLoading(true);
         loadComments();
     }
@@ -177,11 +177,28 @@ function Post(props: any) {
                         tintColor={'transparent'}
                     />
                 }
-                onScroll={onScroll}
+                onScroll={
+                    onScroll
+                }
                 data={
                     // comments
-                    props.mode.tag == 'Comment' && props.shouldActive ? comments : comments.slice(0, 5)
+                    props.shouldActive ? comments : []
                 }
+                onEndReached={() => {
+                    console.log('debug one end reached', props.index);
+                    if (waitingForCommentLoading) {
+                        // console.log('debug waitingForCommentLoading');
+                        return;
+                    }
+                    if (comments.length >= count) {
+                        // console.log('debug have all comments already');
+                        return;
+                    }
+
+                    // console.log('debug loading');
+                    setWaitingForCommentLoading(true);
+                    loadComments();
+                }}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 ListHeaderComponent={<View>
@@ -218,26 +235,37 @@ function Post(props: any) {
             />
 
             {
-                props.mode.tag == 'Normal' && <View style={{
-                    position: 'absolute',
-                    bottom: 0,
-                    left: 0,
-                    right: 0,
-                }}>
-                    <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.5)']} style={{
+                props.mode.tag == 'Normal' &&
+                <>
+
+
+                    <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.9)']} style={{
                         width: '100%',
-                        paddingBottom: 8,
-                        paddingTop: 64,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }} >
-                        {
-                            comments.length > 0 && <MoreDiscussionsButton onPress={() => {
+                        position: 'absolute',
+                        bottom: 0,
+                        height: 128
+                    }}
+                        pointerEvents='none'
+                    />
+
+                    {
+                        comments.length > 0 &&
+                        <View style={{
+                            position: 'absolute',
+                            bottom: 16,
+                            alignSelf: 'center',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            // backgroundColor: 'blue'
+                        }}>
+                            <MoreDiscussionsButton onPress={() => {
                                 props.setMode({ tag: 'Comment' })
                             }} />
-                        }
-                    </LinearGradient>
-                </View>
+                        </View>
+                    }
+
+                </>
+
             }
 
         </View>

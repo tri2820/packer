@@ -15,7 +15,7 @@ const androidPagingFallback = Platform.OS == 'android' && {
 }
 
 function Wall(props: any) {
-    // const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
+    const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) =>
         // <View style={{
         //     height: props.height,
@@ -51,7 +51,7 @@ function Wall(props: any) {
             renderItem={renderItem}
             onEndReachedThreshold={2}
             onEndReached={onEndReached}
-            // getItemLayout={getItemLayout}
+            getItemLayout={getItemLayout}
             onScroll={onScroll}
             // removeClippedSubviews
             windowSize={7}

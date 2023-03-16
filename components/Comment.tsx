@@ -114,7 +114,7 @@ function Comment(props: any) {
 
         setMode('Inline')
     }
-    console.log('debug Comment was rendered', new Date().toLocaleTimeString())
+    // console.log('debug Comment was rendered', new Date().toLocaleTimeString())
     return (
         <Animated.View style={{
             // marginTop: 4,
