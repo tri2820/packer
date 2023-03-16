@@ -47,16 +47,11 @@ function Bar(props: any) {
         return normalizedHostname(url.hostname);
     }
 
-    const _text = useDerivedValue(() => {
-        return text
-    }, [text]);
-
-
     const barStyles = useAnimatedStyle(() => {
         // ONE
         // console.log('debug showHint.value', showHint.value == '& ');
 
-        const x = _text.value.startsWith('& ') && focused ? 24 : 0
+        const x = text[0] == '&' && text[1] == ' ' && focused ? 24 : 0
         if
             (
             // keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING
@@ -75,7 +70,7 @@ function Bar(props: any) {
                 translateY:
                     // withSpring(
                     offset.value - x
-                // - x, { mass: 0.01, overshootClamping: true })
+                // , { mass: 0.01, overshootClamping: true })
             }]
         };
     });
@@ -232,6 +227,7 @@ function Bar(props: any) {
 
                             {props.mode.tag != 'App' && <>
                                 <TextInput
+                                    // multiline
                                     onFocus={() => { setFocused(true) }}
                                     onBlur={() => { setFocused(false) }}
                                     ref={ref}
@@ -249,6 +245,11 @@ function Bar(props: any) {
                                     returnKeyType='send'
                                     keyboardAppearance='dark'
                                     onSubmitEditing={() => {
+                                        // Submit async, call api
+                                        // When receive, noti?
+                                        // Or better, server sent event + reply
+
+
                                         offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                         _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                         setText('');
@@ -261,14 +262,14 @@ function Bar(props: any) {
 
                             {
                                 props.mode.tag == 'Normal' &&
-                                <Pressable
+                                <TouchableOpacity
                                     onPress={() => {
-                                        setText('& '.concat(text))
-                                        ref?.current.focus()
+                                        if (!text.startsWith('& ')) setText('& '.concat(text))
+                                        ref?.current?.focus()
                                     }}
                                 >
                                     <IconAmpersand size={24} stroke={2.4} color='#F1F1F1' />
-                                </Pressable>
+                                </TouchableOpacity>
                             }
 
                             {
