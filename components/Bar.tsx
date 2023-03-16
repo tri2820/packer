@@ -56,19 +56,19 @@ function Bar(props: any) {
         // ONE
         // console.log('debug showHint.value', showHint.value == '& ');
 
-        let newValue = 0;
+        const x = _text.value.startsWith('& ') && focused ? 24 : 0
         if
             (
             // keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING
             // && 
-            offset.value > 0 || keyboard.state.value == KeyboardState.OPENING
+            // offset.value > 0 && 
+            keyboard.state.value == KeyboardState.OPENING
+            && offset.value > -(keyboard.height.value - insets.bottom + x)
         ) {
-            // offset.value > -(keyboard.height.value - insets.bottom + (copiedText.value.startsWith('& ') ? 24 : 0))) {
+            // ) {
             offset.value = -(keyboard.height.value - insets.bottom)
             _offset.value = -(keyboard.height.value - insets.bottom)
         }
-
-        const x = _text.value.startsWith('& ') && focused ? 24 : 0
 
         return {
             transform: [{
@@ -116,8 +116,8 @@ function Bar(props: any) {
 
             if (newOffset > minOffset / 2) {
                 // THREE
-                _offset.value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0
-                offset.value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0
+                _offset.value = withSpring(keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
+                offset.value = withSpring(keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 return;
             }
 
@@ -205,7 +205,7 @@ function Bar(props: any) {
                                 <Text style={{
                                     color: '#C2C2C2',
                                     fontSize: 10
-                                }}>An AI will reply you.</Text>
+                                }}>An AI will reply to you.</Text>
                             </Animated.View>
                         }
 
@@ -257,7 +257,6 @@ function Bar(props: any) {
                                 />
 
                             </>}
-
 
 
                             {
