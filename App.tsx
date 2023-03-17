@@ -10,7 +10,6 @@ import Wall from './components/Wall';
 import { constants, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
-import SearchIcon from './components/SearchIcon';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
 
 const INJECTED_JAVASCRIPT = `(function() {
@@ -137,9 +136,6 @@ function Main(props: any) {
           }
 
           <Bar activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
-          {/* {
-            mode.tag == 'Normal' && <SearchIcon />
-          } */}
         </Animated.View>
       </GestureDetector>
 

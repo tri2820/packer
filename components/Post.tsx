@@ -5,7 +5,6 @@ import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from '
 import Animated, { FadeInDown, FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants } from '../utils';
-import { IconArrowAutofitHeight, IconActivity } from 'tabler-icons-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment, { MemoComment } from './Comment';
 import * as Haptics from 'expo-haptics';
@@ -15,7 +14,7 @@ import CommentSection from './CommentSection';
 import { INIT_DATE, supabaseClient } from '../supabaseClient';
 import VideoPlayer from './VideoPlayer';
 import KeyTakeaways from './KeyTakeaways';
-
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 function Post(props: any) {
     const [comments, setComments] = useState<any[]>([]);
@@ -218,7 +217,9 @@ function Post(props: any) {
                             }}
                                 entering={FadeInUp}
                             >
-                                <IconActivity size={16} color='#A3A3A3' stroke={1.8} />
+                                <FontAwesome5 name="comment-slash" size={16} color='#A3A3A3' style={{
+                                    marginRight: 4
+                                }} />
                                 <Text style={{
                                     color: '#A3A3A3',
                                     marginLeft: 4,

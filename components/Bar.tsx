@@ -3,12 +3,17 @@ import { useEffect, useRef, useState } from 'react';
 import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, View, TouchableOpacity, Linking, Platform } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
-import { IconX, IconAmpersand, IconLock, IconChevronLeft, IconArrowUpRightCircle, IconBrandSafari, IconSearch } from 'tabler-icons-react-native';
 import Animated, { Easing, FadeInDown, FadeOutDown, FadeOutUp, KeyboardState, useAnimatedKeyboard, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
+import { signIn } from '../login';
+import { supabaseClient, upsertProfile } from '../supabaseClient';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
+
 
 function Bar(props: any) {
     const [text, setText] = useState('');
+    const [profile, setProfile] = useState<any>(undefined);
 
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
@@ -121,9 +126,35 @@ function Bar(props: any) {
         })
 
 
+
+
+    const syncProfile = async () => {
+        console.log('syncing profile from supabase');
+        const { data, error } = await supabaseClient.from('profiles').select('*').single()
+        if (error) {
+            console.log('there is an error while querying profiles, possibly because they log out', error)
+            setProfile(null)
+            return null;
+        }
+        setProfile(data)
+        console.log('profile:', data)
+        return data;
+    }
+
+    const signInAndUpdateProfile = async (provider: 'apple' | 'google') => {
+        const user = await signIn(provider);
+        if (!user) return;
+        console.log('debug user', user);
+
+        // // Round trip
+        // await upsertProfile(user);
+        // await syncProfile();
+    }
+
     return (
         <>
 
+            {/* Overlay */}
             <Animated.View
                 style={[{
                     backgroundColor: 'black',
@@ -144,6 +175,8 @@ function Bar(props: any) {
                     }}
                 />
             </Animated.View>
+
+            {/* Sheet */}
             <GestureDetector gesture={gesture}>
                 <Animated.View style={[{
                     top: constants.height - props.minBarHeight - insets.bottom,
@@ -155,6 +188,7 @@ function Bar(props: any) {
                     borderTopColor: '#2A2829',
                 }, barStyles]}>
 
+                    {/* HANDLER */}
                     <View style={{
                         width: '100%',
                         height: HANDLER_HEIGHT,
@@ -172,15 +206,17 @@ function Bar(props: any) {
 
                     </View>
 
+                    {/* IINPUT BAR */}
                     <Animated.View
                         style={{
                             // backgroundColor: 'red',
                             paddingLeft: 20,
                             paddingRight: 20,
                             width: '100%',
-                            top: HANDLER_HEIGHT,
+                            height: props.minBarHeight - HANDLER_HEIGHT
+                            // top: HANDLER_HEIGHT,
                             // backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
-                            position: 'absolute'
+                            // position: 'absolute'
                         }}
                     >
                         {
@@ -217,9 +253,10 @@ function Bar(props: any) {
                                     props.setMode({ tag: 'Normal' });
                                 }}>
                                     <Animated.View style={animatedStyles} >
-                                        <IconX size={28} stroke={1.4} color='#C2C2C2' style={{
-                                            padding: 4,
-                                            marginRight: props.mode.tag == 'Comment' ? 16 : 0,
+                                        <Ionicons name="close" size={26} color='#C2C2C2' style={{
+                                            // padding: 4,
+                                            marginRight: props.mode.tag == 'Comment' ? 8 : 0,
+                                            // backgroundColor: 'red'
                                         }} />
                                     </Animated.View>
                                 </TouchableOpacity>
@@ -259,7 +296,7 @@ function Bar(props: any) {
 
                             </>}
 
-
+                            {/* 
                             {
                                 props.mode.tag == 'Normal' &&
                                 <TouchableOpacity
@@ -268,9 +305,9 @@ function Bar(props: any) {
                                         ref?.current?.focus()
                                     }}
                                 >
-                                    <IconAmpersand size={24} stroke={2.4} color='#F1F1F1' />
+                                    <MaterialCommunityIcons name="bookmark" size={24} stroke={2.4} color='#F1F1F1' />
                                 </TouchableOpacity>
-                            }
+                            } */}
 
                             {
                                 props.mode.tag == 'App' &&
@@ -298,13 +335,13 @@ function Bar(props: any) {
                                         console.warn('An error occurred: ', error),
                                     )
                                 }}>
-                                    <View>
+                                    <View style={{
+                                        padding: 4,
+                                    }}>
                                         {
-                                            Platform.OS == 'ios' ? <IconBrandSafari size={28} color='#C2C2C2' stroke={1.2} style={{
-                                                padding: 4,
-                                            }} /> : <IconArrowUpRightCircle size={28} color='#C2C2C2' stroke={1.2} style={{
-                                                padding: 4,
-                                            }} />
+                                            Platform.OS == 'ios' ?
+                                                <Ionicons name='compass-outline' size={26} color='#C2C2C2' />
+                                                : <Ionicons name='arrow-forward-circle-outline' size={26} color='#C2C2C2' />
                                         }
 
                                     </View>
@@ -314,6 +351,21 @@ function Bar(props: any) {
 
                     </Animated.View>
 
+
+                    <TouchableOpacity onPress={() => {
+                        signInAndUpdateProfile('apple')
+                    }}>
+                        <View style={{
+                            height: 30,
+                            width: '100%',
+                            backgroundColor: 'blue'
+                        }} >
+                            {/* <IconBrandApple size={28} floodColor='red' color='yellow' /> */}
+                            <FontAwesome5 name='facebook' backgroundColor="#3b5998" onPress={() => { }}>
+                                Login with Facebook
+                            </FontAwesome5>
+                        </View>
+                    </TouchableOpacity>
 
 
                 </Animated.View>

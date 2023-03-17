@@ -5,7 +5,6 @@ import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from '
 import Animated, { FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
-import { IconMedicalCrossFilled } from 'tabler-icons-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment from './Comment';
 import * as Haptics from 'expo-haptics';

@@ -5,10 +5,10 @@ import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from '
 import Animated, { FadeIn, FadeInDown, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants } from '../utils';
-import { IconArrowAutofitHeight } from 'tabler-icons-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
 function Post(props: any) {
     return (
@@ -27,13 +27,13 @@ function Post(props: any) {
             }}
                 entering={FadeInDown}
             >
-                <IconArrowAutofitHeight color='#E6E6E6' size={16} />
+                <FontAwesome5 name='expand' color='#E6E6E6' size={16} />
                 <Text style={{
                     color: '#E6E6E6',
                     fontWeight: '500',
-                    marginLeft: 4
+                    marginLeft: 8
                 }}>
-                    See discussions
+                    Expand
                 </Text>
             </Animated.View>
         </TouchableOpacity>

@@ -7,7 +7,6 @@ import Animated, { useDerivedValue } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, randomColor } from '../utils';
 import Post, { MemoPost } from './Post';
-import VideoPost from './VideoPost';
 
 const androidPagingFallback = Platform.OS == 'android' && {
     pagingEnabled: true,

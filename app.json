@@ -2,6 +2,7 @@
   "expo": {
     "name": "Packer",
     "slug": "packer",
+    "scheme": "packer",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -31,6 +32,12 @@
       "eas": {
         "projectId": "99a4fb77-5ba1-404f-8f20-f9680db3e4dc"
       }
+    },
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/99a4fb77-5ba1-404f-8f20-f9680db3e4dc"
     }
   }
 }

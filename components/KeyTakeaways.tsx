@@ -5,7 +5,7 @@ import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from '
 import Animated, { FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants } from '../utils';
-import { IconMedicalCrossFilled } from 'tabler-icons-react-native';
+import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
@@ -48,14 +48,12 @@ function KeyTakeaways(props: any) {
                 alignItems: 'center'
             }}>
                 <View style={{
-                    backgroundColor: '#F2C740',
+                    // backgroundColor: '#F2C740',
                     borderRadius: 4,
                     padding: 2,
                     marginRight: 8,
                 }}>
-                    <IconMedicalCrossFilled size={16} color='transparent' style={{
-                        color: '#E6E6E6'
-                    }} />
+                    <FontAwesome5 name='pen' size={16} color="#F2C740" />
                 </View>
 
                 <Text style={{

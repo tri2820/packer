@@ -6,7 +6,6 @@ import Animated, { useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSh
 
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants } from '../utils';
-import { IconArrowAutofitHeight } from 'tabler-icons-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
