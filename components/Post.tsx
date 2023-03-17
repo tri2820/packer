@@ -14,7 +14,7 @@ import CommentSection from './CommentSection';
 import { INIT_DATE, supabaseClient } from '../supabaseClient';
 import VideoPlayer from './VideoPlayer';
 import KeyTakeaways from './KeyTakeaways';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 function Post(props: any) {
     const [comments, setComments] = useState<any[]>([]);
@@ -217,7 +217,7 @@ function Post(props: any) {
                             }}
                                 entering={FadeInUp}
                             >
-                                <FontAwesome5 name="comment-slash" size={16} color='#A3A3A3' style={{
+                                <Ionicons name="chatbubble" size={16} color='#A3A3A3' style={{
                                     marginRight: 4
                                 }} />
                                 <Text style={{
@@ -227,7 +227,7 @@ function Post(props: any) {
                                 }}
 
                                 >
-                                    {firstLoadResult == 'success' ? "It's empty here" : "Dang, error querying comments"}
+                                    {firstLoadResult == 'success' ? "This post has no activity yet. You can be the first to start a discussion for people to share their thoughts." : "Dang, error querying comments"}
                                 </Text>
                             </Animated.View>
                         }
