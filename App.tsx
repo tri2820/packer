@@ -21,7 +21,7 @@ const INJECTED_JAVASCRIPT = `(function() {
 
 
 function Main(props: any) {
-
+  const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
   const [activePostIndex, setActivePostIndex] = useState(0);
 
@@ -135,7 +135,7 @@ function Main(props: any) {
             </Animated.View>
           }
 
-          <Bar activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
+          <Bar user={user} setUser={setUser} activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
         </Animated.View>
       </GestureDetector>
 

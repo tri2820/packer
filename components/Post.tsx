@@ -162,6 +162,7 @@ function Post(props: any) {
             height: props.height
         }}>
             <FlatList
+                showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}
                 contentInset={{ top: insets.top }}

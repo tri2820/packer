@@ -16,7 +16,9 @@ function Bar(props: any) {
     const signInAndUpdateProfile = async (provider: 'apple' | 'google') => {
         const user = await signIn(provider);
         if (!user) return;
-        console.log('debug user', user);
+
+        console.log('debug user', JSON.stringify(user));
+        props.setUser(user);
 
         // // Round trip
         // await upsertProfile(user);
@@ -25,15 +27,18 @@ function Bar(props: any) {
 
     return (
         <Animated.View
-            style={props.animatedStyles}
+            style={[props.animatedStyles,
+            {
+                position: 'absolute',
+                width: constants.width,
+            }]}
+            exiting={FadeOut}
         >
-            <ImageBackground
-                style={{
-                    position: 'absolute',
-                    top: 4,
-                    width: constants.width,
-                    height: 600,
-                }}
+            <ImageBackground style={{
+                position: 'absolute',
+                width: '100%',
+                height: 600,
+            }}
                 source={require('../assets/loginBackground.jpg')}
             >
                 <LinearGradient colors={['transparent', props.mode.tag == 'Comment' ? '#212121' : '#151316']} style={{

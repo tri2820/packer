@@ -36,6 +36,7 @@ function Wall(props: any) {
 
     return (
         <FlatList
+            showsVerticalScrollIndicator={false}
             style={{
                 width: constants.width,
                 height: props.height

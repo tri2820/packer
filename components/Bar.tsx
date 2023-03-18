@@ -4,7 +4,7 @@ import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, Safe
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
 import Animated, { Easing, FadeIn, FadeInDown, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, useAnimatedKeyboard, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
+import { FlatList, Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
 import { signIn } from '../login';
 import { supabaseClient, upsertProfile } from '../supabaseClient';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
@@ -19,7 +19,7 @@ function Bar(props: any) {
 
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
-    const MARGIN_TOP = insets.top + 100;
+    const MARGIN_TOP = insets.top + 200;
     const INSETS_OFFSET_BOTTOM = 200;
     const HANDLER_HEIGHT = 14;
     const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
@@ -36,6 +36,20 @@ function Bar(props: any) {
             transform: [
                 { scale: props.offset.value > 1 ? (2 - 1 / Math.pow(props.offset.value, 0.2)) : 1 },
             ]
+        };
+    });
+
+    const inputStyles = useAnimatedStyle(() => {
+        return {
+            display: offset.value < -40 && !focused ? 'none' : 'flex',
+            // opacity: Math.pow(1 - (offset.value / minOffset), 0.3)
+        };
+    });
+
+    const userStyles = useAnimatedStyle(() => {
+        return {
+            display: offset.value == 0 ? 'none' : 'flex',
+            opacity: Math.pow(offset.value / minOffset, 0.3)
         };
     });
 
@@ -198,6 +212,12 @@ function Bar(props: any) {
                     borderTopRightRadius: 4,
                 }, barStyles]}>
 
+
+                    {
+                        props.user === null && <LoginSection animatedStyles={loginStyles} mode={props.mode} user={props.user} setUser={props.setUser} />
+                    }
+
+
                     {/* HANDLER */}
                     <View style={{
                         width: '100%',
@@ -216,9 +236,9 @@ function Bar(props: any) {
 
                     </View>
 
-                    {/* IINPUT BAR */}
+                    {/* INPUT BAR */}
                     <Animated.View
-                        style={{
+                        style={[{
                             // backgroundColor: 'red',
                             paddingLeft: 20,
                             paddingRight: 20,
@@ -227,8 +247,10 @@ function Bar(props: any) {
                             // top: HANDLER_HEIGHT,
                             // backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
                             // position: 'absolute'
-                        }}
+                        }, inputStyles]}
+                        exiting={FadeOut}
                     >
+                        {/* TOOLS */}
                         {
                             text.startsWith('& ') &&
                             focused &&
@@ -250,6 +272,7 @@ function Bar(props: any) {
                             </Animated.View>
                         }
 
+                        {/* INPUT */}
                         <Animated.View style={{
                             flex: 1,
                             flexDirection: 'row',
@@ -351,7 +374,93 @@ function Bar(props: any) {
 
                     </Animated.View>
 
-                    <LoginSection animatedStyles={loginStyles} mode={props.mode} />
+                    {
+                        props.user !== null && !focused && <Animated.View style={[{
+                            marginHorizontal: 20
+                        }, userStyles]}
+                            exiting={FadeOut}
+                        >
+                            <FlatList
+                                // When hit top, keeps continue to scroll = change offset back to 0
+                                scrollEnabled={false}
+
+                                showsVerticalScrollIndicator={false}
+                                listKey='userList'
+                                style={{
+                                    marginTop: 24,
+                                    // paddingTop: 12,
+                                    // backgroundColor: 'blue',
+                                    height: HEIGHT - 24 - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom
+                                }}
+                                // ref={ref}
+                                // contentInset={{ top: insets.top }}
+                                // automaticallyAdjustContentInsets={false}
+                                // scrollEnabled={props.mode.tag == 'Comment'}
+                                // refreshControl={}
+                                data={[0, 1]}
+                                // keyExtractor={keyExtractor}
+                                renderItem={() =>
+                                    <View style={{
+                                        height: constants.height / 3,
+                                        width: '100%',
+                                        // backgroundColor: 'blue',
+                                        borderRadius: 8,
+                                        marginVertical: 8,
+                                        borderStyle: 'dashed',
+                                        borderWidth: 2,
+                                        borderColor: '#5D5F64'
+                                    }}>
+
+                                    </View>
+                                }
+
+                                ListHeaderComponent={
+
+                                    <View>
+
+                                        <Text style={{
+                                            color: '#F1F1F1',
+                                            fontSize: 24,
+                                            fontWeight: '800'
+                                        }}>
+                                            {
+                                                props.user.user_metadata.full_name
+                                            }
+                                        </Text>
+
+                                        <Text style={{
+                                            color: '#C2C2C2',
+                                            fontWeight: '300',
+                                            marginTop: 4
+                                        }}>
+                                            {
+                                                // props.user.user_metadata.email
+                                                '@default'
+                                            }
+                                        </Text>
+
+                                        <Text style={{
+                                            color: '#F1F1F1',
+                                            marginTop: 20
+                                        }}>
+                                            Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
+                                        </Text>
+
+                                        <Text style={{
+                                            marginTop: 40,
+                                            marginBottom: 4,
+                                            color: '#F1F1F1',
+                                            fontSize: 24,
+                                            fontWeight: '800'
+                                        }}>
+                                            Discussions
+                                        </Text>
+                                    </View>
+                                }
+                            />
+                        </Animated.View>
+                    }
+
                 </Animated.View>
             </GestureDetector>
         </>
