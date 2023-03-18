@@ -227,7 +227,7 @@ function Post(props: any) {
                                 }}
 
                                 >
-                                    {firstLoadResult == 'success' ? "This post has no activity yet. You can be the first to start a discussion for people to share their thoughts." : "Dang, error querying comments"}
+                                    {firstLoadResult == 'success' ? `Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!` : "Dang, error querying comments"}
                                 </Text>
                             </Animated.View>
                         }
