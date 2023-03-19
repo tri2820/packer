@@ -24,6 +24,7 @@ function Main(props: any) {
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
   const [activePostIndex, setActivePostIndex] = useState(0);
+  const [recentComment, setRecentComment] = useState<any>(null);
 
   // const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('transparent');
   const insets = useSafeAreaInsets();
@@ -92,6 +93,49 @@ function Main(props: any) {
       runOnJS(setMode)({ tag: 'Normal' })
     });
 
+  // useEffect(() => {
+  //   console.log('debug recentComments', recentComments)
+  // }, [recentComments])
+
+  const submitComment = async (comment: any) => {
+    const post_id = props.posts[activePostIndex].id;
+
+    console.log("debug text", comment.text)
+    const data = {
+      content: comment.text,
+      post_id: post_id,
+      parent_id: null,
+      need_bot_comment: false
+    }
+    // console.log(data)
+
+    const responseData = {
+      comment: {
+        id: "6fa61e63-b7e3-4cf5-844f-0f8e6eb5fc02",
+        created_at: "2023-03-19T20:11:24.073577+00:00",
+        content: "How does Twitter as an ‘infomediary’ influence on bank’s reputation and how are banks’ reputation defined and (re)measured through digital platforms?",
+        author_name: "Anon",
+        parent_id: null,
+        // post_id: "89a3a11c-0191-54e9-a350-27837bae863e"
+        post_id: post_id
+      }
+    }
+
+    setRecentComment(responseData);
+
+    // const { data, error } = 
+    // await supabaseClient.functions.invoke('add_comment')
+    // if (error) {
+    //   console.log('there is an error while querying bookings', error)
+    //   return null;
+    // }
+    // console.log(`bookings: ${data.length} items, example:`, data[0]);
+    return {
+
+    };
+
+  }
+
   return (
     <View style={{
       height: constants.height,
@@ -100,7 +144,7 @@ function Main(props: any) {
     }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
-          <Wall requestPost={props.requestPost} posts={props.posts} activePostIndex={activePostIndex} setActivePostIndex={setActivePostIndex} height={constants.height - minBarHeight - insets.bottom} mode={mode} setMode={setMode} />
+          <Wall recentComment={recentComment} requestPost={props.requestPost} posts={props.posts} activePostIndex={activePostIndex} setActivePostIndex={setActivePostIndex} height={constants.height - minBarHeight - insets.bottom} mode={mode} setMode={setMode} />
 
           {
             mode.tag === 'App' && <Animated.View style={{
@@ -135,7 +179,7 @@ function Main(props: any) {
             </Animated.View>
           }
 
-          <Bar user={user} setUser={setUser} activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
+          <Bar submitComment={submitComment} user={user} setUser={setUser} activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
         </Animated.View>
       </GestureDetector>
 

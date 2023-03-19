@@ -15,13 +15,18 @@ const androidPagingFallback = Platform.OS == 'android' && {
 
 function Wall(props: any) {
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
-    const renderItem = ({ index, item }: any) =>
-        // <View style={{
-        //     height: props.height,
-        //     width: constants.width,
-        //     backgroundColor: randomColor()
-        // }}></View>
-        <MemoPost height={props.height} post={item} shouldActive={props.activePostIndex == index} index={index} mode={props.mode} setMode={props.setMode} />
+    const renderItem = ({ index, item }: any) => {
+        return <MemoPost
+            recentComment={props.recentComment?.comment.post_id == item.id ? props.recentComment : null}
+            height={props.height}
+            post={item}
+            shouldActive={props.activePostIndex == index}
+            index={index}
+            mode={props.mode}
+            setMode={props.setMode}
+        />
+    }
+
     const keyExtractor = (item: any) => item.id
     const onEndReached = () => { props.requestPost() }
     const onScroll = (event: any) => {

@@ -20,7 +20,7 @@ function Bar(props: any) {
 
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
-    const MARGIN_TOP = insets.top + 200;
+    const MARGIN_TOP = insets.top + 170;
     const INSETS_OFFSET_BOTTOM = 200;
     const HANDLER_HEIGHT = 14;
     const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
@@ -42,7 +42,7 @@ function Bar(props: any) {
     const [showInputBar, setShowInputBar] = useState(true);
     useDerivedValue(() => {
         // console.log('props.offset.value', offset.value)
-        runOnJS(setShowInputBar)(offset.value > -40 || focused)
+        runOnJS(setShowInputBar)(offset.value > -200 || focused)
         return offset.value
     })
 
@@ -205,8 +205,8 @@ function Bar(props: any) {
                             // position: 'absolute'
                         },
                         ]}
-                        exiting={FadeOutUp}
-                        entering={FadeInUp}
+                        exiting={FadeOutUp.duration(100)}
+                        entering={FadeInDown.duration(100)}
                     >
                         {/* TOOLS */}
                         {
@@ -258,7 +258,17 @@ function Bar(props: any) {
                             {props.mode.tag != 'App' && <>
                                 <TextInput
                                     // multiline
-                                    onFocus={() => { setFocused(true) }}
+                                    onFocus={() => {
+                                        if (props.user === null) {
+                                            console.log('debug minOffset', minOffset)
+                                            ref.current.blur()
+                                            _offset.value = withSpring(minOffset, { mass: 0.5 })
+                                            offset.value = withSpring(minOffset, { mass: 0.5 })
+                                            return;
+                                        }
+
+                                        setFocused(true)
+                                    }}
                                     onBlur={() => { setFocused(false) }}
                                     ref={ref}
                                     value={text}
@@ -278,10 +288,12 @@ function Bar(props: any) {
                                         // Submit async, call api
                                         // When receive, noti?
                                         // Or better, server sent event + reply
+                                        props.submitComment({
+                                            text
+                                        })
 
-
-                                        offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-                                        _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+                                        offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+                                        _offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
                                         setText('');
                                     }}
                                     selectionColor='#F2C740'

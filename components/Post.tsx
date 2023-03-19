@@ -123,6 +123,13 @@ function Post(props: any) {
         }
     }, [props.mode])
 
+    useEffect(() => {
+        console.log('debug changed props.recentComment', props.recentComment
+            // .filter((c: any) => c.comment.post_id == props.post.id)
+            // , props.post.id
+        )
+    }, [props.recentComment])
+
     const renderItem = ({ item, index }: any) => <View style={{
         paddingHorizontal: 16
     }}>
