@@ -25,13 +25,21 @@ function Bar(props: any) {
         // await syncProfile();
     }
 
+
+    const animatedStyles = useAnimatedStyle(() => {
+        return {
+            opacity: Math.pow(props.offset.value / props.minOffset, 0.3)
+        };
+    });
+
+
     return (
         <Animated.View
-            style={[props.animatedStyles,
-            {
-                position: 'absolute',
-                width: constants.width,
-            }]}
+            style={[animatedStyles,
+                {
+                    position: 'absolute',
+                    width: constants.width,
+                }]}
             exiting={FadeOut}
         >
             <ImageBackground style={{

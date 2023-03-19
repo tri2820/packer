@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground, PanResponder } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
-import Animated, { Easing, FadeIn, FadeInDown, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
+import Animated, { Easing, FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput, FlatList } from 'react-native-gesture-handler';
 import { signIn } from '../login';
 import { supabaseClient, upsertProfile } from '../supabaseClient';
@@ -39,18 +39,12 @@ function Bar(props: any) {
         };
     });
 
-    const inputStyles = useAnimatedStyle(() => {
-        return {
-            display: offset.value < -40 && !focused ? 'none' : 'flex',
-            // opacity: Math.pow(1 - (offset.value / minOffset), 0.3)
-        };
-    });
-
-    const loginStyles = useAnimatedStyle(() => {
-        return {
-            opacity: Math.pow(offset.value / minOffset, 0.3)
-        };
-    });
+    const [showInputBar, setShowInputBar] = useState(true);
+    useDerivedValue(() => {
+        // console.log('props.offset.value', offset.value)
+        runOnJS(setShowInputBar)(offset.value > -40 || focused)
+        return offset.value
+    })
 
     useEffect(() => {
         setText('');
@@ -176,7 +170,7 @@ function Bar(props: any) {
                 }, barStyles]}
                 >
                     {
-                        props.user === null && <LoginSection animatedStyles={loginStyles} mode={props.mode} user={props.user} setUser={props.setUser} />
+                        props.user === null && <LoginSection minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} />
                     }
 
 
@@ -199,18 +193,20 @@ function Bar(props: any) {
                     </View>
 
                     {/* INPUT BAR */}
-                    <Animated.View
+                    {showInputBar && <Animated.View
                         style={[{
                             // backgroundColor: 'red',
                             paddingLeft: 20,
                             paddingRight: 20,
                             width: '100%',
-                            height: props.minBarHeight - HANDLER_HEIGHT
+                            height: props.minBarHeight - HANDLER_HEIGHT,
                             // top: HANDLER_HEIGHT,
-                            // backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
+                            // backgroundColor: 'blue',
                             // position: 'absolute'
-                        }, inputStyles]}
-                        exiting={FadeOut}
+                        },
+                        ]}
+                        exiting={FadeOutUp}
+                        entering={FadeInUp}
                     >
                         {/* TOOLS */}
                         {
@@ -335,9 +331,10 @@ function Bar(props: any) {
                         </Animated.View>
 
                     </Animated.View>
+                    }
 
                     {
-                        props.user !== null && !focused && <UserList offset={offset} user={props.user} />
+                        props.user !== null && !focused && <UserList offset={offset} user={props.user} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>

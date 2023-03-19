@@ -14,44 +14,78 @@ import LoginSection from './LoginSection';
 
 
 function UserList(props: any) {
-    const insets = useSafeAreaInsets();
-    const MARGIN_TOP = insets.top + 200;
-    const INSETS_OFFSET_BOTTOM = 200;
-    const HANDLER_HEIGHT = 14;
-    const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
-    const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
-    // const offset = useSharedValue(-600);
+
 
     const userStyles = useAnimatedStyle(() => {
         return {
             display: props.offset.value == 0 ? 'none' : 'flex',
-            opacity: Math.pow(props.offset.value / minOffset, 0.3)
+            opacity: Math.pow(props.offset.value / props.minOffset, 0.3)
         };
     });
 
     return (
 
         <Animated.View style={[{
-            marginHorizontal: 20
+            marginHorizontal: 20,
+            height: props.listHeight,
+            // backgroundColor: 'blue'
         }, userStyles]}
             exiting={FadeOut}
-
         >
+            <View>
+                <Text style={{
+                    marginTop: 24,
+                    color: '#F1F1F1',
+                    fontSize: 24,
+                    fontWeight: '800'
+                }}>
+                    {
+                        props.user.user_metadata.full_name
+                    }
+                </Text>
+
+                <Text style={{
+                    color: '#C2C2C2',
+                    fontWeight: '300',
+                    marginTop: 4
+                }}>
+                    {
+                        // props.user.user_metadata.email
+                        '@default'
+                    }
+                </Text>
+
+                <Text style={{
+                    color: '#F1F1F1',
+                    marginTop: 20
+                }}>
+                    Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
+                </Text>
+
+                <Text style={{
+                    marginTop: 40,
+                    marginBottom: 4,
+                    color: '#F1F1F1',
+                    fontSize: 24,
+                    fontWeight: '800'
+                }}>
+                    Discussions
+                </Text>
+            </View>
             <Animated.FlatList
                 horizontal={false}
                 showsVerticalScrollIndicator={false}
                 listKey='userList'
                 style={{
-                    marginTop: 24,
+                    marginTop: 8,
                     // paddingTop: 12,
                     // backgroundColor: 'blue',
-                    height: HEIGHT - 24 - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom
                 }}
-                data={[0, 1]}
+                data={[0, 1, 2, 3, 4]}
                 // keyExtractor={keyExtractor}
                 renderItem={() =>
                     <View style={{
-                        height: constants.height / 3,
+                        height: 60,
                         width: '100%',
                         // backgroundColor: 'blue',
                         borderRadius: 8,
@@ -61,50 +95,6 @@ function UserList(props: any) {
                         borderColor: '#5D5F64'
                     }}>
 
-                    </View>
-                }
-
-                ListHeaderComponent={
-
-                    <View>
-
-                        <Text style={{
-                            color: '#F1F1F1',
-                            fontSize: 24,
-                            fontWeight: '800'
-                        }}>
-                            {
-                                props.user.user_metadata.full_name
-                            }
-                        </Text>
-
-                        <Text style={{
-                            color: '#C2C2C2',
-                            fontWeight: '300',
-                            marginTop: 4
-                        }}>
-                            {
-                                // props.user.user_metadata.email
-                                '@default'
-                            }
-                        </Text>
-
-                        <Text style={{
-                            color: '#F1F1F1',
-                            marginTop: 20
-                        }}>
-                            Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
-                        </Text>
-
-                        <Text style={{
-                            marginTop: 40,
-                            marginBottom: 4,
-                            color: '#F1F1F1',
-                            fontSize: 24,
-                            fontWeight: '800'
-                        }}>
-                            Discussions
-                        </Text>
                     </View>
                 }
             />
