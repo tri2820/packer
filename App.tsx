@@ -7,10 +7,11 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar from './components/Bar';
 import Wall from './components/Wall';
-import { constants, Mode } from './utils';
+import { constants, Mode, read } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
+
 
 const INJECTED_JAVASCRIPT = `(function() {
   window.ReactNativeWebView.postMessage(JSON.stringify(
@@ -101,39 +102,62 @@ function Main(props: any) {
     const post_id = props.posts[activePostIndex].id;
 
     console.log("debug text", comment.text)
-    const data = {
+    const body = {
       content: comment.text,
       post_id: post_id,
       parent_id: null,
-      need_bot_comment: false
+      need_bot_comment: true
     }
     // console.log(data)
 
     const responseData = {
       comment: {
-        id: "6fa61e63-b7e3-4cf5-844f-0f8e6eb5fc02",
-        created_at: "2023-03-19T20:11:24.073577+00:00",
-        content: "How does Twitter as an ‘infomediary’ influence on bank’s reputation and how are banks’ reputation defined and (re)measured through digital platforms?",
-        author_name: "Anon",
+        // Could get from header
+        id: "recent-comment-id",
+        created_at: new Date(),
+        content: comment.text,
+        author_name: "@default",
         parent_id: null,
-        // post_id: "89a3a11c-0191-54e9-a350-27837bae863e"
         post_id: post_id
       }
     }
 
     setRecentComment(responseData);
 
-    // const { data, error } = 
-    // await supabaseClient.functions.invoke('add_comment')
-    // if (error) {
-    //   console.log('there is an error while querying bookings', error)
-    //   return null;
-    // }
-    // console.log(`bookings: ${data.length} items, example:`, data[0]);
-    return {
 
-    };
+    // curl -L -X POST 'https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154' --data '{"content":"What is `fake news`?", "post_id": "89a3a11c-0191-54e9-a350-27837bae863e", "parent_id":null, "need_bot_comment": true}'
 
+
+
+
+    //   fetch('https://jsonplaceholder.typicode.com/todos/1', {  })
+    // .then(response => response.body)
+    // .then(stream => ...)
+
+    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
+      // @ts-ignore
+      reactNative: { textStreaming: true },
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        content: 'What is `fake news`?',
+        post_id: '89a3a11c-0191-54e9-a350-27837bae863e',
+        parent_id: null,
+        need_bot_comment: true
+      })
+    })
+
+    if (!response.body || !response.ok) {
+      console.log('ERROR: response', response)
+      return
+    }
+
+    const reader = response.body.getReader()
+    const answer = await read(reader);
+    console.log('answer', answer);
   }
 
   return (

@@ -181,8 +181,7 @@ function Comment(props: any) {
                         }}
                             numberOfLines={1}
                             entering={FadeInDown}
-                        > •
-                            {props.commentStream ? '...' : props.comment.content}
+                        > • {props.commentStream ? '...' : props.comment.content}
                         </Animated.Text>
                     }
                 </View>

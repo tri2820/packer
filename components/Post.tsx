@@ -216,7 +216,9 @@ function Post(props: any) {
                         <PostHeader post={props.post} setMode={props.setMode} />
                         <KeyTakeaways content={props.post.keytakeaways} />
                         {
-                            (firstLoadResult != 'waiting' && comments.length == 0) &&
+                            props.recentComment === null &&
+                            firstLoadResult != 'waiting' &&
+                            comments.length == 0 &&
                             <Animated.View style={{
                                 flex: 1,
                                 flexDirection: 'row',
