@@ -262,8 +262,8 @@ function Bar(props: any) {
                                         if (props.user === null) {
                                             console.log('debug minOffset', minOffset)
                                             ref.current.blur()
-                                            _offset.value = withSpring(minOffset, { mass: 0.5 })
-                                            offset.value = withSpring(minOffset, { mass: 0.5 })
+                                            _offset.value = withSpring(minOffset, { mass: 0.15 })
+                                            offset.value = withSpring(minOffset, { mass: 0.15 })
                                             return;
                                         }
 
@@ -292,8 +292,8 @@ function Bar(props: any) {
                                             text
                                         })
 
-                                        offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
-                                        _offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+                                        offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+                                        _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                         setText('');
                                     }}
                                     selectionColor='#F2C740'

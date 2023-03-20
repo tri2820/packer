@@ -76,7 +76,7 @@ function Bar(props: any) {
                 fontWeight: '700',
                 alignSelf: 'center',
                 textAlign: 'center'
-            }}>Explore the Internet. Powered by Packer.</Text>
+            }}>Explore the Internet. Together with Packer.</Text>
 
             <View style={{
                 marginTop: 32,

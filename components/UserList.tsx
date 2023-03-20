@@ -69,7 +69,7 @@ function UserList(props: any) {
                     fontSize: 24,
                     fontWeight: '800'
                 }}>
-                    Discussions
+                    My Discussions
                 </Text>
             </View>
             <Animated.FlatList

@@ -10,6 +10,8 @@ import * as Haptics from 'expo-haptics';
 import { State, INIT_DATE, supabaseClient, requestCommentsCount, unitC, C } from '../supabaseClient';
 import { MarkdownRule, MarkdownRules, MarkdownStyles, MarkdownView } from 'react-native-markdown-view'
 import moment from 'moment';
+import { MemoCommentChildren } from './CommentChildren';
+import BlinkingCursor from './BlinkingCursor';
 
 const quote: MarkdownRule = {
     order: 0,
@@ -89,6 +91,8 @@ function Comment(props: any) {
     }
 
     useEffect(() => {
+        if (props.isRecentComment) return;
+
         if (!props.startLoading) return;
         if (props.level > 1) return;
 
@@ -140,7 +144,7 @@ function Comment(props: any) {
                     paddingTop: 4,
                     paddingBottom: 4,
                     paddingLeft: 16,
-                    borderLeftColor: '#F2C740',
+                    borderLeftColor: '#6b5920',
                     borderLeftWidth: 2,
                 }]}
                 onPress={switchMode}
@@ -149,11 +153,16 @@ function Comment(props: any) {
                 <View style={{
                     flex: 1,
                     flexDirection: 'row',
+                    // backgroundColor: 'blue'
                 }}>
                     <Text style={{
                         fontWeight: 'bold',
-                        color: '#A3A3A3'
-                    }}>{props.comment.author_name}</Text>
+                        color: props.isRecentComment ? '#F2C740' : '#A3A3A3'
+                    }}>
+                        {
+                            props.isRecentComment ? '@default' : props.comment.author_name
+                        }
+                    </Text>
 
                     {
                         mode == 'Normal' &&
@@ -168,11 +177,12 @@ function Comment(props: any) {
                         mode == 'Inline' && <Animated.Text style={{
                             color: '#A3A3A3',
                             flex: 1,
-                            paddingBottom: props.level > 0 ? 0 : 4
+                            paddingBottom: props.level > 0 ? 0 : 4,
                         }}
                             numberOfLines={1}
                             entering={FadeInDown}
-                        > • {props.comment.content}
+                        > •
+                            {props.commentStream ? '...' : props.comment.content}
                         </Animated.Text>
                     }
                 </View>
@@ -191,10 +201,13 @@ function Comment(props: any) {
                             onLinkPress={onLinkPress}
                             styles={mdstyles}
                         >
-                            {
-                                props.comment.content
-                            }
+                            {props.commentStream ? 'A *really good* multiple line bot answer that is long and insightful' : props.comment.content}
                         </MarkdownView>
+
+
+                        {
+                            props.commentStream && <BlinkingCursor />
+                        }
                     </Animated.View>
                 }
             </Pressable>
@@ -203,43 +216,29 @@ function Comment(props: any) {
                 display: mode == 'Inline' ? 'none' : 'flex'
             }}>
                 {
-                    comments?.map((c: any, i: number) => <View
-                        key={c.id}
-                        style={{
-                            paddingLeft: props.level > 0 ? 20 : 0
-                        }}
-                    >
+                    props.isRecentComment ?
                         <MemoComment
-                            comment={c}
+                            commentStream
+                            comment={{
+                                author_name: 'packer',
+                                // content: `It's coming`,
+                                created_at: new Date().toUTCString()
+                            }}
                             level={props.level + 1}
                             startLoading={props.startLoading}
                             setMode={props.setMode}
                         />
-                    </View>)
+                        : <MemoCommentChildren
+                            level={props.level}
+                            count={count}
+                            comments={comments}
+                            mode={mode}
+                            requestingComments={requestingComments}
+                            requestComments={requestComments}
+                        />
                 }
             </View>
 
-            {
-                comments.length < count && !requestingComments && mode == 'Normal' &&
-                <TouchableOpacity style={{
-                    backgroundColor: '#2C2C2C',
-                    marginTop: 4,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    paddingVertical: 4,
-                    paddingHorizontal: 8,
-                    borderRadius: 4
-                }}
-                    onPress={() => { requestComments() }}
-                >
-                    <Text style={{
-                        color: '#e6e6e6',
-                        fontWeight: '500'
-                    }}>
-                        Load {count - comments.length} more
-                    </Text>
-                </TouchableOpacity>
-            }
         </Animated.View>
     );
 }

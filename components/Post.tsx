@@ -240,7 +240,21 @@ function Post(props: any) {
                             </Animated.View>
                         }
                     </View>
-                </View>}
+                    {
+                        props.recentComment && <View style={{
+                            marginHorizontal: 16
+                        }}>
+                            <MemoComment
+                                comment={props.recentComment.comment}
+                                level={0}
+                                startLoading={props.startLoading}
+                                setMode={props.setMode}
+                                isRecentComment
+                            />
+                        </View>
+                    }
+                </View>
+                }
             />
 
             {
@@ -277,7 +291,7 @@ function Post(props: any) {
 
             }
 
-        </View>
+        </View >
     );
 }
 
