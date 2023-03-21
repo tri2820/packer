@@ -7,7 +7,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar from './components/Bar';
 import Wall from './components/Wall';
-import { constants, Mode, read } from './utils';
+import { constants, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
@@ -127,38 +127,38 @@ function Main(props: any) {
     setRecentComment(responseData);
 
 
-    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
-      // @ts-ignore
-      reactNative: { textStreaming: true },
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
-        // 'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    })
+    // const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
+    //   // @ts-ignore
+    //   reactNative: { textStreaming: true },
+    //   method: 'POST',
+    //   headers: {
+    //     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
+    //     // 'Content-Type': 'application/json'
+    //   },
+    //   body: JSON.stringify(body)
+    // })
 
-    if (!response.body || !response.ok) {
-      console.log('ERROR: response', response)
-      return
-    }
+    // if (!response.body || !response.ok) {
+    //   console.log('ERROR: response', response)
+    //   return
+    // }
 
-    const reader = response.body.getReader()
-    await read(reader, async (update) => {
-      setRecentComment((recentComment: any) => {
-        console.log(update);
-        const r = { ...recentComment }
-        r.child.content = r.child.content.concat(update).trimStart();
-        return r
-      })
-    });
+    // const reader = response.body.getReader()
+    // await read(reader, async (update) => {
+    //   setRecentComment((recentComment: any) => {
+    //     console.log(update);
+    //     const r = { ...recentComment }
+    //     r.child.content = r.child.content.concat(update).trimStart();
+    //     return r
+    //   })
+    // });
 
-    setRecentComment((recentComment: any) => {
-      const r = { ...recentComment }
-      r.child.finished = true;
-      console.log('debug DONE r', r)
-      return r
-    })
+    // setRecentComment((recentComment: any) => {
+    //   const r = { ...recentComment }
+    //   r.child.finished = true;
+    //   console.log('debug DONE r', r)
+    //   return r
+    // })
   }
 
   return (
