@@ -17,7 +17,12 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.tri2820.packer"
+      "bundleIdentifier": "com.tri2820.packer",
+      "entitlements": {
+        "com.apple.developer.applesignin": [
+          "Default"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
