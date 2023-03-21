@@ -5,12 +5,12 @@ import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area
 import { constants, normalizedHostname } from '../utils';
 import Animated, { Easing, FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput, FlatList } from 'react-native-gesture-handler';
-import { signIn } from '../login';
+import { signIn } from '../auth';
 import { supabaseClient, upsertProfile } from '../supabaseClient';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
-import LoginSection from './LoginSection';
+import SignInSection from './SignInSection';
 import UserList from './UserList';
 
 
@@ -170,7 +170,7 @@ function Bar(props: any) {
                 }, barStyles]}
                 >
                     {
-                        props.user === null && <LoginSection minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} />
+                        props.user === null && <SignInSection minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} />
                     }
 
 
@@ -346,7 +346,7 @@ function Bar(props: any) {
                     }
 
                     {
-                        props.user !== null && !focused && <UserList offset={offset} user={props.user} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        props.user !== null && !focused && <UserList offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>

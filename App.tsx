@@ -56,6 +56,11 @@ function Main(props: any) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
   }, [mode.tag])
 
+
+  useEffect(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+  }, [user])
+
   const onMessage = (event: WebViewMessageEvent) => {
     if (mode.tag != 'App') return;
     setMode({

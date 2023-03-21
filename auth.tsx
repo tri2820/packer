@@ -33,8 +33,12 @@ export const signIn = async (provider: 'google' | 'apple') => {
     return data.user;
 };
 
-export const signOut = async (userId: string, pushToken: string) => {
+export const signOut = async () => {
     console.log('Sign out of supabase!')
     const { error } = await supabaseClient.auth.signOut();
-    if (error) console.log('Error during sign out', error);
+    if (error) {
+        console.log('Error during sign out', error);
+        return false;
+    }
+    return true
 }

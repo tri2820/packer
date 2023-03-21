@@ -5,14 +5,14 @@ import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area
 import { constants, normalizedHostname } from '../utils';
 import Animated, { Easing, FadeIn, FadeInDown, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, useAnimatedKeyboard, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
-import { signIn } from '../login';
+import { signIn } from '../auth';
 import { supabaseClient, upsertProfile } from '../supabaseClient';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 
 
-function Bar(props: any) {
+function SignInSection(props: any) {
     const signInAndUpdateProfile = async (provider: 'apple' | 'google') => {
         const user = await signIn(provider);
         if (!user) return;
@@ -24,7 +24,6 @@ function Bar(props: any) {
         // await upsertProfile(user);
         // await syncProfile();
     }
-
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -102,4 +101,4 @@ function Bar(props: any) {
     );
 }
 
-export default Bar;
+export default SignInSection;
