@@ -222,7 +222,7 @@ function Comment(props: any) {
                             fixed
                             blinking={!props.comment.child.finished}
                             comment={{
-                                author_name: 'packer',
+                                author_name: 'Packer',
                                 content: props.comment.child.content,
                                 created_at: new Date().toUTCString()
                             }}
