@@ -153,11 +153,11 @@ function Main(props: any) {
       })
     });
 
-    console.log('debug DONE')
     setRecentComment((recentComment: any) => {
       const r = { ...recentComment }
       r.child.finished = true;
-      return recentComment
+      console.log('debug DONE r', r)
+      return r
     })
   }
 
