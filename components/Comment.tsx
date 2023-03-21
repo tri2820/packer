@@ -90,7 +90,10 @@ function Comment(props: any) {
     }
 
     useEffect(() => {
-        if (props.fixed) return;
+        if (props.fixed) {
+            setInited(true);
+            return;
+        }
 
         if (!props.startLoading) return;
         if (props.level > 1) return;

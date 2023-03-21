@@ -34,6 +34,15 @@ function Main(props: any) {
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [recentComment, setRecentComment] = useState<any>(null);
 
+  useEffect(() => {
+    (async () => {
+      const userResponse = await supabaseClient.auth.getUser();
+      console.log('Load user', userResponse.data.user)
+      setUser(userResponse.data.user)
+    })()
+  }, [])
+
+
   // const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('transparent');
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
