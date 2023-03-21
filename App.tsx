@@ -11,6 +11,13 @@ import { constants, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
+// @ts-ignore
+import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
+// @ts-ignore
+import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
+// @ts-ignore
+import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
+
 
 
 const INJECTED_JAVASCRIPT = `(function() {
@@ -126,39 +133,71 @@ function Main(props: any) {
 
     setRecentComment(responseData);
 
+    polyfillEncoding()
+    polyfillReadableStream()
+    polyfillFetch()
 
-    // const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
-    //   // @ts-ignore
-    //   reactNative: { textStreaming: true },
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
-    //     // 'Content-Type': 'application/json'
-    //   },
-    //   body: JSON.stringify(body)
-    // })
+    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
+      // @ts-ignore
+      reactNative: { textStreaming: true },
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
+        // 'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    })
 
-    // if (!response.body || !response.ok) {
-    //   console.log('ERROR: response', response)
-    //   return
-    // }
 
-    // const reader = response.body.getReader()
-    // await read(reader, async (update) => {
-    //   setRecentComment((recentComment: any) => {
-    //     console.log(update);
-    //     const r = { ...recentComment }
-    //     r.child.content = r.child.content.concat(update).trimStart();
-    //     return r
-    //   })
-    // });
+    if (!response.body || !response.ok) {
+      console.log('ERROR: response', response)
+      return
+    }
 
-    // setRecentComment((recentComment: any) => {
-    //   const r = { ...recentComment }
-    //   r.child.finished = true;
-    //   console.log('debug DONE r', r)
-    //   return r
-    // })
+
+    const utf8Decoder = new TextDecoder('utf-8')
+
+    const decodeResponse = (response?: Uint8Array) => {
+      if (!response) {
+        return ''
+      }
+
+      const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
+      const decodedText = utf8Decoder.decode(response)
+      const matches: string[] = []
+
+      let match
+      while ((match = pattern.exec(decodedText)) !== null) {
+        matches.push(JSON.parse(match[1]).content)
+      }
+      return matches.join('')
+    }
+
+    async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
+      const { value, done } = await reader.read()
+      if (done) return
+      const delta = decodeResponse(value)
+      partialUpdate(delta);
+      await read(reader, partialUpdate)
+    }
+
+    const reader = response.body.getReader()
+    console.log('reader', reader)
+    await read(reader, async (update) => {
+      setRecentComment((recentComment: any) => {
+        console.log(update);
+        const r = { ...recentComment }
+        r.child.content = r.child.content.concat(update).trimStart();
+        return r
+      })
+    });
+
+    setRecentComment((recentComment: any) => {
+      const r = { ...recentComment }
+      r.child.finished = true;
+      console.log('debug DONE r', r)
+      return r
+    })
   }
 
   return (
