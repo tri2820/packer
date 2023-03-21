@@ -1,5 +1,5 @@
 import { Dimensions, PixelRatio } from "react-native";
-import 'react-native-polyfill-globals/auto';
+// import 'react-native-polyfill-globals/auto';
 
 export const constants = {
     width: Dimensions.get('window').width,
@@ -38,22 +38,22 @@ export const normalizedHostname = (hostname: string) => hostname.startsWith('www
 export type Mode = Normal | Comment | App;
 
 
-const utf8Decoder = new TextDecoder('utf-8')
+// const utf8Decoder = new TextDecoder('utf-8')
 
 const decodeResponse = (response?: Uint8Array) => {
     if (!response) {
         return ''
     }
 
-    const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
-    const decodedText = utf8Decoder.decode(response)
-    const matches: string[] = []
+    // const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
+    // const decodedText = utf8Decoder.decode(response)
+    // const matches: string[] = []
 
-    let match
-    while ((match = pattern.exec(decodedText)) !== null) {
-        matches.push(JSON.parse(match[1]).content)
-    }
-    return matches.join('')
+    // let match
+    // while ((match = pattern.exec(decodedText)) !== null) {
+    //     matches.push(JSON.parse(match[1]).content)
+    // }
+    // return matches.join('')
 }
 
 export async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
