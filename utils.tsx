@@ -1,5 +1,8 @@
 import { Dimensions, PixelRatio } from "react-native";
-import 'react-native-polyfill-globals/auto';
+// @ts-ignore
+import { polyfill } from 'react-native-polyfill-globals';
+
+
 
 export const constants = {
     width: Dimensions.get('window').width,
@@ -37,7 +40,7 @@ export const normalizedHostname = (hostname: string) => hostname.startsWith('www
 
 export type Mode = Normal | Comment | App;
 
-
+polyfill();
 const utf8Decoder = new TextDecoder('utf-8')
 
 const decodeResponse = (response?: Uint8Array) => {
