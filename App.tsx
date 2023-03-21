@@ -108,31 +108,24 @@ function Main(props: any) {
       parent_id: null,
       need_bot_comment: true
     }
-    // console.log(data)
+
 
     const responseData = {
-      comment: {
-        // Could get from header
-        id: "recent-comment-id",
-        created_at: new Date(),
-        content: comment.text,
-        author_name: "@default",
-        parent_id: null,
-        post_id: post_id
+      // Could get from header
+      id: "recent-comment-id",
+      created_at: new Date(),
+      content: comment.text,
+      author_name: "Default",
+      parent_id: null,
+      post_id: post_id,
+      child: {
+        content: '',
+        finished: false
       }
     }
 
     setRecentComment(responseData);
 
-
-    // curl -L -X POST 'https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment' -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154' --data '{"content":"What is `fake news`?", "post_id": "89a3a11c-0191-54e9-a350-27837bae863e", "parent_id":null, "need_bot_comment": true}'
-
-
-
-
-    //   fetch('https://jsonplaceholder.typicode.com/todos/1', {  })
-    // .then(response => response.body)
-    // .then(stream => ...)
 
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
       // @ts-ignore
@@ -140,14 +133,9 @@ function Main(props: any) {
       method: 'POST',
       headers: {
         'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
-        'Content-Type': 'application/json'
+        // 'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
-        content: 'What is `fake news`?',
-        post_id: '89a3a11c-0191-54e9-a350-27837bae863e',
-        parent_id: null,
-        need_bot_comment: true
-      })
+      body: JSON.stringify(body)
     })
 
     if (!response.body || !response.ok) {
@@ -156,8 +144,21 @@ function Main(props: any) {
     }
 
     const reader = response.body.getReader()
-    const answer = await read(reader);
-    console.log('answer', answer);
+    await read(reader, async (update) => {
+      setRecentComment((recentComment: any) => {
+        console.log(update);
+        const r = { ...recentComment }
+        r.child.content = r.child.content.concat(update);
+        return r
+      })
+    });
+
+    console.log('debug DONE')
+    setRecentComment((recentComment: any) => {
+      const r = { ...recentComment }
+      r.child.finished = true;
+      return recentComment
+    })
   }
 
   return (

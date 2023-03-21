@@ -91,7 +91,7 @@ function Comment(props: any) {
     }
 
     useEffect(() => {
-        if (props.isRecentComment) return;
+        if (props.fixed) return;
 
         if (!props.startLoading) return;
         if (props.level > 1) return;
@@ -157,10 +157,10 @@ function Comment(props: any) {
                 }}>
                     <Text style={{
                         fontWeight: 'bold',
-                        color: props.isRecentComment ? '#F2C740' : '#A3A3A3'
+                        color: 'white'
                     }}>
                         {
-                            props.isRecentComment ? '@default' : props.comment.author_name
+                            props.comment.author_name
                         }
                     </Text>
 
@@ -200,12 +200,15 @@ function Comment(props: any) {
                             onLinkPress={onLinkPress}
                             styles={mdstyles}
                         >
-                            {props.commentStream ? 'A *really good* multiple line bot answer that is long and insightful' : props.comment.content}
+                            {
+                                // props.commentStream ?? props.comment.content
+                                props.comment.content
+                            }
                         </MarkdownView>
 
 
                         {
-                            props.commentStream && <BlinkingCursor />
+                            props.blinking && <BlinkingCursor />
                         }
                     </Animated.View>
                 }
@@ -215,19 +218,21 @@ function Comment(props: any) {
                 display: mode == 'Inline' ? 'none' : 'flex'
             }}>
                 {
-                    props.isRecentComment ?
+                    props.fixed && props.comment.child ?
                         <MemoComment
-                            commentStream
+                            fixed
+                            blinking={!props.comment.child.finished}
                             comment={{
                                 author_name: 'packer',
-                                // content: `It's coming`,
+                                content: props.comment.child.content,
                                 created_at: new Date().toUTCString()
                             }}
                             level={props.level + 1}
                             startLoading={props.startLoading}
                             setMode={props.setMode}
                         />
-                        : <MemoCommentChildren
+                        :
+                        <MemoCommentChildren
                             level={props.level}
                             count={count}
                             comments={comments}

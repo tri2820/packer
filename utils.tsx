@@ -56,13 +56,12 @@ const decodeResponse = (response?: Uint8Array) => {
     return matches.join('')
 }
 
-export async function read(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<string> {
+export async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
     const { value, done } = await reader.read()
-    if (done) return ''
+    if (done) return
     const delta = decodeResponse(value)
-    console.log(delta)
-    const rest = await read(reader)
-    return delta + rest
+    partialUpdate(delta);
+    await read(reader, partialUpdate)
 }
 
 // export const readStreamToDatabase = async (stream: ReadableStream<Uint8Array>) => {

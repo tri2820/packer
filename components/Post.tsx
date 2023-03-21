@@ -246,12 +246,13 @@ function Post(props: any) {
                         props.recentComment && <View style={{
                             marginHorizontal: 16
                         }}>
+                            {/* <Text>{JSON.stringify(props.recentComment)}</Text> */}
                             <MemoComment
-                                comment={props.recentComment.comment}
+                                fixed
+                                comment={props.recentComment}
                                 level={0}
                                 startLoading={props.startLoading}
                                 setMode={props.setMode}
-                                isRecentComment
                             />
                         </View>
                     }
