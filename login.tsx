@@ -3,7 +3,7 @@ import { makeRedirectUri, startAsync } from 'expo-auth-session';
 import { supabaseClient, supabaseClientUrl } from './supabaseClient';
 
 export const signIn = async (provider: 'google' | 'apple') => {
-    const returnUrl = makeRedirectUri({ useProxy: false });
+    const returnUrl = makeRedirectUri();
     const authUrl = `${supabaseClientUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${returnUrl}`;
 
     const authSessionResult = await startAsync({
