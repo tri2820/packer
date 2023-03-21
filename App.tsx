@@ -148,7 +148,7 @@ function Main(props: any) {
       setRecentComment((recentComment: any) => {
         console.log(update);
         const r = { ...recentComment }
-        r.child.content = r.child.content.concat(update);
+        r.child.content = r.child.content.concat(update).trimStart();
         return r
       })
     });

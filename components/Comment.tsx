@@ -10,7 +10,6 @@ import * as Haptics from 'expo-haptics';
 import { State, INIT_DATE, supabaseClient, requestCommentsCount, unitC, C } from '../supabaseClient';
 import { MarkdownRule, MarkdownRules, MarkdownStyles, MarkdownView } from 'react-native-markdown-view'
 import moment from 'moment';
-import { MemoCommentChildren } from './CommentChildren';
 import BlinkingCursor from './BlinkingCursor';
 
 const quote: MarkdownRule = {
@@ -232,14 +231,45 @@ function Comment(props: any) {
                             setMode={props.setMode}
                         />
                         :
-                        <MemoCommentChildren
-                            level={props.level}
-                            count={count}
-                            comments={comments}
-                            mode={mode}
-                            requestingComments={requestingComments}
-                            requestComments={requestComments}
-                        />
+                        <>
+                            {
+                                comments?.map((c: any, i: number) => <View
+                                    key={c.id}
+                                    style={{
+                                        paddingLeft: props.level > 0 ? 20 : 0
+                                    }}
+                                >
+                                    <MemoComment
+                                        comment={c}
+                                        level={props.level + 1}
+                                        startLoading={props.startLoading}
+                                        setMode={setMode}
+                                    />
+                                </View>)
+                            }
+
+                            {
+                                comments.length < count && !requestingComments && mode == 'Normal' &&
+                                <TouchableOpacity style={{
+                                    backgroundColor: '#2C2C2C',
+                                    marginTop: 4,
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    paddingVertical: 4,
+                                    paddingHorizontal: 8,
+                                    borderRadius: 4
+                                }}
+                                    onPress={() => { requestComments() }}
+                                >
+                                    <Text style={{
+                                        color: '#e6e6e6',
+                                        fontWeight: '500'
+                                    }}>
+                                        Load {count - comments.length} more
+                                    </Text>
+                                </TouchableOpacity>
+                            }
+                        </>
                 }
             </View>
 
