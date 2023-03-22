@@ -10,6 +10,7 @@ import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
 import MoreDiscussionsButton from './MoreDiscussionsButton';
 import moment from 'moment';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 function PostHeader(props: any) {
 
@@ -30,16 +31,24 @@ function PostHeader(props: any) {
                 })
             }}
         >
-            <Text style={{
-                color: '#A3A3A3',
-                fontSize: 12,
+            <View style={{
                 marginBottom: 8,
-                // backgroundColor: 'red'
+                flexDirection: 'row',
+                alignItems: 'center',
+                // justifyContent: 'center'
             }}>
-                {
-                    getSourceName(props.post.source_url)
-                }
-            </Text>
+                <Ionicons name='link' color='#A3A3A3' size={14} />
+                <Text style={{
+                    color: '#A3A3A3',
+                    fontSize: 12,
+                    marginLeft: 4
+                    // backgroundColor: 'red'
+                }}>
+                    {
+                        getSourceName(props.post.source_url)
+                    }
+                </Text>
+            </View>
 
             <Animated.Text style={[{
                 color: '#E6E6E6',

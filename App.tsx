@@ -136,7 +136,8 @@ function Main(props: any) {
       id: "recent-comment-id",
       created_at: new Date(),
       content: comment.text,
-      author_name: "Default",
+      // author_name: user.user_metadata.full_name,
+      author_name: 'Default User',
       parent_id: null,
       post_id: post_id,
       child: {
@@ -196,7 +197,6 @@ function Main(props: any) {
     }
 
     const reader = response.body.getReader()
-    console.log('reader', reader)
     await read(reader, async (update) => {
       setRecentComment((recentComment: any) => {
         console.log(update);
