@@ -4,7 +4,7 @@ import { supabaseClient, supabaseClientUrl } from './supabaseClient';
 
 export const signIn = async (provider: 'google' | 'apple') => {
     const returnUrl = makeRedirectUri({
-        useProxy: false,
+        // useProxy: false,
         path: '/auth/callback',
     });
     const authUrl = `${supabaseClientUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${returnUrl}`;
