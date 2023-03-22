@@ -10,6 +10,7 @@ import { supabaseClient, upsertProfile } from '../supabaseClient';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
+import * as Haptics from 'expo-haptics';
 
 
 function SignInSection(props: any) {
@@ -92,6 +93,7 @@ function SignInSection(props: any) {
                     paddingVertical: 10,
                     paddingHorizontal: 32,
                 }} onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
                     signInAndUpdateProfile('apple')
                 }}>
                     Sign in with Apple
