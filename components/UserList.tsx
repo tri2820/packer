@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground, PanResponder } from 'react-native';
+import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground, PanResponder, Alert } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
 import Animated, { Easing, FadeIn, FadeInDown, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -15,6 +15,17 @@ import LoginSection from './SignInSection';
 
 function UserList(props: any) {
     const [mode, setMode] = useState<'normal' | 'settings'>('normal')
+
+    useEffect(() => {
+        console.log('props.user changed', props.user)
+        if (props.user == null) return
+        // Cancel account deletion
+        (async () => {
+            const { error } = await supabaseClient.from('deletions').delete().eq('user_id', props.user.id)
+            console.log('debug cancel deletion error', error)
+        })()
+    }, [props.user])
+
     const signOutAndUpdateProfile = async () => {
         const signedOut = await signOut();
         if (!signedOut) return;
@@ -32,6 +43,28 @@ function UserList(props: any) {
         if (props.offset.value < 0) return
         runOnJS(setMode)('normal')
     })
+
+    const createDeleteConfirmationAlert = () =>
+        Alert.alert(
+            'Confirm account deletion',
+            'Are you sure you want to delete your account? Your data will be permanently deleted, but you can restore your account within 14 days by signing back in.', [
+            {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+            },
+            {
+                text: 'Delete Account',
+                onPress: async () => {
+                    const { error } = await supabaseClient.from('deletions').upsert({
+                        user_id: props.user.id
+                    })
+                    signOutAndUpdateProfile()
+                },
+                style: 'destructive'
+            },
+        ]);
+
 
     return (
 
@@ -194,9 +227,9 @@ function UserList(props: any) {
                             }}
                         />
 
-                        <TouchableOpacity onPress={() => {
-                            // setMode('normal')
-                        }} style={{
+                        <TouchableOpacity onPress={
+                            createDeleteConfirmationAlert
+                        } style={{
                             paddingVertical: 8,
                             paddingHorizontal: 16,
                             borderRadius: 8,
@@ -216,7 +249,7 @@ function UserList(props: any) {
                             // backgroundColor: 'red',
                             textAlign: 'center'
                         }}>
-                            Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by logging in to your account. Thank you for your understanding.
+                            Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
                         </Text>
                     </View>
                 </Animated.View>
