@@ -152,12 +152,19 @@ function Main(props: any) {
     polyfillReadableStream()
     polyfillFetch()
 
+    const { data } = await supabaseClient.auth.getSession();
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      console.log('Access Token is', accessToken)
+      return
+    }
+
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
       // @ts-ignore
       reactNative: { textStreaming: true },
       method: 'POST',
       headers: {
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqaHV5cnBlcWNidnFiaGZuaWJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE2Nzc4NDQ3NDMsImV4cCI6MTk5MzQyMDc0M30.QwCBvmNlWHeg4vhdTOqYImvZcl4EMuIv7zhQWLge154',
+        'Authorization': `Bearer ${accessToken}`,
         // 'Content-Type': 'application/json'
       },
       body: JSON.stringify(body)
