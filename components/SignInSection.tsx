@@ -67,6 +67,8 @@ function SignInSection(props: any) {
                     width: 60,
                     height: 60,
                     borderRadius: 4,
+                    // left: 'auto',
+                    // right: 'auto',
                     alignSelf: 'center'
                 }}
                 source={require('../assets/icon.png')}
@@ -79,7 +81,15 @@ function SignInSection(props: any) {
                 fontWeight: '700',
                 alignSelf: 'center',
                 textAlign: 'center'
-            }}>Explore the Internet. Together with Packer.</Text>
+            }}>Explore digital worlds.</Text>
+
+            <Text style={{
+                color: 'white',
+                fontSize: 30,
+                fontWeight: '700',
+                alignSelf: 'center',
+                textAlign: 'center'
+            }}>Together with Packer.</Text>
 
             <View style={{
                 marginTop: 32,
