@@ -170,7 +170,7 @@ function Bar(props: any) {
                 }, barStyles]}
                 >
                     {
-                        props.user === null && <SignInSection minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} />
+                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} />
                     }
 
 

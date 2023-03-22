@@ -14,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 
 
 function SignInSection(props: any) {
+    const insets = useSafeAreaInsets();
     const signInAndUpdateProfile = async (provider: 'apple' | 'google') => {
         const user = await signIn(provider);
         if (!user) return;
@@ -39,6 +40,8 @@ function SignInSection(props: any) {
                 {
                     position: 'absolute',
                     width: constants.width,
+                    height: '100%',
+                    // backgroundColor: 'blue'
                 }]}
             exiting={FadeOut}
         >
@@ -89,15 +92,64 @@ function SignInSection(props: any) {
                 elevation: 3,
             }}>
                 <Ionicons.Button name='logo-apple' style={{
-                    backgroundColor: "black",
-                    paddingVertical: 10,
+                    backgroundColor: "white",
+                    paddingTop: 12,
+                    paddingBottom: 10,
                     paddingHorizontal: 32,
-                }} onPress={() => {
-                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-                    signInAndUpdateProfile('apple')
-                }}>
-                    Sign in with Apple
+                    // alignItems: 'flex-end'
+                }}
+                    iconStyle={{
+                        // backgroundColor: 'red',
+                        marginRight: 8,
+                        marginBottom: 4.5,
+                        // marginVertical: 4
+                    }}
+                    color='black'
+                    onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+                        signInAndUpdateProfile('apple')
+                    }}>
+                    <Text style={{
+                        fontWeight: '600',
+                        fontSize: 18,
+                        // paddingTop: 2,
+                        // backgroundColor: 'blue'
+                    }}>
+                        Sign in with Apple
+                    </Text>
+                    {/* Sign in with Apple */}
                 </Ionicons.Button>
+            </View>
+
+            <View style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: insets.bottom + props.INSETS_OFFSET_BOTTOM + 40,
+                // marginTop: 140,
+                alignItems: 'center',
+                // justifyContent: 'center',
+                // flexDirection: 'row'
+            }}>
+                <TouchableOpacity onPress={() => {
+                    Linking.openURL('https://github.com/tri2820/packer-policies/blob/main/privacy_policy.md')
+                }}>
+                    <Text style={{
+                        color: '#f1f1f1',
+                        fontWeight: '300'
+                    }}>Privacy Policy</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity onPress={() => {
+                    Linking.openURL('https://github.com/tri2820/packer-policies/blob/main/terms_and_conditions.md')
+                }}>
+                    <Text style={{
+                        // marginLeft: 16,
+                        marginTop: 4,
+                        color: '#f1f1f1',
+                        fontWeight: '300'
+                    }}>Terms & Conditions</Text>
+                </TouchableOpacity>
             </View>
         </Animated.View>
     );
