@@ -314,7 +314,8 @@ function Bar(props: any) {
                                         // When receive, noti?
                                         // Or better, server sent event + reply
                                         props.submitComment({
-                                            text
+                                            text,
+                                            reply_to_comment_id: props.selectedCommentId == '' ? null : props.selectedCommentId
                                         })
 
                                         offset.value = withSpring(0, { velocity: 5, mass: 0.2 });

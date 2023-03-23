@@ -126,27 +126,9 @@ function Main(props: any) {
     const body = {
       content: comment.text,
       post_id: post_id,
-      parent_id: null,
+      parent_id: comment.reply_to_comment_id,
       need_bot_comment: true
     }
-
-
-    const responseData = {
-      // Could get from header
-      id: "recent-comment-id",
-      created_at: new Date(),
-      content: comment.text,
-      // author_name: user.user_metadata.full_name,
-      author_name: 'Default User',
-      parent_id: null,
-      post_id: post_id,
-      child: {
-        content: '',
-        finished: false
-      }
-    }
-
-    setRecentComment(responseData);
 
     polyfillEncoding()
     polyfillReadableStream()
@@ -159,6 +141,23 @@ function Main(props: any) {
       return
     }
 
+    const responseData = {
+      // Could get from header
+      id: 'placeholder_comment_id',
+      created_at: new Date(),
+      content: comment.text,
+      // author_name: user.user_metadata.full_name,
+      author_name: 'Default User',
+      parent_id: comment.reply_to_comment_id,
+      post_id: post_id,
+      child: {
+        content: '',
+        finished: false
+      }
+    }
+
+    setRecentComment(responseData);
+
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
       // @ts-ignore
       reactNative: { textStreaming: true },
@@ -170,6 +169,9 @@ function Main(props: any) {
       body: JSON.stringify(body)
     })
 
+    const updatedResponse = { ...responseData, id: response.headers.get("comment_id") }
+    console.log('debug updatedResponse', updatedResponse)
+    setRecentComment(updatedResponse);
 
     if (!response.body || !response.ok) {
       console.log('ERROR: response', response)

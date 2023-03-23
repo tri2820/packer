@@ -129,14 +129,20 @@ function Post(props: any) {
         )
     }, [props.recentComment])
 
-    const renderItem = ({ item, index }: any) => <MemoComment
-        startLoading={props.shouldActive}
-        comment={item}
-        level={0}
-        setMode={props.setMode}
-        selectedCommentId={props.selectedCommentId}
-        setSelectedCommentId={props.setSelectedCommentId}
-    />
+    const renderItem = ({ item, index }: any) =>
+        <View style={{
+            marginHorizontal: 16
+        }}>
+            <MemoComment
+                startLoading={props.shouldActive}
+                comment={item}
+                level={0}
+                setMode={props.setMode}
+                selectedCommentId={props.selectedCommentId}
+                setSelectedCommentId={props.setSelectedCommentId}
+                recentComment={props.recentComment}
+            />
+        </View>
 
 
     const keyExtractor = (item: any) => item.id
@@ -241,7 +247,7 @@ function Post(props: any) {
                         }
                     </View>
                     {
-                        props.recentComment && <MemoComment
+                        props.recentComment && props.recentComment.parent_id == null && <MemoComment
                             fixed
                             comment={props.recentComment}
                             level={0}
@@ -249,6 +255,7 @@ function Post(props: any) {
                             setMode={props.setMode}
                             selectedCommentId={props.selectedCommentId}
                             setSelectedCommentId={props.setSelectedCommentId}
+                            recentComment={props.recentComment}
                         />
                     }
                 </View>

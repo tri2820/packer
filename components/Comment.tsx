@@ -122,18 +122,18 @@ function Comment(props: any) {
     }
     // console.log('debug Comment was rendered', new Date().toLocaleTimeString())
     return (
-        <Animated.View style={{
-            backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
-        }}
+        <Animated.View
             entering={FadeInDown}
         >
             <Pressable
                 style={{
                     paddingBottom: props.level > 0 ? 0 : 8,
-                    paddingHorizontal: props.level == 0 ? 16 : 0
+                    // paddingHorizontal: props.level == 0 ? 16 : 0,
+                    // backgroundColor: props.level == 0 ? 'yellow' : 'transparent'
                 }}
                 onPress={switchMode}
                 onLongPress={() => {
+                    if (props.comment.id == 'placeholder_comment_id') return;
                     props.setSelectedCommentId(props.comment.id)
                 }}
             >
@@ -149,7 +149,7 @@ function Comment(props: any) {
 
                 <View
                     style={[(props.level == 0) && {
-                        paddingTop: 12
+                        marginTop: 12
                     }, (props.level > 0) && {
                         marginVertical: 4,
                         paddingTop: 4,
@@ -157,7 +157,10 @@ function Comment(props: any) {
                         paddingLeft: 16,
                         borderLeftColor: '#6b5920',
                         borderLeftWidth: 2,
-                    }]}
+                    }, {
+                        backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
+                    }
+                    ]}
 
                 >
 
@@ -236,40 +239,66 @@ function Comment(props: any) {
                 }}>
                     {
                         props.fixed && props.comment.child ?
-                            <MemoComment
-                                fixed
-                                blinking={!props.comment.child.finished}
-                                comment={{
-                                    author_name: 'Packer',
-                                    content: props.comment.child.content,
-                                    created_at: new Date().toUTCString()
-                                }}
-                                level={props.level + 1}
-                                startLoading={props.startLoading}
-                                setMode={props.setMode}
-                                setSelectedCommentId={props.setSelectedCommentId}
-                                selectedCommentId={props.selectedCommentId}
-                            />
+                            <View style={{
+                                marginLeft: props.level == 0 ? 0 : 16
+                            }}>
+                                <MemoComment
+                                    fixed
+                                    blinking={!props.comment.child.finished}
+                                    comment={{
+                                        id: 'bot answer',
+                                        author_name: 'Packer',
+                                        content: props.comment.child.content,
+                                        created_at: new Date().toUTCString()
+                                    }}
+                                    level={props.level + 1}
+                                    startLoading={props.startLoading}
+                                    setMode={props.setMode}
+                                    setSelectedCommentId={props.setSelectedCommentId}
+                                    selectedCommentId={props.selectedCommentId}
+                                    recentComment={props.recentComment}
+                                />
+                            </View>
                             :
                             <View style={{
                                 marginTop: 4
                             }}>
                                 {
-                                    comments?.map((c: any, i: number) => <View
-                                        key={c.id}
-                                        style={{
-                                            paddingLeft: props.level > 0 ? 20 : 0
-                                        }}
-                                    >
+                                    props.recentComment && props.recentComment.parent_id == props.comment.id &&
+                                    <View style={{
+                                        marginLeft: props.level == 0 ? 0 : 16
+                                    }}>
                                         <MemoComment
-                                            comment={c}
+                                            fixed
+                                            comment={props.recentComment}
                                             level={props.level + 1}
                                             startLoading={props.startLoading}
-                                            setMode={setMode}
-                                            setSelectedCommentId={props.setSelectedCommentId}
+                                            setMode={props.setMode}
                                             selectedCommentId={props.selectedCommentId}
+                                            setSelectedCommentId={props.setSelectedCommentId}
+                                            recentComment={props.recentComment}
                                         />
-                                    </View>)
+                                    </View>
+                                }
+
+                                {
+                                    comments?.map((c: any, i: number) =>
+                                        <View
+                                            key={c.id}
+                                            style={{
+                                                marginLeft: props.level == 0 ? 0 : 16
+                                            }}
+                                        >
+                                            <MemoComment
+                                                comment={c}
+                                                level={props.level + 1}
+                                                startLoading={props.startLoading}
+                                                setMode={setMode}
+                                                setSelectedCommentId={props.setSelectedCommentId}
+                                                selectedCommentId={props.selectedCommentId}
+                                                recentComment={props.recentComment}
+                                            />
+                                        </View>)
                                 }
 
                                 {
