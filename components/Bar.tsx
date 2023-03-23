@@ -12,6 +12,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import SignInSection from './SignInSection';
 import UserList from './UserList';
+import * as Haptics from 'expo-haptics';
 
 
 function Bar(props: any) {
@@ -92,8 +93,10 @@ function Bar(props: any) {
 
     useEffect(() => {
         console.log('debug ', props.selectedCommentId)
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         if (props.selectedCommentId == '') return;
         ref.current?.focus()
+
         // _offset.value = withSpring(minOffset, { mass: 0.15 })
         // offset.value = withSpring(minOffset, { mass: 0.15 })
 
@@ -231,7 +234,7 @@ function Bar(props: any) {
                         entering={FadeInDown.duration(100)}
                     >
                         {/* TOOLS */}
-                        {
+                        {/* {
                             props.selectedCommentId != '' &&
                             focused &&
                             <View style={{
@@ -248,14 +251,14 @@ function Bar(props: any) {
                                     fontSize: 10
                                 }}>Replying to a comment</Text>
                             </View>
-                        }
+                        } */}
 
                         {/* INPUT */}
                         <Animated.View style={{
                             flex: 1,
                             flexDirection: 'row',
                             alignItems: 'center',
-                            height: props.minBarHeight - HANDLER_HEIGHT + 4,
+                            height: props.minBarHeight - HANDLER_HEIGHT,
                             paddingBottom: 4,
                             // backgroundColor: 'blue'
                         }}>
@@ -295,7 +298,7 @@ function Bar(props: any) {
                                     ref={ref}
                                     value={text}
                                     onChangeText={setText}
-                                    placeholder='Add a discussion...'
+                                    placeholder={props.selectedCommentId == '' ? 'Add a discussion...' : 'Replying...'}
                                     placeholderTextColor='#C2C2C2'
                                     style={{
                                         color: '#F1F1F1',

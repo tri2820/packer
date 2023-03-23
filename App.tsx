@@ -43,11 +43,6 @@ function Main(props: any) {
     })()
   }, [])
 
-
-  useEffect(() => {
-    console.log('selectedCommentId', selectedCommentId)
-  }, [selectedCommentId])
-
   // const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('transparent');
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
