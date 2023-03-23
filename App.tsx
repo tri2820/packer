@@ -11,15 +11,6 @@ import { constants, loadingView, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
-// @ts-ignore
-import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
-// @ts-ignore
-import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
-// @ts-ignore
-import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
-
-
-
 const INJECTED_JAVASCRIPT = `(function() {
   window.ReactNativeWebView.postMessage(JSON.stringify(
     window.getComputedStyle( document.documentElement ,null).getPropertyValue('background-color')
@@ -32,8 +23,6 @@ function Main(props: any) {
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
   const [activePostIndex, setActivePostIndex] = useState(0);
-  const [recentComment, setRecentComment] = useState<any>(null);
-  const [selectedCommentId, setSelectedCommentId] = useState<any>('');
 
   useEffect(() => {
     (async () => {
@@ -119,109 +108,7 @@ function Main(props: any) {
   //   console.log('debug recentComments', recentComments)
   // }, [recentComments])
 
-  const submitComment = async (comment: any) => {
-    const post_id = props.posts[activePostIndex].id;
 
-    console.log("debug text", comment.text)
-    const body = {
-      content: comment.text,
-      post_id: post_id,
-      parent_id: comment.reply_to_comment_id,
-      need_bot_comment: true
-    }
-
-    polyfillEncoding()
-    polyfillReadableStream()
-    polyfillFetch()
-
-    const { data } = await supabaseClient.auth.getSession();
-    const accessToken = data.session?.access_token;
-    if (!accessToken) {
-      console.log('Access Token is', accessToken)
-      return
-    }
-
-    const responseData = {
-      // Could get from header
-      id: 'placeholder_comment_id',
-      created_at: new Date(),
-      content: comment.text,
-      // author_name: user.user_metadata.full_name,
-      author_name: 'Default User',
-      parent_id: comment.reply_to_comment_id,
-      post_id: post_id,
-      child: {
-        content: '',
-        finished: false
-      }
-    }
-
-    setRecentComment(responseData);
-
-    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/add_comment', {
-      // @ts-ignore
-      reactNative: { textStreaming: true },
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        // 'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    })
-
-    const updatedResponse = { ...responseData, id: response.headers.get("comment_id") }
-    console.log('debug updatedResponse', updatedResponse)
-    setRecentComment(updatedResponse);
-
-    if (!response.body || !response.ok) {
-      console.log('ERROR: response', response)
-      return
-    }
-
-
-    const utf8Decoder = new TextDecoder('utf-8')
-
-    const decodeResponse = (response?: Uint8Array) => {
-      if (!response) {
-        return ''
-      }
-
-      const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
-      const decodedText = utf8Decoder.decode(response)
-      const matches: string[] = []
-
-      let match
-      while ((match = pattern.exec(decodedText)) !== null) {
-        matches.push(JSON.parse(match[1]).content)
-      }
-      return matches.join('')
-    }
-
-    async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
-      const { value, done } = await reader.read()
-      if (done) return
-      const delta = decodeResponse(value)
-      partialUpdate(delta);
-      await read(reader, partialUpdate)
-    }
-
-    const reader = response.body.getReader()
-    await read(reader, async (update) => {
-      setRecentComment((recentComment: any) => {
-        console.log(update);
-        const r = { ...recentComment }
-        r.child.content = r.child.content.concat(update).trimStart();
-        return r
-      })
-    });
-
-    setRecentComment((recentComment: any) => {
-      const r = { ...recentComment }
-      r.child.finished = true;
-      console.log('debug DONE r', r)
-      return r
-    })
-  }
 
   return (
     <View style={{
@@ -231,8 +118,15 @@ function Main(props: any) {
     }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
-          <Wall selectedCommentId={selectedCommentId} setSelectedCommentId={setSelectedCommentId} recentComment={recentComment} requestPost={props.requestPost} posts={props.posts} activePostIndex={activePostIndex} setActivePostIndex={setActivePostIndex} height={constants.height - minBarHeight - insets.bottom} mode={mode} setMode={setMode} />
-
+          <Wall
+            requestPost={props.requestPost}
+            posts={props.posts}
+            activePostIndex={activePostIndex}
+            setActivePostIndex={setActivePostIndex}
+            height={constants.height - minBarHeight - insets.bottom}
+            mode={mode}
+            setMode={setMode}
+          />
           {
             mode.tag === 'App' && <Animated.View style={{
               position: 'absolute',
@@ -266,7 +160,17 @@ function Main(props: any) {
             </Animated.View>
           }
 
-          <Bar selectedCommentId={selectedCommentId} setSelectedCommentId={setSelectedCommentId} submitComment={submitComment} user={user} setUser={setUser} activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
+          <Bar onSubmit={() => {
+
+          }}
+            user={user}
+            setUser={setUser}
+            activePostIndex={activePostIndex}
+            minBarHeight={minBarHeight}
+            setMode={setMode}
+            mode={mode}
+            offset={offset}
+          />
         </Animated.View>
       </GestureDetector>
 

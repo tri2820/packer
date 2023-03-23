@@ -18,7 +18,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 function Post(props: any) {
     const [comments, setComments] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
-    // const [timeScrolledOn, setTimeScrolledOn] = useState(0);
     const [inited, setInited] = useState(false);
     const [firstLoadResult, setFirstLoadResult] = useState<'waiting' | 'success' | 'failure'>('waiting');
     const [videoPlaying, setVideoPlaying] = useState(false);
@@ -122,13 +121,6 @@ function Post(props: any) {
         }
     }, [props.mode])
 
-    useEffect(() => {
-        console.log('debug changed props.recentComment', props.recentComment
-            // .filter((c: any) => c.comment.post_id == props.post.id)
-            // , props.post.id
-        )
-    }, [props.recentComment])
-
     const renderItem = ({ item, index }: any) =>
         <View style={{
             marginHorizontal: 16
@@ -138,9 +130,6 @@ function Post(props: any) {
                 comment={item}
                 level={0}
                 setMode={props.setMode}
-                selectedCommentId={props.selectedCommentId}
-                setSelectedCommentId={props.setSelectedCommentId}
-                recentComment={props.recentComment}
             />
         </View>
 
@@ -220,7 +209,7 @@ function Post(props: any) {
                         <PostHeader post={props.post} setMode={props.setMode} />
                         <KeyTakeaways content={props.post.keytakeaways} />
                         {
-                            props.recentComment === null &&
+                            // props.recentComment === null &&
                             firstLoadResult != 'waiting' &&
                             comments.length == 0 &&
                             <Animated.View style={{
@@ -246,18 +235,6 @@ function Post(props: any) {
                             </Animated.View>
                         }
                     </View>
-                    {
-                        props.recentComment && props.recentComment.parent_id == null && <MemoComment
-                            fixed
-                            comment={props.recentComment}
-                            level={0}
-                            startLoading={props.startLoading}
-                            setMode={props.setMode}
-                            selectedCommentId={props.selectedCommentId}
-                            setSelectedCommentId={props.setSelectedCommentId}
-                            recentComment={props.recentComment}
-                        />
-                    }
                 </View>
                 }
             />

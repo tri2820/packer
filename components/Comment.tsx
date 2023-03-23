@@ -134,7 +134,7 @@ function Comment(props: any) {
                 onPress={switchMode}
                 onLongPress={() => {
                     if (props.comment.id == 'placeholder_comment_id') return;
-                    props.setSelectedCommentId(props.comment.id)
+
                 }}
             >
 
@@ -158,7 +158,7 @@ function Comment(props: any) {
                         borderLeftColor: '#6b5920',
                         borderLeftWidth: 2,
                     }, {
-                        backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
+                        // backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
                     }
                     ]}
 
@@ -238,32 +238,31 @@ function Comment(props: any) {
                     display: mode == 'Inline' ? 'none' : 'flex'
                 }}>
                     {
-                        props.fixed && props.comment.child ?
-                            <View style={{
-                                marginLeft: props.level == 0 ? 0 : 16
-                            }}>
-                                <MemoComment
-                                    fixed
-                                    blinking={!props.comment.child.finished}
-                                    comment={{
-                                        id: 'bot answer',
-                                        author_name: 'Packer',
-                                        content: props.comment.child.content,
-                                        created_at: new Date().toUTCString()
-                                    }}
-                                    level={props.level + 1}
-                                    startLoading={props.startLoading}
-                                    setMode={props.setMode}
-                                    setSelectedCommentId={props.setSelectedCommentId}
-                                    selectedCommentId={props.selectedCommentId}
-                                    recentComment={props.recentComment}
-                                />
-                            </View>
-                            :
-                            <View style={{
-                                marginTop: 4
-                            }}>
-                                {
+                        // props.fixed && props.comment.child ?
+                        //     <View style={{
+                        //         marginLeft: props.level == 0 ? 0 : 16
+                        //     }}>
+                        //         <MemoComment
+                        //             fixed
+                        //             blinking={!props.comment.child.finished}
+                        //             comment={{
+                        //                 id: 'bot answer',
+                        //                 author_name: 'Packer',
+                        //                 content: props.comment.child.content,
+                        //                 created_at: new Date().toUTCString()
+                        //             }}
+                        //             level={props.level + 1}
+                        //             startLoading={props.startLoading}
+                        //             setMode={props.setMode}
+                        //             setCommentReplyCallback={props.setCommentReplyCallback}
+                        //         // recentComment={props.recentComment}
+                        //         />
+                        //     </View>
+                        //     :
+                        <View style={{
+                            marginTop: 4
+                        }}>
+                            {/* {
                                     props.recentComment && props.recentComment.parent_id == props.comment.id &&
                                     <View style={{
                                         marginLeft: props.level == 0 ? 0 : 16
@@ -274,55 +273,53 @@ function Comment(props: any) {
                                             level={props.level + 1}
                                             startLoading={props.startLoading}
                                             setMode={props.setMode}
-                                            selectedCommentId={props.selectedCommentId}
-                                            setSelectedCommentId={props.setSelectedCommentId}
+                                            setCommentReplyCallback={props.setCommentReplyCallback}
                                             recentComment={props.recentComment}
                                         />
                                     </View>
-                                }
+                                } */}
 
-                                {
-                                    comments?.map((c: any, i: number) =>
-                                        <View
-                                            key={c.id}
-                                            style={{
-                                                marginLeft: props.level == 0 ? 0 : 16
-                                            }}
-                                        >
-                                            <MemoComment
-                                                comment={c}
-                                                level={props.level + 1}
-                                                startLoading={props.startLoading}
-                                                setMode={setMode}
-                                                setSelectedCommentId={props.setSelectedCommentId}
-                                                selectedCommentId={props.selectedCommentId}
-                                                recentComment={props.recentComment}
-                                            />
-                                        </View>)
-                                }
-
-                                {
-                                    comments.length < count && !requestingComments && mode == 'Normal' &&
-                                    <TouchableOpacity style={{
-                                        backgroundColor: '#2C2C2C',
-                                        marginTop: 4,
-                                        marginLeft: 'auto',
-                                        marginRight: 'auto',
-                                        paddingVertical: 4,
-                                        paddingHorizontal: 8,
-                                        borderRadius: 4
-                                    }}
-                                        onPress={() => { requestComments() }}
+                            {
+                                comments?.map((c: any, i: number) =>
+                                    <View
+                                        key={c.id}
+                                        style={{
+                                            marginLeft: props.level == 0 ? 0 : 16
+                                        }}
                                     >
-                                        <Text style={{
-                                            color: '#e6e6e6',
-                                            fontWeight: '500'
-                                        }}>
-                                            Load {count - comments.length} more
-                                        </Text>
-                                    </TouchableOpacity>
-                                }
-                            </View>
+                                        <MemoComment
+                                            comment={c}
+                                            level={props.level + 1}
+                                            startLoading={props.startLoading}
+                                            setMode={setMode}
+                                            setCommentReplyCallback={props.setCommentReplyCallback}
+                                        // recentComment={props.recentComment}
+                                        />
+                                    </View>)
+                            }
+
+                            {
+                                comments.length < count && !requestingComments && mode == 'Normal' &&
+                                <TouchableOpacity style={{
+                                    backgroundColor: '#2C2C2C',
+                                    marginTop: 4,
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
+                                    paddingVertical: 4,
+                                    paddingHorizontal: 8,
+                                    borderRadius: 4
+                                }}
+                                    onPress={() => { requestComments() }}
+                                >
+                                    <Text style={{
+                                        color: '#e6e6e6',
+                                        fontWeight: '500'
+                                    }}>
+                                        Load {count - comments.length} more
+                                    </Text>
+                                </TouchableOpacity>
+                            }
+                        </View>
                     }
                 </View>
             </Pressable>

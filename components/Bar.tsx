@@ -91,28 +91,12 @@ function Bar(props: any) {
         };
     });
 
-    useEffect(() => {
-        console.log('debug ', props.selectedCommentId)
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        if (props.selectedCommentId == '') return;
-        ref.current?.focus()
-
-        // _offset.value = withSpring(minOffset, { mass: 0.15 })
-        // offset.value = withSpring(minOffset, { mass: 0.15 })
-
-    }, [props.selectedCommentId])
 
     const [needReset, setNeedReset] = useState(false);
     useEffect(() => {
         if (!needReset) return;
-        props.setSelectedCommentId('')
         setNeedReset(false)
     }, [needReset])
-
-    useDerivedValue(() => {
-        if (offset.value < 0) return;
-        runOnJS(setNeedReset)(true)
-    })
 
     const gesture = Gesture
         .Pan()
@@ -168,7 +152,6 @@ function Bar(props: any) {
                     Keyboard.dismiss();
                     offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
                     _offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
-                    props.setSelectedCommentId('');
                 }}
                     style={{
                         width: '100%',
@@ -298,7 +281,7 @@ function Bar(props: any) {
                                     ref={ref}
                                     value={text}
                                     onChangeText={setText}
-                                    placeholder={props.selectedCommentId == '' ? 'Add a discussion...' : 'Replying...'}
+                                    placeholder={'Add a discussion...'}
                                     placeholderTextColor='#C2C2C2'
                                     style={{
                                         color: '#F1F1F1',
@@ -310,14 +293,7 @@ function Bar(props: any) {
                                     returnKeyType='send'
                                     keyboardAppearance='dark'
                                     onSubmitEditing={() => {
-                                        // Submit async, call api
-                                        // When receive, noti?
-                                        // Or better, server sent event + reply
-                                        props.submitComment({
-                                            text,
-                                            reply_to_comment_id: props.selectedCommentId == '' ? null : props.selectedCommentId
-                                        })
-
+                                        props.onSubmit(text);
                                         offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                         _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                         setText('');

@@ -17,9 +17,6 @@ function Wall(props: any) {
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
         return <MemoPost
-            setSelectedCommentId={props.setSelectedCommentId}
-            selectedCommentId={props.selectedCommentId}
-            recentComment={props.recentComment?.post_id == item.id ? props.recentComment : null}
             height={props.height}
             post={item}
             shouldActive={props.activePostIndex == index}
