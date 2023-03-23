@@ -90,17 +90,24 @@ function Bar(props: any) {
         };
     });
 
+    useEffect(() => {
+        console.log('debug ', props.selectedCommentId)
+        if (props.selectedCommentId == '') return;
+        ref.current?.focus()
+        // _offset.value = withSpring(minOffset, { mass: 0.15 })
+        // offset.value = withSpring(minOffset, { mass: 0.15 })
+
+    }, [props.selectedCommentId])
 
     const [needReset, setNeedReset] = useState(false);
     useEffect(() => {
         if (!needReset) return;
-        props.setSelectedCommentId(null)
+        props.setSelectedCommentId('')
         setNeedReset(false)
     }, [needReset])
 
     useDerivedValue(() => {
         if (offset.value < 0) return;
-        console.log('a')
         runOnJS(setNeedReset)(true)
     })
 
@@ -155,9 +162,10 @@ function Bar(props: any) {
                     overlayStyles]}
             >
                 <Pressable onPress={() => {
-                    Keyboard.dismiss()
+                    Keyboard.dismiss();
                     offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
                     _offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
+                    props.setSelectedCommentId('');
                 }}
                     style={{
                         width: '100%',
@@ -213,7 +221,7 @@ function Bar(props: any) {
                             paddingLeft: 20,
                             paddingRight: 20,
                             width: '100%',
-                            height: props.minBarHeight - HANDLER_HEIGHT,
+                            height: props.minBarHeight - HANDLER_HEIGHT - 4,
                             // top: HANDLER_HEIGHT,
                             // backgroundColor: 'blue',
                             // position: 'absolute'
@@ -224,9 +232,9 @@ function Bar(props: any) {
                     >
                         {/* TOOLS */}
                         {
-                            text.startsWith('& ') &&
+                            props.selectedCommentId != '' &&
                             focused &&
-                            <Animated.View style={{
+                            <View style={{
                                 marginTop: 4,
                                 height: 20,
                                 width: '100%',
@@ -234,14 +242,12 @@ function Bar(props: any) {
                                 // alignContent: 'center',
                                 justifyContent: 'center'
                             }}
-                                entering={FadeInDown}
-                                exiting={FadeOutDown}
                             >
                                 <Text style={{
                                     color: '#C2C2C2',
                                     fontSize: 10
-                                }}>An AI will reply to you.</Text>
-                            </Animated.View>
+                                }}>Replying to a comment</Text>
+                            </View>
                         }
 
                         {/* INPUT */}
@@ -249,12 +255,14 @@ function Bar(props: any) {
                             flex: 1,
                             flexDirection: 'row',
                             alignItems: 'center',
-                            height: props.minBarHeight - HANDLER_HEIGHT,
+                            height: props.minBarHeight - HANDLER_HEIGHT + 4,
+                            paddingBottom: 4,
                             // backgroundColor: 'blue'
                         }}>
                             {/* Close Button */}
                             {
                                 (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
+                                !focused &&
                                 <TouchableOpacity onPress={() => {
                                     props.setMode({ tag: 'Normal' });
                                 }}>

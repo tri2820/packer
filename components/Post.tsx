@@ -129,18 +129,15 @@ function Post(props: any) {
         )
     }, [props.recentComment])
 
-    const renderItem = ({ item, index }: any) => <View style={{
-        paddingHorizontal: 16
-    }}>
-        <MemoComment
-            startLoading={props.shouldActive}
-            comment={item}
-            level={0}
-            setMode={props.setMode}
-            selectedCommentId={props.selectedCommentId}
-            setSelectedCommentId={props.setSelectedCommentId}
-        />
-    </View>
+    const renderItem = ({ item, index }: any) => <MemoComment
+        startLoading={props.shouldActive}
+        comment={item}
+        level={0}
+        setMode={props.setMode}
+        selectedCommentId={props.selectedCommentId}
+        setSelectedCommentId={props.setSelectedCommentId}
+    />
+
 
     const keyExtractor = (item: any) => item.id
     const onScroll = (event: any) => {
@@ -244,20 +241,15 @@ function Post(props: any) {
                         }
                     </View>
                     {
-                        props.recentComment && <View style={{
-                            marginHorizontal: 16
-                        }}>
-                            {/* <Text>{JSON.stringify(props.recentComment)}</Text> */}
-                            <MemoComment
-                                fixed
-                                comment={props.recentComment}
-                                level={0}
-                                startLoading={props.startLoading}
-                                setMode={props.setMode}
-                                selectedCommentId={props.selectedCommentId}
-                                setSelectedCommentId={props.setSelectedCommentId}
-                            />
-                        </View>
+                        props.recentComment && <MemoComment
+                            fixed
+                            comment={props.recentComment}
+                            level={0}
+                            startLoading={props.startLoading}
+                            setMode={props.setMode}
+                            selectedCommentId={props.selectedCommentId}
+                            setSelectedCommentId={props.setSelectedCommentId}
+                        />
                     }
                 </View>
                 }

@@ -125,7 +125,9 @@ function Comment(props: any) {
         <Animated.View style={{
             // marginTop: 4,
             // marginBottom: props.level == 0 ? 4 : 0,
-            marginBottom: props.level > 0 ? 0 : 8
+            paddingBottom: props.level > 0 ? 0 : 8,
+            backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
+            paddingHorizontal: props.level == 0 ? 16 : 0
         }}
             entering={FadeInDown}
         >
