@@ -1,4 +1,4 @@
-import { Dimensions, PixelRatio } from "react-native";
+import { Dimensions, PixelRatio, View } from "react-native";
 // @ts-ignore
 // import { polyfill } from 'react-native-polyfill-globals';
 
@@ -72,3 +72,10 @@ export type Mode = Normal | Comment | App;
 //   const answer = await read(reader);
 //   return answer
 // }
+
+
+export const loadingView = () => <View style={{
+    backgroundColor: 'black',
+    height: '100%',
+    width: '100%',
+}} />

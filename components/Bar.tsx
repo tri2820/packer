@@ -90,6 +90,20 @@ function Bar(props: any) {
         };
     });
 
+
+    const [needReset, setNeedReset] = useState(false);
+    useEffect(() => {
+        if (!needReset) return;
+        props.setSelectedCommentId(null)
+        setNeedReset(false)
+    }, [needReset])
+
+    useDerivedValue(() => {
+        if (offset.value < 0) return;
+        console.log('a')
+        runOnJS(setNeedReset)(true)
+    })
+
     const gesture = Gesture
         .Pan()
         .activeOffsetY([-10, 10])
@@ -346,7 +360,7 @@ function Bar(props: any) {
                     }
 
                     {
-                        props.user !== null && !focused && <UserList offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        props.user !== null && !focused && <UserList needReset={needReset} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>

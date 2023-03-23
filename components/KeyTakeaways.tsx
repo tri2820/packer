@@ -9,10 +9,6 @@ import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
-import YoutubePlayer from "react-native-youtube-iframe";
-import MoreDiscussionsButton from './MoreDiscussionsButton';
-import PostHeader from './PostHeader';
-import CommentSection from './CommentSection';
 
 
 function KeyTakeaways(props: any) {

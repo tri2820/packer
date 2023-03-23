@@ -7,7 +7,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar from './components/Bar';
 import Wall from './components/Wall';
-import { constants, Mode } from './utils';
+import { constants, loadingView, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
@@ -33,6 +33,7 @@ function Main(props: any) {
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [recentComment, setRecentComment] = useState<any>(null);
+  const [selectedCommentId, setSelectedCommentId] = useState<any>('');
 
   useEffect(() => {
     (async () => {
@@ -42,6 +43,10 @@ function Main(props: any) {
     })()
   }, [])
 
+
+  useEffect(() => {
+    console.log('selectedCommentId', selectedCommentId)
+  }, [selectedCommentId])
 
   // const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('transparent');
   const insets = useSafeAreaInsets();
@@ -229,7 +234,7 @@ function Main(props: any) {
     }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
-          <Wall recentComment={recentComment} requestPost={props.requestPost} posts={props.posts} activePostIndex={activePostIndex} setActivePostIndex={setActivePostIndex} height={constants.height - minBarHeight - insets.bottom} mode={mode} setMode={setMode} />
+          <Wall selectedCommentId={selectedCommentId} setSelectedCommentId={setSelectedCommentId} recentComment={recentComment} requestPost={props.requestPost} posts={props.posts} activePostIndex={activePostIndex} setActivePostIndex={setActivePostIndex} height={constants.height - minBarHeight - insets.bottom} mode={mode} setMode={setMode} />
 
           {
             mode.tag === 'App' && <Animated.View style={{
@@ -264,7 +269,7 @@ function Main(props: any) {
             </Animated.View>
           }
 
-          <Bar submitComment={submitComment} user={user} setUser={setUser} activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
+          <Bar selectedCommentId={selectedCommentId} setSelectedCommentId={setSelectedCommentId} submitComment={submitComment} user={user} setUser={setUser} activePostIndex={activePostIndex} minBarHeight={minBarHeight} setMode={setMode} mode={mode} offset={offset} />
         </Animated.View>
       </GestureDetector>
 

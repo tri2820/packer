@@ -11,6 +11,7 @@ import { State, INIT_DATE, supabaseClient, requestCommentsCount, unitC, C } from
 import { MarkdownRule, MarkdownRules, MarkdownStyles, MarkdownView } from 'react-native-markdown-view'
 import moment from 'moment';
 import BlinkingCursor from './BlinkingCursor';
+import Octicons from '@expo/vector-icons/Octicons';
 
 const quote: MarkdownRule = {
     order: 0,
@@ -126,7 +127,7 @@ function Comment(props: any) {
             // marginBottom: props.level == 0 ? 4 : 0,
             marginBottom: props.level > 0 ? 0 : 8
         }}
-            entering={FadeInUp}
+            entering={FadeInDown}
         >
 
             {
@@ -138,7 +139,7 @@ function Comment(props: any) {
                 />
             }
 
-            <Pressable
+            <View
                 style={[(props.level == 0) && {
                     paddingTop: 12
                 }, (props.level > 0) && {
@@ -149,14 +150,16 @@ function Comment(props: any) {
                     borderLeftColor: '#6b5920',
                     borderLeftWidth: 2,
                 }]}
-                onPress={switchMode}
+
             >
 
-                <View style={{
+                <Pressable style={{
                     flex: 1,
                     flexDirection: 'row',
                     // backgroundColor: 'blue'
-                }}>
+                }}
+                    onPress={switchMode}
+                >
                     <Text style={{
                         fontWeight: 'bold',
                         color: 'white'
@@ -186,7 +189,8 @@ function Comment(props: any) {
                         > • {props.commentStream ? '...' : props.comment.content}
                         </Animated.Text>
                     }
-                </View>
+
+                </Pressable>
 
 
                 {
@@ -194,27 +198,34 @@ function Comment(props: any) {
                     <Animated.View
                         entering={inited ? FadeInUp : undefined}
                     >
-                        <MarkdownView
-                            rules={{
-                                quote,
-                                link
-                            }}
-                            onLinkPress={onLinkPress}
-                            styles={mdstyles}
-                        >
+                        <Pressable
+                            onPress={switchMode}
+                            onLongPress={() => {
+                                props.setSelectedCommentId(props.comment.id)
+                            }}>
+                            <MarkdownView
+                                rules={{
+                                    quote,
+                                    link
+                                }}
+                                onLinkPress={onLinkPress}
+                                styles={mdstyles}
+                            >
+                                {
+                                    // props.commentStream ?? props.comment.content
+                                    props.comment.content
+                                }
+                            </MarkdownView>
+
+
                             {
-                                // props.commentStream ?? props.comment.content
-                                props.comment.content
+                                props.blinking && <BlinkingCursor />
                             }
-                        </MarkdownView>
-
-
-                        {
-                            props.blinking && <BlinkingCursor />
-                        }
+                        </Pressable>
                     </Animated.View>
                 }
-            </Pressable>
+
+            </View>
 
             <View style={{
                 display: mode == 'Inline' ? 'none' : 'flex'
@@ -232,9 +243,13 @@ function Comment(props: any) {
                             level={props.level + 1}
                             startLoading={props.startLoading}
                             setMode={props.setMode}
+                            setSelectedCommentId={props.setSelectedCommentId}
+                            selectedCommentId={props.selectedCommentId}
                         />
                         :
-                        <>
+                        <View style={{
+                            marginTop: 4
+                        }}>
                             {
                                 comments?.map((c: any, i: number) => <View
                                     key={c.id}
@@ -247,6 +262,8 @@ function Comment(props: any) {
                                         level={props.level + 1}
                                         startLoading={props.startLoading}
                                         setMode={setMode}
+                                        setSelectedCommentId={props.setSelectedCommentId}
+                                        selectedCommentId={props.selectedCommentId}
                                     />
                                 </View>)
                             }
@@ -272,7 +289,7 @@ function Comment(props: any) {
                                     </Text>
                                 </TouchableOpacity>
                             }
-                        </>
+                        </View>
                 }
             </View>
 

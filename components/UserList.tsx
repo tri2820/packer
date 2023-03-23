@@ -39,10 +39,11 @@ function UserList(props: any) {
         };
     });
 
-    useDerivedValue(() => {
-        if (props.offset.value < 0) return
-        runOnJS(setMode)('normal')
-    })
+    useEffect(() => {
+        if (!props.needReset) return;
+        console.log(props.needReset);
+        setMode('normal')
+    }, [props.needReset])
 
     const createDeleteConfirmationAlert = () =>
         Alert.alert(
@@ -102,13 +103,13 @@ function UserList(props: any) {
                             }} style={{
                                 marginLeft: 'auto',
                                 marginRight: 0,
-                                paddingVertical: 3,
+                                paddingVertical: 0,
                                 paddingRight: 3,
                                 // Coyote
                                 paddingLeft: 12,
-                                // backgroundColor: 'green'
+                                // backgroundColor: 'red'
                             }} >
-                                <FontAwesome name='gear' color='#E6E6E6' size={24} />
+                                <Ionicons name="settings-sharp" size={28} color='#C2C2C2' />
                             </TouchableOpacity>
                         </View>
 
@@ -196,9 +197,8 @@ function UserList(props: any) {
                                 paddingRight: 3,
                                 // Coyote
                                 paddingLeft: 12,
-                                // backgroundColor: 'green'
+                                // backgroundColor: 'red'
                             }} >
-                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
                                 <Ionicons name="close" size={28} color='#C2C2C2' />
                             </TouchableOpacity>
                         </View>

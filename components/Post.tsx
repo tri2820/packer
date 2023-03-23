@@ -10,7 +10,6 @@ import Comment, { MemoComment } from './Comment';
 import * as Haptics from 'expo-haptics';
 import MoreDiscussionsButton from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
-import CommentSection from './CommentSection';
 import { INIT_DATE, supabaseClient } from '../supabaseClient';
 import VideoPlayer from './VideoPlayer';
 import KeyTakeaways from './KeyTakeaways';
@@ -138,6 +137,8 @@ function Post(props: any) {
             comment={item}
             level={0}
             setMode={props.setMode}
+            selectedCommentId={props.selectedCommentId}
+            setSelectedCommentId={props.setSelectedCommentId}
         />
     </View>
 
@@ -163,17 +164,18 @@ function Post(props: any) {
     }
 
     console.log('Post was rendered!', props.index, new Date().toLocaleTimeString())
-    return (
-        <View style={{
-            backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
-            height: props.height
-        }}>
+
+
+    return <View style={{
+        backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
+        height: props.height
+    }}>
+        {
+            props.shouldActive &&
             <FlatList
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}
-                contentInset={{ top: insets.top }}
-                automaticallyAdjustContentInsets={false}
                 scrollEnabled={props.mode.tag == 'Comment'}
                 refreshControl={
                     <RefreshControl
@@ -187,10 +189,7 @@ function Post(props: any) {
                 onScroll={
                     onScroll
                 }
-                data={
-                    // comments
-                    props.shouldActive ? comments : []
-                }
+                data={comments}
                 onEndReached={() => {
                     console.log('debug one end reached', props.index);
                     if (waitingForCommentLoading) {
@@ -208,7 +207,9 @@ function Post(props: any) {
                 }}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-                ListHeaderComponent={<View>
+                ListHeaderComponent={<View style={{
+                    paddingTop: insets.top
+                }}>
                     <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
                     <View style={{
                         paddingHorizontal: 16
@@ -253,49 +254,49 @@ function Post(props: any) {
                                 level={0}
                                 startLoading={props.startLoading}
                                 setMode={props.setMode}
+                                selectedCommentId={props.selectedCommentId}
+                                setSelectedCommentId={props.setSelectedCommentId}
                             />
                         </View>
                     }
                 </View>
                 }
             />
+        }
 
-            {
-                props.mode.tag == 'Normal' &&
-                <>
+        {
+            props.mode.tag == 'Normal' &&
+            <>
+                <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.9)']} style={{
+                    width: '100%',
+                    position: 'absolute',
+                    bottom: 0,
+                    height: 128
+                }}
+                    pointerEvents='none'
+                />
 
-
-                    <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.9)']} style={{
-                        width: '100%',
+                {
+                    comments.length > 0 && props.shouldActive &&
+                    <View style={{
                         position: 'absolute',
-                        bottom: 0,
-                        height: 128
-                    }}
-                        pointerEvents='none'
-                    />
+                        bottom: 16,
+                        alignSelf: 'center',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        // backgroundColor: 'blue'
+                    }}>
+                        <MoreDiscussionsButton onPress={() => {
+                            props.setMode({ tag: 'Comment' })
+                        }} />
+                    </View>
+                }
 
-                    {
-                        comments.length > 0 &&
-                        <View style={{
-                            position: 'absolute',
-                            bottom: 16,
-                            alignSelf: 'center',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            // backgroundColor: 'blue'
-                        }}>
-                            <MoreDiscussionsButton onPress={() => {
-                                props.setMode({ tag: 'Comment' })
-                            }} />
-                        </View>
-                    }
+            </>
 
-                </>
+        }
 
-            }
-
-        </View >
-    );
+    </View >
 }
 
 export default Post;
