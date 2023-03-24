@@ -27,18 +27,14 @@ function Main(props: any) {
   useEffect(() => {
     (async () => {
       const userResponse = await supabaseClient.auth.getUser();
-      console.log('Load user', userResponse.data.user)
+      // console.log('Load user', userResponse.data.user)
       setUser(userResponse.data.user)
     })()
   }, [])
 
-  // const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('transparent');
+
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
-
-  useEffect(() => {
-    console.log('debug activePostIndex', activePostIndex)
-  }, [activePostIndex])
 
   useEffect(() => {
     if (mode.tag == 'Normal') return;
@@ -63,7 +59,6 @@ function Main(props: any) {
     if (mode.tag != 'App') {
       return 'light'
     }
-    // return;
     const [r, g, b, a] = mode.insetsColor.slice(mode.insetsColor[3] == 'a' ? 6 : 5, -1).split(',').map(s => parseInt(s));
     if (r == 0 && g == 0 && b == 0) {
       return 'dark'
@@ -104,12 +99,6 @@ function Main(props: any) {
       runOnJS(setMode)({ tag: 'Normal' })
     });
 
-  // useEffect(() => {
-  //   console.log('debug recentComments', recentComments)
-  // }, [recentComments])
-
-
-
   return (
     <View style={{
       height: constants.height,
@@ -119,6 +108,8 @@ function Main(props: any) {
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
+            requestComments={props.requestComments}
+            comments={props.comments}
             requestPost={props.requestPost}
             posts={props.posts}
             activePostIndex={activePostIndex}
@@ -180,31 +171,90 @@ function Main(props: any) {
   )
 }
 
-const PAGE = 7
+
 export default function App() {
   const [posts, setPosts] = useState<any[]>([]);
-  const [range, setRange] = useState(0);
+  const [comments, setComments] = useState<any[]>([]);
+  const [offsets, setOffsets] = useState<any>({});
+  const [_, setRequestStatuses] = useState<any>({});
 
-  const requestPost = async () => {
-    console.log('debug requesting posts from app');
-    const { data, error } = await supabaseClient
-      .from('posts')
-      .select()
-      .lt('created_at', INIT_DATE)
-      .order('created_at', { ascending: false })
-      .range(range, range + PAGE - 1);
-    if (error) return;
-    setPosts(posts.concat(data));
-    setRange(range + PAGE);
+  const _requestComments = async (post_id: string, parent_id: string | null) => {
+    const key = parent_id ?? post_id;
+    const count = parent_id === null ?
+      posts.find(p => p.id == post_id).comment_count :
+      comments.find(p => p.id == post_id).comment_count;
+
+    const offset = offsets[key] ?? 0;
+    if (offset >= count) return;
+
+    setOffsets((offsets: any) => {
+      return {
+        ...offsets,
+        [key]: offset + 6
+      }
+    })
+
+    const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 5, postid: post_id, parentid: parent_id })
+    if (error) {
+      console.log('debug error query comments from post', error)
+      return 'error';
+    }
+
+    if (data.length > 0) setComments((comments) => comments.concat(data));
+  }
+
+  const requestComments = async (post_id: string, parent_id: string | null) => {
+    const key = parent_id ?? post_id;
+    setRequestStatuses((s: any) => {
+      if (s[key] == 'running') {
+        console.log('reject request comments from', post_id, parent_id);
+        return s;
+      }
+      return {
+        ...s,
+        [key]: 'running'
+      }
+    })
+
+    await _requestComments(post_id, parent_id);
+
+    setRequestStatuses((s: any) => {
+      return { ...s, [key]: 'done' }
+    })
   }
 
   useEffect(() => {
     requestPost();
   }, [])
 
+  useEffect(() => {
+    console.log('debug posts.length', posts.length)
+  }, [posts])
+
+  useEffect(() => {
+    console.log('debug comments.length', comments.length)
+  }, [posts])
+
+  const requestPost = async () => {
+    const offset = offsets['main'] ?? 0;
+    setOffsets((offsets: any) => {
+      return {
+        ...offsets,
+        'main': offset + 6
+      }
+    })
+
+    const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
+    if (error) {
+      console.log('error post', error)
+      return;
+    }
+    if (data.length > 0) setPosts(posts => posts.concat(data))
+  }
+
   return (
     <SafeAreaProvider>
-      <Main posts={posts} requestPost={requestPost} />
+      <Main posts={posts} requestPost={requestPost} requestComments={requestComments} comments={comments} />
     </SafeAreaProvider>
   );
 }

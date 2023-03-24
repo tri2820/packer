@@ -17,6 +17,8 @@ function Wall(props: any) {
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
         return <MemoPost
+            requestComments={props.requestComments}
+            comments={props.comments}
             height={props.height}
             post={item}
             shouldActive={props.activePostIndex == index}
@@ -27,7 +29,10 @@ function Wall(props: any) {
     }
 
     const keyExtractor = (item: any) => item.id
-    const onEndReached = () => { props.requestPost() }
+    const onEndReached = () => {
+        console.log('wall on end reached')
+        props.requestPost()
+    }
     const onScroll = (event: any) => {
         let offset = event.nativeEvent.contentOffset.y;
         if (offset < props.height / 2) {

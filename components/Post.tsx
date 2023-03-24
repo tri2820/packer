@@ -16,84 +16,21 @@ import KeyTakeaways from './KeyTakeaways';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 function Post(props: any) {
-    const [comments, setComments] = useState<any[]>([]);
     const [refreshing, setRefreshing] = useState(false);
-    const [inited, setInited] = useState(false);
-    const [firstLoadResult, setFirstLoadResult] = useState<'waiting' | 'success' | 'failure'>('waiting');
     const [videoPlaying, setVideoPlaying] = useState(false);
-    const [waitingForCommentLoading, setWaitingForCommentLoading] = useState(false);
-    const [count, setCount] = useState(0);
-    const [page, setPage] = useState(0);
-    const [shouldActive, setShouldActive] = useState(false);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
+    const comments = props.comments.filter((c: any) => c.post_id == props.post.id && c.parent_id == null);
+    const [inited, setInited] = useState(false);
 
     useEffect(() => {
-        setWaitingForCommentLoading(false)
-    }, [page])
-
-    const loadComments = async () => {
-        console.log('debug requesting comments from post');
-        const { data, error } = await supabaseClient
-            .from('comments')
-            .select()
-            .lt('created_at', INIT_DATE)
-            .order('created_at', { ascending: false })
-            .eq('post_id', props.post.id)
-            .is('parent_id', null)
-            .range(page, page + 5);
-
-        if (error) {
-            console.log('debug error query comments from post', error)
-            return 'failure';
-        }
-        setComments(comments.concat(data));
-        setPage(page + 6);
-        return 'success'
-    }
-
-    const getCount = async () => {
-        const { count, error } = await supabaseClient
-            .from('comments')
-            .select('*', { count: 'exact', head: true })
-            .lt('created_at', INIT_DATE)
-            .eq('post_id', props.post.id)
-            .is('parent_id', null)
-
-        if (error) {
-            console.log('debug error getting count from post', error)
-            return;
-        }
-
-        setCount(count ? count : 0)
-    }
-
-    useEffect(() => {
-        setShouldActive(props.shouldActive);
-        if (inited) return;
         if (!props.shouldActive) return;
-
+        if (inited) return;
+        console.log('active');
         (async () => {
-            // Sleep
-            await new Promise(r => setTimeout(r, 300));
-            let active = undefined;
-            setShouldActive(shouldActive => {
-                active = shouldActive;
-                return shouldActive
-            })
-
-            // Not focusing -> return
-            if (!active) {
-                console.log('!! debug request', active, props.index);
-                return;
-            }
-            console.log('!! debug request', active, props.index);
-            setInited(true);
-            const result = await loadComments();
-            setFirstLoadResult(result);
-            getCount();
+            await props.requestComments(props.post.id, null);
+            setInited(true)
         })()
-
     }, [props.shouldActive])
 
     const onRefresh = React.useCallback(() => {
@@ -139,24 +76,11 @@ function Post(props: any) {
         // Hack because onEndReached doesn't work
         const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
         const y = event.nativeEvent.contentOffset.y;
-        if (y < end * 0.9) return;
-        // console.log('debug over 0.9');
-        if (waitingForCommentLoading) {
-            // console.log('debug waitingForCommentLoading');
-            return;
-        }
-        if (comments.length >= count) {
-            // console.log('debug have all comments already');
-            return;
-        }
-
-        // console.log('debug loading');
-        setWaitingForCommentLoading(true);
-        loadComments();
+        if (y < end - constants.height / 4) return;
+        // props.requestComments(props.post.id, null);
     }
 
-    console.log('Post was rendered!', props.index, new Date().toLocaleTimeString())
-
+    let onEndReachedCalledDuringMomentum = true;
 
     return <View style={{
         backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
@@ -178,24 +102,11 @@ function Post(props: any) {
                         tintColor={'transparent'}
                     />
                 }
-                onScroll={
-                    onScroll
-                }
+                onScroll={onScroll}
                 data={comments}
                 onEndReached={() => {
-                    console.log('debug one end reached', props.index);
-                    if (waitingForCommentLoading) {
-                        // console.log('debug waitingForCommentLoading');
-                        return;
-                    }
-                    if (comments.length >= count) {
-                        // console.log('debug have all comments already');
-                        return;
-                    }
-
-                    // console.log('debug loading');
-                    setWaitingForCommentLoading(true);
-                    loadComments();
+                    console.log('on end reached');
+                    props.requestComments(props.post.id, null);
                 }}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
@@ -209,9 +120,7 @@ function Post(props: any) {
                         <PostHeader post={props.post} setMode={props.setMode} />
                         <KeyTakeaways content={props.post.keytakeaways} />
                         {
-                            // props.recentComment === null &&
-                            firstLoadResult != 'waiting' &&
-                            comments.length == 0 &&
+                            inited && comments.length == 0 &&
                             <Animated.View style={{
                                 flex: 1,
                                 flexDirection: 'row',
@@ -228,9 +137,8 @@ function Post(props: any) {
                                     marginLeft: 4,
                                     marginRight: 16 + 4
                                 }}
-
                                 >
-                                    {firstLoadResult == 'success' ? `Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!` : "Dang, error querying comments"}
+                                    Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!
                                 </Text>
                             </Animated.View>
                         }

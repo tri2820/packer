@@ -66,20 +66,20 @@ const link = {
 
 function Comment(props: any) {
     const [mode, setMode] = useState<'Normal' | 'Inline'>('Normal');
-    const [comments, setComments] = useState<any[]>([]);
-    const [c, setC] = useState<C>(unitC);
+    // const [comments, setComments] = useState<any[]>([]);
+    // const [c, setC] = useState<C>(unitC);
     const [count, setCount] = useState(0);
     const [inited, setInited] = useState(false);
     const [requestingComments, setRequestingComments] = useState(false);
 
     const requestComments = async (k?: C) => {
-        if (requestingComments) return;
-        setRequestingComments(true);
-        const { c: q, data } = await (k ?? c)();
-        if (!data) return;
-        setC(() => q);
-        setComments(comments.concat(data));
-        setRequestingComments(false);
+        // if (requestingComments) return;
+        // setRequestingComments(true);
+        // const { c: q, data } = await (k ?? c)();
+        // if (!data) return;
+        // setC(() => q);
+        // setComments(comments.concat(data));
+        // setRequestingComments(false);
     }
 
     const onLinkPress = (target: string) => {
@@ -102,7 +102,7 @@ function Comment(props: any) {
         if (inited) return;
         setInited(true);
 
-        console.log('debug comment request', props.level);
+        // console.log('debug comment request', props.level);
 
         (async () => {
             const { c, data: count } = await requestCommentsCount(props.comment.id);
@@ -279,7 +279,7 @@ function Comment(props: any) {
                                     </View>
                                 } */}
 
-                            {
+                            {/* {
                                 comments?.map((c: any, i: number) =>
                                     <View
                                         key={c.id}
@@ -296,9 +296,9 @@ function Comment(props: any) {
                                         // recentComment={props.recentComment}
                                         />
                                     </View>)
-                            }
+                            } */}
 
-                            {
+                            {/* {
                                 comments.length < count && !requestingComments && mode == 'Normal' &&
                                 <TouchableOpacity style={{
                                     backgroundColor: '#2C2C2C',
@@ -318,7 +318,7 @@ function Comment(props: any) {
                                         Load {count - comments.length} more
                                     </Text>
                                 </TouchableOpacity>
-                            }
+                            } */}
                         </View>
                     }
                 </View>
