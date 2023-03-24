@@ -135,6 +135,11 @@ function Bar(props: any) {
             offset.value = withSpring(minOffset, { velocity: event.velocityY, mass: 0.15 });
         })
 
+    useEffect(() => {
+        if (props.selectedCommentId === null) return;
+        ref.current.focus()
+    }, [props.selectedCommentId])
+
     return (
         <>
 
@@ -150,6 +155,7 @@ function Bar(props: any) {
             >
                 <Pressable onPress={() => {
                     Keyboard.dismiss();
+                    props.setSelectedCommentId(null);
                     offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
                     _offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
                 }}

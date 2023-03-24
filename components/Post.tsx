@@ -63,6 +63,8 @@ function Post(props: any) {
             marginHorizontal: 16
         }}>
             <MemoComment
+                selectedCommentId={props.selectedCommentId}
+                setSelectedCommentId={props.setSelectedCommentId}
                 shouldActive={props.shouldActive}
                 comment={item}
                 level={0}
@@ -82,7 +84,6 @@ function Post(props: any) {
         // props.requestComments(props.post.id, null);
     }
 
-    let onEndReachedCalledDuringMomentum = true;
 
     return <View style={{
         backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',

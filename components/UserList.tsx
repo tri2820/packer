@@ -16,16 +16,6 @@ import LoginSection from './SignInSection';
 function UserList(props: any) {
     const [mode, setMode] = useState<'normal' | 'settings'>('normal')
 
-    useEffect(() => {
-        // console.log('props.user changed', props.user)
-        if (props.user == null) return
-        // Cancel account deletion
-        (async () => {
-            const { error } = await supabaseClient.from('deletions').delete().eq('user_id', props.user.id)
-            console.log('debug cancel deletion error, [NORMAL IF NOT REQUEST DELETION BEFORE]', error)
-        })()
-    }, [props.user])
-
     const signOutAndUpdateProfile = async () => {
         const signedOut = await signOut();
         if (!signedOut) return;

@@ -25,6 +25,8 @@ function Wall(props: any) {
             index={index}
             mode={props.mode}
             setMode={props.setMode}
+            selectedCommentId={props.selectedCommentId}
+            setSelectedCommentId={props.setSelectedCommentId}
         />
     }
 

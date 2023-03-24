@@ -11,6 +11,13 @@ import { constants, loadingView, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
+// @ts-ignore
+import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
+// @ts-ignore
+import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
+// @ts-ignore
+import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
+
 const INJECTED_JAVASCRIPT = `(function() {
   window.ReactNativeWebView.postMessage(JSON.stringify(
     window.getComputedStyle( document.documentElement ,null).getPropertyValue('background-color')
@@ -22,7 +29,18 @@ const INJECTED_JAVASCRIPT = `(function() {
 function Main(props: any) {
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
-  const [activePostIndex, setActivePostIndex] = useState(0);
+
+
+
+  useEffect(() => {
+    // console.log('props.user changed', props.user)
+    if (props.user == null) return
+    // Cancel account deletion
+    (async () => {
+      const { error } = await supabaseClient.from('deletions').delete().eq('user_id', props.user.id)
+      console.log('debug cancel deletion error, [NORMAL IF NOT REQUEST DELETION BEFORE]', error)
+    })()
+  }, [props.user])
 
   useEffect(() => {
     (async () => {
@@ -113,11 +131,13 @@ function Main(props: any) {
             comments={props.comments}
             requestPost={props.requestPost}
             posts={props.posts}
-            activePostIndex={activePostIndex}
-            setActivePostIndex={setActivePostIndex}
+            activePostIndex={props.activePostIndex}
+            setActivePostIndex={props.setActivePostIndex}
             height={constants.height - minBarHeight - insets.bottom}
             mode={mode}
             setMode={setMode}
+            selectedCommentId={props.selectedCommentId}
+            setSelectedCommentId={props.setSelectedCommentId}
           />
           {
             mode.tag === 'App' && <Animated.View style={{
@@ -152,16 +172,16 @@ function Main(props: any) {
             </Animated.View>
           }
 
-          <Bar onSubmit={() => {
-
-          }}
+          <Bar onSubmit={props.onSubmit}
             user={user}
             setUser={setUser}
-            activePostIndex={activePostIndex}
+            activePostIndex={props.activePostIndex}
             minBarHeight={minBarHeight}
             setMode={setMode}
             mode={mode}
             offset={offset}
+            selectedCommentId={props.selectedCommentId}
+            setSelectedCommentId={props.setSelectedCommentId}
           />
         </Animated.View>
       </GestureDetector>
@@ -215,6 +235,133 @@ const grc = async (sharedAsyncState: any, setData: any, post_id: string, parent_
 export default function App() {
   const [posts, setPosts] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
+  const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
+  const [activePostIndex, setActivePostIndex] = useState(0);
+  let inited = false;
+
+  const updateComment = (id: string, key: any, value: any) => {
+    setComments((comments: any) => {
+      const comment = comments.find((c: any) => c.id == id);
+      // if (!comment) return comments;
+      const others = comments.filter((c: any) => c.id != id);
+      comment[key] = typeof value === 'function' ? value(comment[key]) : value;
+      const x = [comment, ...others];
+      return x;
+    })
+  }
+
+  const submitComment = async (
+    text: string,
+    parent_id: string | null,
+    post_id: string) => {
+    const body = {
+      content: text,
+      post_id: post_id,
+      parent_id: parent_id,
+      need_bot_comment: true
+    }
+
+    polyfillEncoding()
+    polyfillReadableStream()
+    polyfillFetch()
+
+    const { data } = await supabaseClient.auth.getSession();
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      console.log('Access Token is', accessToken)
+      return
+    }
+
+    const placeholderId = `placeholder-${Math.random()}`;
+    const placeholderComment = {
+      // Could get from header
+      id: placeholderId,
+      created_at: new Date(),
+      content: text,
+      // author_name: user.user_metadata.full_name,
+      author_name: 'Default User',
+      parent_id: parent_id,
+      post_id: post_id,
+      blockRequestChildren: true
+    }
+
+    // setRecentComment(responseData);
+    setComments((comments) => [placeholderComment, ...comments])
+
+    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
+      // @ts-ignore
+      reactNative: { textStreaming: true },
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(body)
+    })
+
+    const newId = response.headers.get("comment_id");
+    const childId = response.headers.get("child_id")
+    console.log('debug comment_id', newId)
+    console.log('debug childId', childId)
+
+    if (!response.body || !response.ok || !childId) {
+      console.log('ERROR: response', response)
+      return
+    }
+
+    updateComment(placeholderId, 'id', newId)
+
+    const childComment = {
+      id: childId,
+      created_at: new Date(),
+      content: '',
+      author_name: 'Packer',
+      parent_id: newId,
+      post_id: post_id,
+      blinking: true,
+      blockRequestChildren: true
+    }
+    setComments((comments) => comments.concat(childComment))
+
+    const utf8Decoder = new TextDecoder('utf-8')
+
+    const decodeResponse = (response?: Uint8Array) => {
+      if (!response) {
+        return ''
+      }
+
+      const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
+      const decodedText = utf8Decoder.decode(response)
+      const matches: string[] = []
+
+      let match
+      while ((match = pattern.exec(decodedText)) !== null) {
+        matches.push(JSON.parse(match[1]).content)
+      }
+      return matches.join('')
+    }
+
+    async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
+      const { value, done } = await reader.read()
+      if (done) return
+      const delta = decodeResponse(value)
+      partialUpdate(delta);
+      await read(reader, partialUpdate)
+    }
+
+    const reader = response.body.getReader()
+    await read(reader, async (update) => {
+      console.log('update', update);
+      updateComment(childId, 'content', (old: string) => old + update);
+    });
+
+    updateComment(childId, 'blinking', false)
+  }
+
+  const onSubmit = (text: string) => {
+    console.log('submitted');
+    submitComment(text, selectedCommentId, posts[activePostIndex].id);
+    setSelectedCommentId(null);
+  }
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
     const count = parent_id === null ?
@@ -228,6 +375,8 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (inited) return;
+    inited = true;
     requestPost();
   }, [])
 
@@ -246,6 +395,11 @@ export default function App() {
         requestPost={requestPost}
         requestComments={requestComments}
         comments={comments}
+        onSubmit={onSubmit}
+        selectedCommentId={selectedCommentId}
+        setSelectedCommentId={setSelectedCommentId}
+        activePostIndex={activePostIndex}
+        setActivePostIndex={setActivePostIndex}
       />
     </SafeAreaProvider>
   );

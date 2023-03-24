@@ -78,6 +78,8 @@ function Comment(props: any) {
     }
 
     const requestChildren = async () => {
+        if (props.comment.blockRequestChildren) return;
+        // if (props.comment.id.startsWith('placeholder')) return;
         setRequestingChildren(true)
         await props.requestComments(props.comment.post_id, props.comment.id);
         setRequestingChildren(false)
@@ -112,8 +114,7 @@ function Comment(props: any) {
                 }}
                 onPress={switchMode}
                 onLongPress={() => {
-                    if (props.comment.id == 'placeholder_comment_id') return;
-
+                    props.setSelectedCommentId(props.comment.id);
                 }}
             >
 
@@ -128,7 +129,8 @@ function Comment(props: any) {
 
                 <View
                     style={[(props.level == 0) && {
-                        marginTop: 12
+                        marginTop: 8,
+                        paddingTop: 4
                     }, (props.level > 0) && {
                         marginVertical: 4,
                         paddingTop: 4,
@@ -137,7 +139,7 @@ function Comment(props: any) {
                         borderLeftColor: '#6b5920',
                         borderLeftWidth: 2,
                     }, {
-                        // backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
+                        backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
                     }
                     ]}
 
@@ -199,9 +201,8 @@ function Comment(props: any) {
                                     }
                                 </MarkdownView>
 
-
                                 {
-                                    props.blinking && <BlinkingCursor />
+                                    props.comment.blinking && <BlinkingCursor />
                                 }
                             </View>
                         </Animated.View>
@@ -234,6 +235,8 @@ function Comment(props: any) {
                                             setMode={setMode}
                                             comments={props.comments}
                                             requestComments={props.requestComments}
+                                            selectedCommentId={props.selectedCommentId}
+                                            setSelectedCommentId={props.setSelectedCommentId}
                                         />
                                     </View>)
                             }
