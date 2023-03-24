@@ -145,8 +145,7 @@ function Comment(props: any) {
 
                     <View style={{
                         flex: 1,
-                        flexDirection: 'row',
-                        // backgroundColor: 'blue'
+                        flexDirection: 'row'
                     }}
 
                     >
@@ -185,9 +184,7 @@ function Comment(props: any) {
 
                     {
                         mode == 'Normal' &&
-                        <Animated.View
-                        // entering={inited ? FadeInUp : undefined}
-                        >
+                        <Animated.View>
                             <View>
                                 <MarkdownView
                                     rules={{
@@ -198,7 +195,6 @@ function Comment(props: any) {
                                     styles={mdstyles}
                                 >
                                     {
-                                        // props.commentStream ?? props.comment.content
                                         props.comment.content
                                     }
                                 </MarkdownView>

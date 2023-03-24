@@ -204,24 +204,27 @@ const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_i
   if (data.length > 0) setData((comments: any) => comments.concat(data));
 }
 
+const grc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null, count: number) => {
+  const key = `status-${parent_id ?? post_id}`;
+  if (sharedAsyncState[key] == 'running') return;
+  sharedAsyncState[key] = 'running';
+  await rc(sharedAsyncState, setData, post_id, parent_id, count);
+  sharedAsyncState[key] = 'done';
+}
 
 export default function App() {
   const [posts, setPosts] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
-    const key = `status-${parent_id ?? post_id}`;
-    if (sharedAsyncState[key] == 'running') return;
-    sharedAsyncState[key] = 'running';
     const count = parent_id === null ?
       posts.find((p: any) => p.id == post_id).comment_count :
       comments.find((c: any) => c.id == parent_id).comment_count;
-    await rc(sharedAsyncState, setComments, post_id, parent_id, count);
-    sharedAsyncState[key] = 'done';
+    await grc(sharedAsyncState, setComments, post_id, parent_id, count)
   }
 
   const requestPost = async () => {
-    rp(sharedAsyncState, setPosts)
+    await rp(sharedAsyncState, setPosts)
   }
 
   useEffect(() => {
