@@ -285,8 +285,20 @@ export default function App() {
       blockRequestChildren: true
     }
 
-    // setRecentComment(responseData);
-    setComments((comments) => [placeholderComment, ...comments])
+    const childPlaceholderId = `placeholder-${Math.random()}`;
+    const childComment = {
+      id: childPlaceholderId,
+      created_at: new Date(),
+      content: '',
+      author_name: 'Packer',
+      parent_id: placeholderId,
+      post_id: post_id,
+      blinking: true,
+      blockRequestChildren: true
+    }
+
+
+    setComments((comments) => [placeholderComment, childComment, ...comments])
 
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
       // @ts-ignore
@@ -308,19 +320,9 @@ export default function App() {
       return
     }
 
+    updateComment(childPlaceholderId, 'id', childId)
+    updateComment(childId, 'parent_id', newId)
     updateComment(placeholderId, 'id', newId)
-
-    const childComment = {
-      id: childId,
-      created_at: new Date(),
-      content: '',
-      author_name: 'Packer',
-      parent_id: newId,
-      post_id: post_id,
-      blinking: true,
-      blockRequestChildren: true
-    }
-    setComments((comments) => comments.concat(childComment))
 
     const utf8Decoder = new TextDecoder('utf-8')
 
