@@ -1,5 +1,5 @@
 import { StatusBar, StatusBarStyle } from 'expo-status-bar';
-import { memo, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, ZoomIn, ZoomInEasyUp, ZoomInLeft, ZoomInRight, ZoomOutLeft } from 'react-native-reanimated';
@@ -173,75 +173,55 @@ function Main(props: any) {
 }
 const MemoMain = memo(Main);
 
+const sharedAsyncState: any = {}
+const rp = async (sharedAsyncState: any, setData: any) => {
+  console.log('debug post get requested');
+  const offset = sharedAsyncState['main'] ?? 0;
+  sharedAsyncState['main'] = offset + 6;
+
+  const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
+  if (error) {
+    console.log('error post', error)
+    return;
+  }
+  if (data.length > 0) setData((posts: any) => posts.concat(data))
+}
+
+const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null, count: number) => {
+  const key = parent_id ?? post_id;
+
+
+  const offset = sharedAsyncState[key] ?? 0;
+  if (offset >= count) return;
+  sharedAsyncState[key] = offset + 6;
+
+  const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 5, postid: post_id, parentid: parent_id })
+  if (error) {
+    console.log('debug error query comments from post', error)
+    return 'error';
+  }
+
+  if (data.length > 0) setData((comments: any) => comments.concat(data));
+}
+
 
 export default function App() {
   const [posts, setPosts] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
-  const [offsets, setOffsets] = useState<any>({});
-  const [_, setRequestStatuses] = useState<any>({});
-
-  const _requestComments = async (post_id: string, parent_id: string | null) => {
-    const key = parent_id ?? post_id;
-    const count = parent_id === null ?
-      posts.find(p => p.id == post_id).comment_count :
-      comments.find(p => p.id == parent_id).comment_count;
-
-    const offset = offsets[key] ?? 0;
-    if (offset >= count) return;
-
-    setOffsets((offsets: any) => {
-      return {
-        ...offsets,
-        [key]: offset + 6
-      }
-    })
-
-    const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 5, postid: post_id, parentid: parent_id })
-    if (error) {
-      console.log('debug error query comments from post', error)
-      return 'error';
-    }
-
-    if (data.length > 0) setComments((comments) => comments.concat(data));
-  }
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
-    const key = parent_id ?? post_id;
-    setRequestStatuses((s: any) => {
-      if (s[key] == 'running') {
-        console.log('reject request comments from', post_id, parent_id);
-        return s;
-      }
-      return {
-        ...s,
-        [key]: 'running'
-      }
-    })
-
-    await _requestComments(post_id, parent_id);
-
-    setRequestStatuses((s: any) => {
-      return { ...s, [key]: 'done' }
-    })
+    const key = `status-${parent_id ?? post_id}`;
+    if (sharedAsyncState[key] == 'running') return;
+    sharedAsyncState[key] = 'running';
+    const count = parent_id === null ?
+      posts.find((p: any) => p.id == post_id).comment_count :
+      comments.find((c: any) => c.id == parent_id).comment_count;
+    await rc(sharedAsyncState, setComments, post_id, parent_id, count);
+    sharedAsyncState[key] = 'done';
   }
 
-
   const requestPost = async () => {
-    console.log('debug post get requested');
-    const offset = offsets['main'] ?? 0;
-    setOffsets((offsets: any) => {
-      return {
-        ...offsets,
-        'main': offset + 6
-      }
-    })
-
-    const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
-    if (error) {
-      console.log('error post', error)
-      return;
-    }
-    if (data.length > 0) setPosts(posts => posts.concat(data))
+    rp(sharedAsyncState, setPosts)
   }
 
   useEffect(() => {
@@ -255,10 +235,6 @@ export default function App() {
   useEffect(() => {
     console.log('debug comments.length', comments.length)
   }, [comments])
-
-  useEffect(() => {
-    console.log('debug requestPost', requestPost)
-  }, [requestPost])
 
   return (
     <SafeAreaProvider>
