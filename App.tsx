@@ -1,5 +1,5 @@
 import { StatusBar, StatusBarStyle } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, ZoomIn, ZoomInEasyUp, ZoomInLeft, ZoomInRight, ZoomOutLeft } from 'react-native-reanimated';
@@ -99,6 +99,7 @@ function Main(props: any) {
       runOnJS(setMode)({ tag: 'Normal' })
     });
 
+  console.log('debug main get rendered')
   return (
     <View style={{
       height: constants.height,
@@ -170,6 +171,7 @@ function Main(props: any) {
 
   )
 }
+const MemoMain = memo(Main);
 
 
 export default function App() {
@@ -182,7 +184,7 @@ export default function App() {
     const key = parent_id ?? post_id;
     const count = parent_id === null ?
       posts.find(p => p.id == post_id).comment_count :
-      comments.find(p => p.id == post_id).comment_count;
+      comments.find(p => p.id == parent_id).comment_count;
 
     const offset = offsets[key] ?? 0;
     if (offset >= count) return;
@@ -223,19 +225,9 @@ export default function App() {
     })
   }
 
-  useEffect(() => {
-    requestPost();
-  }, [])
-
-  useEffect(() => {
-    console.log('debug posts.length', posts.length)
-  }, [posts])
-
-  useEffect(() => {
-    console.log('debug comments.length', comments.length)
-  }, [posts])
 
   const requestPost = async () => {
+    console.log('debug post get requested');
     const offset = offsets['main'] ?? 0;
     setOffsets((offsets: any) => {
       return {
@@ -252,9 +244,30 @@ export default function App() {
     if (data.length > 0) setPosts(posts => posts.concat(data))
   }
 
+  useEffect(() => {
+    requestPost();
+  }, [])
+
+  useEffect(() => {
+    console.log('debug posts.length', posts.length)
+  }, [posts])
+
+  useEffect(() => {
+    console.log('debug comments.length', comments.length)
+  }, [comments])
+
+  useEffect(() => {
+    console.log('debug requestPost', requestPost)
+  }, [requestPost])
+
   return (
     <SafeAreaProvider>
-      <Main posts={posts} requestPost={requestPost} requestComments={requestComments} comments={comments} />
+      <MemoMain
+        posts={posts}
+        requestPost={requestPost}
+        requestComments={requestComments}
+        comments={comments}
+      />
     </SafeAreaProvider>
   );
 }

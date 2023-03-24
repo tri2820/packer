@@ -63,10 +63,12 @@ function Post(props: any) {
             marginHorizontal: 16
         }}>
             <MemoComment
-                startLoading={props.shouldActive}
+                shouldActive={props.shouldActive}
                 comment={item}
                 level={0}
                 setMode={props.setMode}
+                comments={props.comments}
+                requestComments={props.requestComments}
             />
         </View>
 

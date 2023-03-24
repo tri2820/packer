@@ -66,21 +66,8 @@ const link = {
 
 function Comment(props: any) {
     const [mode, setMode] = useState<'Normal' | 'Inline'>('Normal');
-    // const [comments, setComments] = useState<any[]>([]);
-    // const [c, setC] = useState<C>(unitC);
-    const [count, setCount] = useState(0);
-    const [inited, setInited] = useState(false);
-    const [requestingComments, setRequestingComments] = useState(false);
-
-    const requestComments = async (k?: C) => {
-        // if (requestingComments) return;
-        // setRequestingComments(true);
-        // const { c: q, data } = await (k ?? c)();
-        // if (!data) return;
-        // setC(() => q);
-        // setComments(comments.concat(data));
-        // setRequestingComments(false);
-    }
+    const [requestingChildren, setRequestingChildren] = useState(false);
+    const comments = props.comments.filter((c: any) => c.parent_id == props.comment.id);
 
     const onLinkPress = (target: string) => {
         props.setMode({
@@ -90,27 +77,17 @@ function Comment(props: any) {
         })
     }
 
+    const requestChildren = async () => {
+        setRequestingChildren(true)
+        await props.requestComments(props.comment.post_id, props.comment.id);
+        setRequestingChildren(false)
+    }
+
     useEffect(() => {
-        if (props.fixed) {
-            setInited(true);
-            return;
-        }
-
-        if (!props.startLoading) return;
+        if (!props.shouldActive) return;
         if (props.level > 1) return;
-
-        if (inited) return;
-        setInited(true);
-
-        // console.log('debug comment request', props.level);
-
-        (async () => {
-            const { c, data: count } = await requestCommentsCount(props.comment.id);
-            if (!count) return;
-            setCount(count);
-            requestComments(c);
-        })()
-    }, [props.startLoading])
+        requestChildren();
+    }, [props.shouldActive])
 
     const switchMode = () => {
         if (mode == 'Inline') {
@@ -120,7 +97,9 @@ function Comment(props: any) {
 
         setMode('Inline')
     }
-    // console.log('debug Comment was rendered', new Date().toLocaleTimeString())
+
+    // console.log('comment ger render', props.comment.id)
+
     return (
         <Animated.View
             entering={FadeInDown}
@@ -207,7 +186,7 @@ function Comment(props: any) {
                     {
                         mode == 'Normal' &&
                         <Animated.View
-                            entering={inited ? FadeInUp : undefined}
+                        // entering={inited ? FadeInUp : undefined}
                         >
                             <View>
                                 <MarkdownView
@@ -238,48 +217,13 @@ function Comment(props: any) {
                     display: mode == 'Inline' ? 'none' : 'flex'
                 }}>
                     {
-                        // props.fixed && props.comment.child ?
-                        //     <View style={{
-                        //         marginLeft: props.level == 0 ? 0 : 16
-                        //     }}>
-                        //         <MemoComment
-                        //             fixed
-                        //             blinking={!props.comment.child.finished}
-                        //             comment={{
-                        //                 id: 'bot answer',
-                        //                 author_name: 'Packer',
-                        //                 content: props.comment.child.content,
-                        //                 created_at: new Date().toUTCString()
-                        //             }}
-                        //             level={props.level + 1}
-                        //             startLoading={props.startLoading}
-                        //             setMode={props.setMode}
-                        //             setCommentReplyCallback={props.setCommentReplyCallback}
-                        //         // recentComment={props.recentComment}
-                        //         />
-                        //     </View>
-                        //     :
+
                         <View style={{
                             marginTop: 4
                         }}>
-                            {/* {
-                                    props.recentComment && props.recentComment.parent_id == props.comment.id &&
-                                    <View style={{
-                                        marginLeft: props.level == 0 ? 0 : 16
-                                    }}>
-                                        <MemoComment
-                                            fixed
-                                            comment={props.recentComment}
-                                            level={props.level + 1}
-                                            startLoading={props.startLoading}
-                                            setMode={props.setMode}
-                                            setCommentReplyCallback={props.setCommentReplyCallback}
-                                            recentComment={props.recentComment}
-                                        />
-                                    </View>
-                                } */}
 
-                            {/* {
+
+                            {
                                 comments?.map((c: any, i: number) =>
                                     <View
                                         key={c.id}
@@ -290,16 +234,17 @@ function Comment(props: any) {
                                         <MemoComment
                                             comment={c}
                                             level={props.level + 1}
-                                            startLoading={props.startLoading}
+                                            shouldActive={props.shouldActive}
                                             setMode={setMode}
-                                            setCommentReplyCallback={props.setCommentReplyCallback}
-                                        // recentComment={props.recentComment}
+                                            comments={props.comments}
+                                            requestComments={props.requestComments}
                                         />
                                     </View>)
-                            } */}
+                            }
 
-                            {/* {
-                                comments.length < count && !requestingComments && mode == 'Normal' &&
+                            {
+                                !requestingChildren &&
+                                comments.length < props.comment.comment_count && mode == 'Normal' &&
                                 <TouchableOpacity style={{
                                     backgroundColor: '#2C2C2C',
                                     marginTop: 4,
@@ -309,16 +254,18 @@ function Comment(props: any) {
                                     paddingHorizontal: 8,
                                     borderRadius: 4
                                 }}
-                                    onPress={() => { requestComments() }}
+                                    onPress={() => {
+                                        requestChildren()
+                                    }}
                                 >
                                     <Text style={{
                                         color: '#e6e6e6',
                                         fontWeight: '500'
                                     }}>
-                                        Load {count - comments.length} more
+                                        Load {props.comment.comment_count - comments.length} more
                                     </Text>
                                 </TouchableOpacity>
-                            } */}
+                            }
                         </View>
                     }
                 </View>
