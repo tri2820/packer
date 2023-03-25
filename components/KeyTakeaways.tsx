@@ -55,7 +55,7 @@ function KeyTakeaways(props: any) {
                 <Text style={{
                     color: '#E6E6E6',
                     fontWeight: 'bold',
-                }}>Key Takeaways</Text>
+                }}>TLDR</Text>
             </View>
 
             {

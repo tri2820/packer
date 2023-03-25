@@ -108,7 +108,7 @@ function Post(props: any) {
                 onScroll={onScroll}
                 data={comments}
                 onEndReached={() => {
-                    console.log('on end reached');
+                    console.log('on end reached', props.post.id);
                     props.requestComments(props.post.id, null);
                 }}
                 keyExtractor={keyExtractor}
@@ -116,6 +116,7 @@ function Post(props: any) {
                 ListHeaderComponent={<View style={{
                     paddingTop: insets.top
                 }}>
+                    {/* <Text style={{ color: 'white' }}>{JSON.stringify(props.post.id)}</Text> */}
                     <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
                     <View style={{
                         paddingHorizontal: 16

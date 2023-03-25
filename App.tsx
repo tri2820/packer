@@ -27,29 +27,7 @@ const INJECTED_JAVASCRIPT = `(function() {
 
 
 function Main(props: any) {
-  const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
-
-
-
-  useEffect(() => {
-    // console.log('props.user changed', props.user)
-    if (props.user == null) return
-    // Cancel account deletion
-    (async () => {
-      const { error } = await supabaseClient.from('deletions').delete().eq('user_id', props.user.id)
-      console.log('debug cancel deletion error, [NORMAL IF NOT REQUEST DELETION BEFORE]', error)
-    })()
-  }, [props.user])
-
-  useEffect(() => {
-    (async () => {
-      const userResponse = await supabaseClient.auth.getUser();
-      // console.log('Load user', userResponse.data.user)
-      setUser(userResponse.data.user)
-    })()
-  }, [])
-
 
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
@@ -59,10 +37,6 @@ function Main(props: any) {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
   }, [mode.tag])
 
-
-  useEffect(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-  }, [user])
 
   const onMessage = (event: WebViewMessageEvent) => {
     if (mode.tag != 'App') return;
@@ -117,7 +91,7 @@ function Main(props: any) {
       runOnJS(setMode)({ tag: 'Normal' })
     });
 
-  console.log('debug main get rendered')
+  // console.log('debug main get rendered')
   return (
     <View style={{
       height: constants.height,
@@ -173,8 +147,8 @@ function Main(props: any) {
           }
 
           <Bar onSubmit={props.onSubmit}
-            user={user}
-            setUser={setUser}
+            user={props.user}
+            setUser={props.setUser}
             activePostIndex={props.activePostIndex}
             minBarHeight={minBarHeight}
             setMode={setMode}
@@ -237,6 +211,33 @@ export default function App() {
   const [comments, setComments] = useState<any[]>([]);
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [activePostIndex, setActivePostIndex] = useState(0);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // console.log('props.user changed', props.user)
+    if (user == null) return
+    // Cancel account deletion
+    (async () => {
+      const { error } = await supabaseClient.from('deletions').delete().eq('user_id', user.id)
+    })()
+  }, [user])
+
+
+  useEffect(() => {
+    (async () => {
+      const userResponse = await supabaseClient.auth.getUser();
+      // console.log('Load user', userResponse.data.user)
+      setUser(userResponse.data.user)
+    })()
+  }, [])
+
+
+  useEffect(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+  }, [user])
+
+
+
   let inited = false;
 
   const updateComment = (id: string, key: any, value: any) => {
@@ -250,10 +251,8 @@ export default function App() {
     })
   }
 
-  const submitComment = async (
-    text: string,
-    parent_id: string | null,
-    post_id: string) => {
+  const submitComment = async (text: string, parent_id: string | null, post_id: string) => {
+    console.log('submit content by', user.user_metadata.full_name)
     const body = {
       content: text,
       post_id: post_id,
@@ -278,8 +277,7 @@ export default function App() {
       id: placeholderId,
       created_at: new Date(),
       content: text,
-      // author_name: user.user_metadata.full_name,
-      author_name: 'Default User',
+      author_name: user.user_metadata.full_name,
       parent_id: parent_id,
       post_id: post_id,
       blockRequestChildren: true
@@ -402,6 +400,8 @@ export default function App() {
         setSelectedCommentId={setSelectedCommentId}
         activePostIndex={activePostIndex}
         setActivePostIndex={setActivePostIndex}
+        user={user}
+        setUser={setUser}
       />
     </SafeAreaProvider>
   );
