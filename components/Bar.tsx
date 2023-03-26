@@ -16,7 +16,8 @@ import * as Haptics from 'expo-haptics';
 
 
 function Bar(props: any) {
-    const { mode, setMode, setSelectedCommentId, selectedCommentId } = useContext(MainContext);
+    const { mode, setMode, comments, setSelectedCommentId, selectedCommentId } = useContext(MainContext);
+
     const [text, setText] = useState('');
     const [profile, setProfile] = useState<any>(undefined);
 
@@ -24,7 +25,7 @@ function Bar(props: any) {
     const keyboard = useAnimatedKeyboard();
     const MARGIN_TOP = insets.top + 170;
     const INSETS_OFFSET_BOTTOM = 200;
-    const HANDLER_HEIGHT = 14;
+    const HANDLER_HEIGHT = 20;
     const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
     const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
     const offset = useSharedValue(0);
@@ -33,11 +34,23 @@ function Bar(props: any) {
 
     // const showHint = useSharedValue(false);
     const ref = useRef<any>(undefined);
+    if (selectedCommentId) {
+        ref.current?.focus();
+    }
+
     const animatedStyles = useAnimatedStyle(() => {
         return {
             transform: [
                 { scale: props.offset.value > 1 ? (2 - 1 / Math.pow(props.offset.value, 0.2)) : 1 },
             ]
+        };
+    });
+
+    const inputStyles = useAnimatedStyle(() => {
+        const k = -(offset.value) - HANDLER_HEIGHT + props.minBarHeight - keyboard.height.value +
+            (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? insets.bottom : 0);
+        return {
+            height: k,
         };
     });
 
@@ -51,6 +64,17 @@ function Bar(props: any) {
     useEffect(() => {
         setText('');
     }, [props.activePostIndex])
+
+    useEffect(() => {
+        if (focused) {
+            offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+            _offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+            return
+        }
+
+        offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+        _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+    }, [focused])
 
     const getSourceName = (source_url: string) => {
         const url = new URL(source_url);
@@ -136,11 +160,6 @@ function Bar(props: any) {
             offset.value = withSpring(minOffset, { velocity: event.velocityY, mass: 0.15 });
         })
 
-    useEffect(() => {
-        if (selectedCommentId === null) return;
-        ref.current.focus()
-    }, [selectedCommentId])
-
     return (
         <>
 
@@ -156,10 +175,8 @@ function Bar(props: any) {
                 }}
             >
                 <Pressable onPress={() => {
-                    Keyboard.dismiss();
                     setSelectedCommentId(null);
-                    offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
-                    _offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
+                    ref.current?.blur();
                 }}
                     style={{
                         width: '100%',
@@ -197,6 +214,7 @@ function Bar(props: any) {
                         // backgroundColor: 'blue',
                         alignItems: 'center',
                         justifyContent: 'flex-end',
+                        paddingBottom: 4
                     }}>
 
                         <View style={{
@@ -215,43 +233,20 @@ function Bar(props: any) {
                             paddingLeft: 20,
                             paddingRight: 20,
                             width: '100%',
-                            height: props.minBarHeight - HANDLER_HEIGHT - 4,
                             // top: HANDLER_HEIGHT,
-                            // backgroundColor: 'blue',
+                            // backgroundColor: 'yellow',
                             // position: 'absolute'
-                        },
+                        }, inputStyles
                         ]}
                         exiting={FadeOutUp.duration(100)}
                         entering={FadeInDown.duration(100)}
                     >
-                        {/* TOOLS */}
-                        {/* {
-                            selectedCommentId != '' &&
-                            focused &&
-                            <View style={{
-                                marginTop: 4,
-                                height: 20,
-                                width: '100%',
-                                // backgroundColor: 'blue',
-                                // alignContent: 'center',
-                                justifyContent: 'center'
-                            }}
-                            >
-                                <Text style={{
-                                    color: '#C2C2C2',
-                                    fontSize: 10
-                                }}>Replying to a comment</Text>
-                            </View>
-                        } */}
-
                         {/* INPUT */}
                         <View style={{
                             flex: 1,
                             flexDirection: 'row',
                             alignItems: 'center',
-                            height: props.minBarHeight - HANDLER_HEIGHT,
-                            paddingBottom: 4,
-                            // backgroundColor: 'blue'
+                            // backgroundColor: 'red'
                         }}>
                             {/* Close Button */}
                             {
@@ -273,11 +268,11 @@ function Bar(props: any) {
 
                             {mode.tag != 'App' && <>
                                 <TextInput
-                                    // multiline
+                                    multiline
+                                    // numberOfLines={4}
                                     onFocus={() => {
                                         if (props.user === null) {
-                                            console.log('debug minOffset', minOffset)
-                                            ref.current.blur()
+                                            ref.current?.blur()
                                             _offset.value = withSpring(minOffset, { mass: 0.15 })
                                             offset.value = withSpring(minOffset, { mass: 0.15 })
                                             return;
@@ -289,21 +284,25 @@ function Bar(props: any) {
                                     ref={ref}
                                     value={text}
                                     onChangeText={setText}
-                                    placeholder={'Add a discussion...'}
+                                    placeholder={
+                                        selectedCommentId ? `Replying to "${comments.find((c: any) => c.id == selectedCommentId).content}"` : 'Add a discussion...'
+                                    }
                                     placeholderTextColor='#C2C2C2'
                                     style={{
+                                        // backgroundColor: 'blue',
                                         color: '#F1F1F1',
                                         height: '100%',
                                         flex: 1,
                                         marginLeft: 0,
-                                        marginRight: 0
+                                        marginRight: 0,
+                                        // paddingBottom: 4,
                                     }}
                                     returnKeyType='send'
                                     keyboardAppearance='dark'
                                     onSubmitEditing={() => {
                                         props.onSubmit(text);
-                                        offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-                                        _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+                                        // offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+                                        // _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
                                         setText('');
                                     }}
                                     selectionColor='#F2C740'

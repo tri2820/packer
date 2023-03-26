@@ -111,7 +111,7 @@ function Post(props: any) {
                     ListHeaderComponent={<View style={{
                         paddingTop: insets.top
                     }}>
-                        <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text>
+                        {/* <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text> */}
                         <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
                         <View style={{
                             paddingHorizontal: 16

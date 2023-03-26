@@ -240,11 +240,11 @@ function Comment(props: any) {
                             myCommentIds.length < comment.comment_count && display == 'Normal' &&
                             <TouchableOpacity style={{
                                 backgroundColor: '#2C2C2C',
-                                marginTop: 4,
+                                marginBottom: 8,
                                 marginLeft: 'auto',
                                 marginRight: 'auto',
-                                paddingVertical: 4,
-                                paddingHorizontal: 8,
+                                paddingVertical: 8,
+                                paddingHorizontal: 16,
                                 borderRadius: 4
                             }}
                                 onPress={() => {
