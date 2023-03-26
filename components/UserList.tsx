@@ -132,7 +132,7 @@ function UserList(props: any) {
                             My Discussions
                         </Text>
                     </View>
-                    <Animated.FlatList
+                    <FlatList
                         horizontal={false}
                         showsVerticalScrollIndicator={false}
                         listKey='userList'

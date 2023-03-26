@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeInDown, FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -14,13 +14,16 @@ import { INIT_DATE, supabaseClient } from '../supabaseClient';
 import VideoPlayer from './VideoPlayer';
 import KeyTakeaways from './KeyTakeaways';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { MainContext } from '../utils';
 
 function Post(props: any) {
+    const { mode, posts, setMode, comments, requestComments } = useContext(MainContext);
     const [refreshing, setRefreshing] = useState(false);
     const [videoPlaying, setVideoPlaying] = useState(false);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
-    const comments = props.comments.filter((c: any) => c.post_id == props.post.id && c.parent_id == null);
+    const post = posts.find((post: any) => post.id == props.id);
+    const myCommentIds = comments.filter((c: any) => c.post_id == post.id && c.parent_id == null).map((c: any) => c.id);
     const [inited, setInited] = useState(false);
 
     useEffect(() => {
@@ -28,13 +31,13 @@ function Post(props: any) {
         if (inited) return;
         console.log('active');
         (async () => {
-            await props.requestComments(props.post.id, null);
+            await requestComments(post.id, null);
             setInited(true)
         })()
     }, [props.shouldActive])
 
     const onRefresh = React.useCallback(() => {
-        props.setMode({ tag: 'Normal' });
+        setMode({ tag: 'Normal' });
     }, []);
 
     useEffect(() => {
@@ -47,30 +50,25 @@ function Post(props: any) {
 
     useEffect(() => {
         if (!props.shouldActive) return;
-        if (props.mode.tag == 'Normal') {
+        if (mode.tag == 'Normal') {
             ref.current?.scrollToOffset({ offset: -insets.top });
             return;
         }
 
-        if (props.mode.tag == 'Comment') {
-            comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+        if (mode.tag == 'Comment') {
+            myCommentIds.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
             return;
         }
-    }, [props.mode])
+    }, [mode])
 
     const renderItem = ({ item, index }: any) =>
         <View style={{
             marginHorizontal: 16
         }}>
             <MemoComment
-                selectedCommentId={props.selectedCommentId}
-                setSelectedCommentId={props.setSelectedCommentId}
                 shouldActive={props.shouldActive}
-                comment={item}
                 level={0}
-                setMode={props.setMode}
-                comments={props.comments}
-                requestComments={props.requestComments}
+                id={item}
             />
         </View>
 
@@ -81,79 +79,82 @@ function Post(props: any) {
         const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
         const y = event.nativeEvent.contentOffset.y;
         if (y < end - constants.height / 4) return;
-        // props.requestComments(props.post.id, null);
+        // requestComments(post.id, null);
     }
 
 
     return <View style={{
-        backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
+        backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
         height: props.height
     }}>
         {
             props.shouldActive &&
-            <FlatList
-                showsVerticalScrollIndicator={false}
-                listKey={props.post.id}
-                ref={ref}
-                scrollEnabled={props.mode.tag == 'Comment'}
-                refreshControl={
-                    <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        colors={['transparent']}
-                        progressBackgroundColor='transparent'
-                        tintColor={'transparent'}
-                    />
-                }
-                onScroll={onScroll}
-                data={comments}
-                onEndReached={() => {
-                    console.log('on end reached', props.post.id);
-                    props.requestComments(props.post.id, null);
-                }}
-                keyExtractor={keyExtractor}
-                renderItem={renderItem}
-                ListHeaderComponent={<View style={{
-                    paddingTop: insets.top
-                }}>
-                    {/* <Text style={{ color: 'white' }}>{JSON.stringify(props.post.id)}</Text> */}
-                    <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
-                    <View style={{
-                        paddingHorizontal: 16
+            <Animated.View
+                entering={FadeInDown}>
+                <FlatList
+                    showsVerticalScrollIndicator={false}
+                    listKey={post.id}
+                    ref={ref}
+                    scrollEnabled={mode.tag == 'Comment'}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            colors={['transparent']}
+                            progressBackgroundColor='transparent'
+                            tintColor={'transparent'}
+                        />
+                    }
+                    onScroll={onScroll}
+                    data={myCommentIds}
+                    onEndReached={() => {
+                        console.log('on end reached', post.id);
+                        requestComments(post.id, null);
+                    }}
+                    keyExtractor={keyExtractor}
+                    renderItem={renderItem}
+                    ListHeaderComponent={<View style={{
+                        paddingTop: insets.top
                     }}>
-                        <PostHeader post={props.post} setMode={props.setMode} />
-                        <KeyTakeaways content={props.post.keytakeaways} />
-                        {
-                            inited && comments.length == 0 &&
-                            <Animated.View style={{
-                                flex: 1,
-                                flexDirection: 'row',
-                                marginLeft: 'auto',
-                                marginRight: 'auto',
-                            }}
-                                entering={FadeInUp}
-                            >
-                                <Ionicons name="chatbubble" size={16} color='#A3A3A3' style={{
-                                    marginRight: 4
-                                }} />
-                                <Text style={{
-                                    color: '#A3A3A3',
-                                    marginLeft: 4,
-                                    marginRight: 16 + 4
+                        {/* <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text> */}
+                        <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
+                        <View style={{
+                            paddingHorizontal: 16
+                        }}>
+                            <PostHeader post={post} setMode={setMode} />
+                            <KeyTakeaways content={post.keytakeaways} />
+                            {
+                                inited && myCommentIds.length == 0 &&
+                                <View style={{
+                                    flex: 1,
+                                    flexDirection: 'row',
+                                    marginLeft: 'auto',
+                                    marginRight: 'auto',
                                 }}
+                                // entering={FadeInUp}
                                 >
-                                    Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!
-                                </Text>
-                            </Animated.View>
-                        }
+                                    <Ionicons name="chatbubble" size={16} color='#A3A3A3' style={{
+                                        marginRight: 4
+                                    }} />
+                                    <Text style={{
+                                        color: '#A3A3A3',
+                                        marginLeft: 4,
+                                        marginRight: 16 + 4
+                                    }}
+                                    >
+                                        Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!
+                                    </Text>
+                                </View>
+                            }
+                        </View>
                     </View>
-                </View>
-                }
-            />
+                    }
+                />
+            </Animated.View>
         }
 
         {
-            props.mode.tag == 'Normal' &&
+            mode.tag == 'Normal' &&
             <>
                 <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.9)']} style={{
                     width: '100%',
@@ -165,7 +166,7 @@ function Post(props: any) {
                 />
 
                 {
-                    comments.length > 0 && props.shouldActive &&
+                    myCommentIds.length > 0 && props.shouldActive &&
                     <View style={{
                         position: 'absolute',
                         bottom: 16,
@@ -175,7 +176,7 @@ function Post(props: any) {
                         // backgroundColor: 'blue'
                     }}>
                         <MoreDiscussionsButton onPress={() => {
-                            props.setMode({ tag: 'Comment' })
+                            setMode({ tag: 'Comment' })
                         }} />
                     </View>
                 }

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { memo, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, Platform, Linking, TouchableOpacity } from 'react-native';
 import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutLeft, FadeOutUp, Layout, SequencedTransition, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
@@ -12,6 +12,7 @@ import { MarkdownRule, MarkdownRules, MarkdownStyles, MarkdownView } from 'react
 import moment from 'moment';
 import BlinkingCursor from './BlinkingCursor';
 import Octicons from '@expo/vector-icons/Octicons';
+import { MainContext } from '../utils';
 
 const quote: MarkdownRule = {
     order: 0,
@@ -50,7 +51,6 @@ const quote: MarkdownRule = {
 const link = {
     order: 0,
     render: (node: any, output: any, state: any, styles: any) => {
-        // console.log('debug node', node.target, state)
         return <Text
             key={state.key}
             onPress={
@@ -65,12 +65,15 @@ const link = {
 }
 
 function Comment(props: any) {
-    const [mode, setMode] = useState<'Normal' | 'Inline'>('Normal');
+    const { posts, comments, setMode, selectedCommentId, requestComments, setSelectedCommentId } = useContext(MainContext);
+    const [display, setDisplay] = useState<'Normal' | 'Inline'>('Normal');
     const [requestingChildren, setRequestingChildren] = useState(false);
-    const comments = props.comments.filter((c: any) => c.parent_id == props.comment.id);
+    const comment = comments.find((c: any) => c.id == props.id);
+    const myCommentIds = comments.filter((c: any) => c.parent_id == comment.id).map((c: any) => c.id);
+    const [switchedOnce, setSwitchedOnce] = useState(false);
 
     const onLinkPress = (target: string) => {
-        props.setMode({
+        setMode({
             tag: 'App',
             value: target,
             insetsColor: 'rgba(0, 0, 0, 0)'
@@ -78,10 +81,10 @@ function Comment(props: any) {
     }
 
     const requestChildren = async () => {
-        if (props.comment.blockRequestChildren) return;
-        // if (props.comment.id.startsWith('placeholder')) return;
+        if (comment.blockRequestChildren) return;
+        // if (comment.id.startsWith('placeholder')) return;
         setRequestingChildren(true)
-        await props.requestComments(props.comment.post_id, props.comment.id);
+        await requestComments(comment.post_id, comment.id);
         setRequestingChildren(false)
     }
 
@@ -92,19 +95,20 @@ function Comment(props: any) {
     }, [props.shouldActive])
 
     const switchMode = () => {
-        if (mode == 'Inline') {
-            setMode('Normal')
+        setSwitchedOnce(true);
+        if (display == 'Inline') {
+            setDisplay('Normal')
             return;
         }
 
-        setMode('Inline')
+        setDisplay('Inline')
     }
 
-    // console.log('comment ger render', props.comment.id)
+    console.log('comment ger render', comment.id)
 
     return (
-        <Animated.View
-            entering={FadeInDown}
+        <View
+        // entering={FadeInDown}
         >
             <Pressable
                 style={{
@@ -114,7 +118,7 @@ function Comment(props: any) {
                 }}
                 onPress={switchMode}
                 onLongPress={() => {
-                    props.setSelectedCommentId(props.comment.id);
+                    setSelectedCommentId(comment.id);
                 }}
             >
 
@@ -139,7 +143,7 @@ function Comment(props: any) {
                         borderLeftColor: '#6b5920',
                         borderLeftWidth: 2,
                     }, {
-                        backgroundColor: props.selectedCommentId == props.comment.id ? '#6b5920' : 'transparent',
+                        backgroundColor: selectedCommentId == comment.id ? '#6b5920' : 'transparent',
                     }
                     ]}
 
@@ -156,28 +160,28 @@ function Comment(props: any) {
                             color: 'white'
                         }}>
                             {
-                                props.comment.author_name
+                                comment.author_name
                             }
                         </Text>
 
                         {
-                            mode == 'Normal' &&
+                            display == 'Normal' &&
                             <Text style={{
                                 color: '#A3A3A3'
                             }}> • {
-                                    moment.utc(props.comment.created_at).local().startOf('seconds').fromNow()
+                                    moment.utc(comment.created_at).local().startOf('seconds').fromNow()
                                 }</Text>
                         }
 
                         {
-                            mode == 'Inline' && <Animated.Text style={{
+                            display == 'Inline' && <Animated.Text style={{
                                 color: '#A3A3A3',
                                 flex: 1,
                                 paddingBottom: props.level > 0 ? 0 : 4,
                             }}
                                 numberOfLines={1}
                                 entering={FadeInDown}
-                            > • {props.commentStream ? '...' : props.comment.content}
+                            > • {comment.content}
                             </Animated.Text>
                         }
 
@@ -185,33 +189,33 @@ function Comment(props: any) {
 
 
                     {
-                        mode == 'Normal' &&
-                        <Animated.View>
-                            <View>
-                                <MarkdownView
-                                    rules={{
-                                        quote,
-                                        link
-                                    }}
-                                    onLinkPress={onLinkPress}
-                                    styles={mdstyles}
-                                >
-                                    {
-                                        props.comment.content
-                                    }
-                                </MarkdownView>
-
+                        display == 'Normal' &&
+                        <Animated.View
+                            entering={switchedOnce ? FadeInDown : undefined}
+                        >
+                            <MarkdownView
+                                rules={{
+                                    quote,
+                                    link
+                                }}
+                                onLinkPress={onLinkPress}
+                                styles={mdstyles}
+                            >
                                 {
-                                    props.comment.blinking && <BlinkingCursor />
+                                    comment.content
                                 }
-                            </View>
+                            </MarkdownView>
+
+                            {
+                                comment.blinking && <BlinkingCursor />
+                            }
                         </Animated.View>
                     }
 
                 </View>
 
                 <View style={{
-                    display: mode == 'Inline' ? 'none' : 'flex'
+                    display: display == 'Inline' ? 'none' : 'flex'
                 }}>
                     {
 
@@ -221,7 +225,7 @@ function Comment(props: any) {
 
 
                             {
-                                comments?.map((c: any, i: number) =>
+                                myCommentIds?.map((c: any, i: number) =>
                                     <View
                                         key={c.id}
                                         style={{
@@ -229,21 +233,16 @@ function Comment(props: any) {
                                         }}
                                     >
                                         <MemoComment
-                                            comment={c}
+                                            id={c}
                                             level={props.level + 1}
                                             shouldActive={props.shouldActive}
-                                            setMode={setMode}
-                                            comments={props.comments}
-                                            requestComments={props.requestComments}
-                                            selectedCommentId={props.selectedCommentId}
-                                            setSelectedCommentId={props.setSelectedCommentId}
                                         />
                                     </View>)
                             }
 
                             {
                                 !requestingChildren &&
-                                comments.length < props.comment.comment_count && mode == 'Normal' &&
+                                myCommentIds.length < comment.comment_count && display == 'Normal' &&
                                 <TouchableOpacity style={{
                                     backgroundColor: '#2C2C2C',
                                     marginTop: 4,
@@ -261,7 +260,7 @@ function Comment(props: any) {
                                         color: '#e6e6e6',
                                         fontWeight: '500'
                                     }}>
-                                        Load {props.comment.comment_count - comments.length} more
+                                        Load {comment.comment_count - myCommentIds.length} more
                                     </Text>
                                 </TouchableOpacity>
                             }
@@ -269,7 +268,7 @@ function Comment(props: any) {
                     }
                 </View>
             </Pressable>
-        </Animated.View>
+        </View>
     );
 }
 

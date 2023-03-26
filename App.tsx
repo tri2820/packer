@@ -1,5 +1,5 @@
 import { StatusBar, StatusBarStyle } from 'expo-status-bar';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { createContext, memo, useCallback, useContext, useEffect, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, ZoomIn, ZoomInEasyUp, ZoomInLeft, ZoomInRight, ZoomOutLeft } from 'react-native-reanimated';
@@ -7,7 +7,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar from './components/Bar';
 import Wall from './components/Wall';
-import { constants, loadingView, Mode } from './utils';
+import { constants, loadingView, MainContext, Mode } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
@@ -27,7 +27,7 @@ const INJECTED_JAVASCRIPT = `(function() {
 
 
 function Main(props: any) {
-  const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
+  const { mode, setMode } = useContext(MainContext);
 
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
@@ -51,7 +51,7 @@ function Main(props: any) {
     if (mode.tag != 'App') {
       return 'light'
     }
-    const [r, g, b, a] = mode.insetsColor.slice(mode.insetsColor[3] == 'a' ? 6 : 5, -1).split(',').map(s => parseInt(s));
+    const [r, g, b, a] = mode.insetsColor.slice(mode.insetsColor[3] == 'a' ? 6 : 5, -1).split(',').map((s: any) => parseInt(s));
     if (r == 0 && g == 0 && b == 0) {
       return 'dark'
     }
@@ -91,7 +91,7 @@ function Main(props: any) {
       runOnJS(setMode)({ tag: 'Normal' })
     });
 
-  // console.log('debug main get rendered')
+  console.log('debug main get rendered')
   return (
     <View style={{
       height: constants.height,
@@ -101,17 +101,9 @@ function Main(props: any) {
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
-            requestComments={props.requestComments}
-            comments={props.comments}
-            requestPost={props.requestPost}
-            posts={props.posts}
             activePostIndex={props.activePostIndex}
             setActivePostIndex={props.setActivePostIndex}
             height={constants.height - minBarHeight - insets.bottom}
-            mode={mode}
-            setMode={setMode}
-            selectedCommentId={props.selectedCommentId}
-            setSelectedCommentId={props.setSelectedCommentId}
           />
           {
             mode.tag === 'App' && <Animated.View style={{
@@ -151,11 +143,7 @@ function Main(props: any) {
             setUser={props.setUser}
             activePostIndex={props.activePostIndex}
             minBarHeight={minBarHeight}
-            setMode={setMode}
-            mode={mode}
             offset={offset}
-            selectedCommentId={props.selectedCommentId}
-            setSelectedCommentId={props.setSelectedCommentId}
           />
         </Animated.View>
       </GestureDetector>
@@ -212,6 +200,7 @@ export default function App() {
   const [selectedCommentId, setSelectedCommentId] = useState<string | null>(null);
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
+  const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
 
   useEffect(() => {
     // console.log('props.user changed', props.user)
@@ -239,6 +228,7 @@ export default function App() {
 
 
   let inited = false;
+
 
   const updateComment = (id: string, key: any, value: any) => {
     setComments((comments: any) => {
@@ -388,21 +378,33 @@ export default function App() {
     console.log('debug comments.length', comments.length)
   }, [comments])
 
+  const memoRequestPost = React.useCallback(requestPost, [])
+  const memoRequestComments = React.useCallback(requestComments, [posts, comments])
+  const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedCommentId])
+
+
   return (
     <SafeAreaProvider>
-      <MemoMain
-        posts={posts}
-        requestPost={requestPost}
-        requestComments={requestComments}
-        comments={comments}
-        onSubmit={onSubmit}
-        selectedCommentId={selectedCommentId}
-        setSelectedCommentId={setSelectedCommentId}
-        activePostIndex={activePostIndex}
-        setActivePostIndex={setActivePostIndex}
-        user={user}
-        setUser={setUser}
-      />
+      <MainContext.Provider value={{
+        posts: posts,
+        comments: comments,
+        requestPost: memoRequestPost,
+        requestComments: memoRequestComments,
+        mode: mode,
+        setMode: setMode,
+        selectedCommentId: selectedCommentId,
+        setSelectedCommentId: setSelectedCommentId,
+      }}>
+        <MemoMain
+          onSubmit={memoOnSubmit}
+          selectedCommentId={selectedCommentId}
+          setSelectedCommentId={setSelectedCommentId}
+          activePostIndex={activePostIndex}
+          setActivePostIndex={setActivePostIndex}
+          user={user}
+          setUser={setUser}
+        />
+      </MainContext.Provider>
     </SafeAreaProvider>
   );
 }

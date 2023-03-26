@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname } from '../utils';
+import { constants, MainContext, normalizedHostname } from '../utils';
 import Animated, { Easing, FadeIn, FadeInDown, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, useAnimatedKeyboard, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
 import { signIn } from '../auth';
@@ -14,6 +14,7 @@ import * as Haptics from 'expo-haptics';
 
 
 function SignInSection(props: any) {
+    const { mode } = useContext(MainContext);
     const insets = useSafeAreaInsets();
     const signInAndUpdateProfile = async (provider: 'apple' | 'google') => {
         const user = await signIn(provider);
@@ -52,7 +53,7 @@ function SignInSection(props: any) {
             }}
                 source={require('../assets/loginBackground.jpg')}
             >
-                <LinearGradient colors={['transparent', props.mode.tag == 'Comment' ? '#212121' : '#151316']} style={{
+                <LinearGradient colors={['transparent', mode.tag == 'Comment' ? '#212121' : '#151316']} style={{
                     width: '100%',
                     height: '100%'
                 }}

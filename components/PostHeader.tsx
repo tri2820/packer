@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname } from '../utils';
+import { constants, MainContext, normalizedHostname } from '../utils';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
@@ -13,6 +13,7 @@ import moment from 'moment';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 function PostHeader(props: any) {
+    const { setMode } = useContext(MainContext);
 
     const getSourceName = (source_url: string) => {
         const url = new URL(source_url);
@@ -24,7 +25,7 @@ function PostHeader(props: any) {
     }}>
         <TouchableOpacity
             onPress={() => {
-                props.setMode({
+                setMode({
                     tag: 'App',
                     value: props.post.source_url,
                     insetsColor: 'rgba(0, 0, 0, 0)'
@@ -50,7 +51,7 @@ function PostHeader(props: any) {
                 </Text>
             </View>
 
-            <Animated.Text style={[{
+            <Text style={[{
                 color: '#E6E6E6',
                 fontWeight: 'bold',
                 fontSize: 18,
@@ -59,7 +60,7 @@ function PostHeader(props: any) {
                 // animatedStyles
             ]}>
                 {props.post.title}
-            </Animated.Text>
+            </Text>
         </TouchableOpacity>
 
         <Text style={{

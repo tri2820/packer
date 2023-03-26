@@ -1,8 +1,8 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground, PanResponder } from 'react-native';
 import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname } from '../utils';
+import { constants, MainContext, normalizedHostname } from '../utils';
 import Animated, { Easing, FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { Gesture, GestureDetector, TextInput, FlatList } from 'react-native-gesture-handler';
 import { signIn } from '../auth';
@@ -16,6 +16,7 @@ import * as Haptics from 'expo-haptics';
 
 
 function Bar(props: any) {
+    const { mode, setMode, setSelectedCommentId, selectedCommentId } = useContext(MainContext);
     const [text, setText] = useState('');
     const [profile, setProfile] = useState<any>(undefined);
 
@@ -136,9 +137,9 @@ function Bar(props: any) {
         })
 
     useEffect(() => {
-        if (props.selectedCommentId === null) return;
+        if (selectedCommentId === null) return;
         ref.current.focus()
-    }, [props.selectedCommentId])
+    }, [selectedCommentId])
 
     return (
         <>
@@ -155,7 +156,7 @@ function Bar(props: any) {
             >
                 <Pressable onPress={() => {
                     Keyboard.dismiss();
-                    props.setSelectedCommentId(null);
+                    setSelectedCommentId(null);
                     offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
                     _offset.value = withSpring(0, { velocity: 5, mass: 0.15 });
                 }}
@@ -176,7 +177,7 @@ function Bar(props: any) {
                     height: HEIGHT,
                     position: 'absolute',
                     width: constants.width,
-                    backgroundColor: props.mode.tag == 'Comment' ? '#212121' : '#151316',
+                    backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
                     borderTopWidth: StyleSheet.hairlineWidth,
                     borderTopColor: '#2A2829',
                     borderTopLeftRadius: 4,
@@ -184,7 +185,7 @@ function Bar(props: any) {
                 }, barStyles]}
                 >
                     {
-                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} />
+                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={mode} user={props.user} setUser={props.setUser} />
                     }
 
 
@@ -224,7 +225,7 @@ function Bar(props: any) {
                     >
                         {/* TOOLS */}
                         {/* {
-                            props.selectedCommentId != '' &&
+                            selectedCommentId != '' &&
                             focused &&
                             <View style={{
                                 marginTop: 4,
@@ -243,7 +244,7 @@ function Bar(props: any) {
                         } */}
 
                         {/* INPUT */}
-                        <Animated.View style={{
+                        <View style={{
                             flex: 1,
                             flexDirection: 'row',
                             alignItems: 'center',
@@ -253,15 +254,15 @@ function Bar(props: any) {
                         }}>
                             {/* Close Button */}
                             {
-                                (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
+                                (mode.tag == 'Comment' || mode.tag == 'App') &&
                                 !focused &&
                                 <TouchableOpacity onPress={() => {
-                                    props.setMode({ tag: 'Normal' });
+                                    setMode({ tag: 'Normal' });
                                 }}>
                                     <Animated.View style={animatedStyles} >
                                         <Ionicons name="close" size={26} color='#C2C2C2' style={{
                                             // padding: 4,
-                                            marginRight: props.mode.tag == 'Comment' ? 8 : 0,
+                                            marginRight: mode.tag == 'Comment' ? 8 : 0,
                                             // backgroundColor: 'red'
                                         }} />
                                     </Animated.View>
@@ -269,7 +270,7 @@ function Bar(props: any) {
                             }
 
 
-                            {props.mode.tag != 'App' && <>
+                            {mode.tag != 'App' && <>
                                 <TextInput
                                     // multiline
                                     onFocus={() => {
@@ -311,7 +312,7 @@ function Bar(props: any) {
 
 
                             {
-                                props.mode.tag == 'App' &&
+                                mode.tag == 'App' &&
                                 <View style={{
                                     // backgroundColor: 'blue',
                                     width: '100%',
@@ -323,16 +324,16 @@ function Bar(props: any) {
                                         color: '#C2C2C2',
                                         fontWeight: '600'
                                     }}>{
-                                            getSourceName(props.mode.value)
+                                            getSourceName(mode.value)
                                         }
                                     </Text>
                                 </View>
                             }
 
                             {
-                                props.mode.tag == 'App' &&
+                                mode.tag == 'App' &&
                                 <TouchableOpacity onPress={() => {
-                                    Linking.openURL(props.mode.value).catch(error =>
+                                    Linking.openURL(mode.value).catch(error =>
                                         console.warn('An error occurred: ', error),
                                     )
                                 }}>
@@ -348,7 +349,7 @@ function Bar(props: any) {
                                     </View>
                                 </TouchableOpacity>
                             }
-                        </Animated.View>
+                        </View>
 
                     </Animated.View>
                     }
