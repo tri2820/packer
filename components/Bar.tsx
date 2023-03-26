@@ -31,6 +31,7 @@ function Bar(props: any) {
     const offset = useSharedValue(0);
     const _offset = useSharedValue(0);
     const [focused, setFocused] = useState(false);
+    const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
     // const showHint = useSharedValue(false);
     const ref = useRef<any>(undefined);
@@ -57,7 +58,7 @@ function Bar(props: any) {
     const [showInputBar, setShowInputBar] = useState(true);
     useDerivedValue(() => {
         // console.log('props.offset.value', offset.value)
-        runOnJS(setShowInputBar)(offset.value > -200 || focused)
+        runOnJS(setShowInputBar)(offset.value >= -40 || focused)
         return offset.value
     })
 
@@ -116,13 +117,6 @@ function Bar(props: any) {
     //     };
     // });
 
-
-    const [needReset, setNeedReset] = useState(false);
-    useEffect(() => {
-        if (!needReset) return;
-        setNeedReset(false)
-    }, [needReset])
-
     const gesture = Gesture
         .Pan()
         .activeOffsetY([-10, 10])
@@ -151,14 +145,22 @@ function Bar(props: any) {
 
             if (newOffset > minOffset / 2) {
                 // THREE
-                _offset.value = withSpring(keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
-                offset.value = withSpring(keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
+                const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0;
+                _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
+                offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
+                if (value == 0) runOnJS(setUserListMode)('normal')
                 return;
             }
 
             _offset.value = withSpring(minOffset, { velocity: event.velocityY, mass: 0.15 });
             offset.value = withSpring(minOffset, { velocity: event.velocityY, mass: 0.15 });
+
         })
+
+    const getQuote = () => {
+        const text = comments.find((c: any) => c.id == selectedCommentId).content;
+        return text.length > 30 ? `${text.slice(0, 30)}...` : text;
+    }
 
     return (
         <>
@@ -266,7 +268,15 @@ function Bar(props: any) {
                             }
 
 
-                            {mode.tag != 'App' && <>
+                            {mode.tag != 'App' && <View
+                                style={{
+                                    // backgroundColor: 'yellow',
+                                    height: '100%',
+                                    width: '100%',
+                                    flexDirection: 'row',
+                                    alignItems: 'flex-start'
+                                }}
+                            >
                                 <TextInput
                                     multiline
                                     // numberOfLines={4}
@@ -285,30 +295,42 @@ function Bar(props: any) {
                                     value={text}
                                     onChangeText={setText}
                                     placeholder={
-                                        selectedCommentId ? `Replying to "${comments.find((c: any) => c.id == selectedCommentId).content}"` : 'Add a discussion...'
+                                        selectedCommentId ? `Replying to "${getQuote()}"` : 'Add a discussion...'
                                     }
                                     placeholderTextColor='#C2C2C2'
                                     style={{
                                         // backgroundColor: 'blue',
                                         color: '#F1F1F1',
                                         height: '100%',
-                                        flex: 1,
-                                        marginLeft: 0,
-                                        marginRight: 0,
-                                        // paddingBottom: 4,
+                                        flexGrow: 1
                                     }}
-                                    returnKeyType='send'
+                                    // returnKeyType='send'
                                     keyboardAppearance='dark'
-                                    onSubmitEditing={() => {
-                                        props.onSubmit(text);
-                                        // offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-                                        // _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-                                        setText('');
-                                    }}
+                                    // onSubmitEditing={() => {
+
+                                    // }}
                                     selectionColor='#F2C740'
                                 />
-
-                            </>}
+                                {focused &&
+                                    <TouchableOpacity onPress={() => {
+                                        if (text.trim().length > 0) {
+                                            props.onSubmit(text);
+                                        }
+                                        ref.current?.blur();
+                                        setText('');
+                                    }}
+                                        style={{
+                                            height: props.minBarHeight - HANDLER_HEIGHT,
+                                            width: props.minBarHeight - HANDLER_HEIGHT,
+                                            // backgroundColor: 'red',
+                                            alignItems: 'flex-end',
+                                            justifyContent: 'flex-start'
+                                        }}
+                                    >
+                                        <Ionicons name="send" size={24} color='#F2C740' />
+                                    </TouchableOpacity>
+                                }
+                            </View>}
 
 
                             {
@@ -355,7 +377,7 @@ function Bar(props: any) {
                     }
 
                     {
-                        props.user !== null && !focused && <UserList needReset={needReset} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        props.user !== null && !focused && <UserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>

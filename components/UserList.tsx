@@ -14,8 +14,6 @@ import LoginSection from './SignInSection';
 
 
 function UserList(props: any) {
-    const [mode, setMode] = useState<'normal' | 'settings'>('normal')
-
     const signOutAndUpdateProfile = async () => {
         const signedOut = await signOut();
         if (!signedOut) return;
@@ -28,12 +26,6 @@ function UserList(props: any) {
             opacity: Math.pow(props.offset.value / props.minOffset, 0.3)
         };
     });
-
-    useEffect(() => {
-        if (!props.needReset) return;
-        console.log(props.needReset);
-        setMode('normal')
-    }, [props.needReset])
 
     const createDeleteConfirmationAlert = () =>
         Alert.alert(
@@ -66,14 +58,13 @@ function UserList(props: any) {
         }, userStyles]}
             exiting={FadeOut}
         >
-            {mode == 'normal' ?
+            {props.mode == 'normal' ?
                 <Animated.View
                     entering={FadeIn}
                     exiting={FadeOut}
                 >
                     <View>
                         <View style={{
-                            marginTop: 24,
                             flexDirection: 'row',
                             alignItems: 'center',
                             // backgroundColor: 'blue'
@@ -81,7 +72,8 @@ function UserList(props: any) {
                             <Text style={{
                                 color: '#F1F1F1',
                                 fontSize: 24,
-                                fontWeight: '800'
+                                fontWeight: '800',
+                                flexGrow: 1
                             }}>
                                 {
                                     props.user.user_metadata.full_name
@@ -89,14 +81,12 @@ function UserList(props: any) {
                             </Text>
 
                             <TouchableOpacity onPress={() => {
-                                setMode('settings')
+                                props.setMode('settings')
                             }} style={{
-                                marginLeft: 'auto',
-                                marginRight: 0,
-                                paddingVertical: 0,
-                                paddingRight: 3,
-                                // Coyote
-                                paddingLeft: 12,
+                                height: 60,
+                                width: 60,
+                                alignItems: 'flex-end',
+                                justifyContent: 'center',
                                 // backgroundColor: 'red'
                             }} >
                                 <Ionicons name="settings-sharp" size={28} color='#C2C2C2' />
@@ -165,7 +155,6 @@ function UserList(props: any) {
                 >
                     <View>
                         <View style={{
-                            marginTop: 24,
                             flexDirection: 'row',
                             alignItems: 'center',
                             // backgroundColor: 'blue'
@@ -173,20 +162,19 @@ function UserList(props: any) {
                             <Text style={{
                                 color: '#F1F1F1',
                                 fontSize: 24,
-                                fontWeight: '800'
+                                fontWeight: '800',
+                                flexGrow: 1
                             }}>
                                 Settings
                             </Text>
 
                             <TouchableOpacity onPress={() => {
-                                setMode('normal')
+                                props.setMode('normal')
                             }} style={{
-                                marginLeft: 'auto',
-                                marginRight: 0,
-                                paddingVertical: 0,
-                                paddingRight: 3,
-                                // Coyote
-                                paddingLeft: 12,
+                                height: 60,
+                                width: 60,
+                                alignItems: 'flex-end',
+                                justifyContent: 'center',
                                 // backgroundColor: 'red'
                             }} >
                                 <Ionicons name="close" size={28} color='#C2C2C2' />
