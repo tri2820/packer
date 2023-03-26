@@ -107,168 +107,169 @@ function Comment(props: any) {
     console.log('comment ger render', comment.id)
 
     return (
-        <View
-        // entering={FadeInDown}
+        <Pressable
+            style={{
+                paddingBottom: props.level > 0 ? 0 : 8,
+                // paddingHorizontal: props.level == 0 ? 16 : 0,
+                // backgroundColor: props.level == 0 ? 'yellow' : 'transparent'
+            }}
+            onPress={switchMode}
+            onLongPress={() => {
+                setSelectedCommentId(comment.id);
+            }}
         >
-            <Pressable
-                style={{
-                    paddingBottom: props.level > 0 ? 0 : 8,
-                    // paddingHorizontal: props.level == 0 ? 16 : 0,
-                    // backgroundColor: props.level == 0 ? 'yellow' : 'transparent'
-                }}
-                onPress={switchMode}
-                onLongPress={() => {
-                    setSelectedCommentId(comment.id);
-                }}
+
+            {
+                props.level === 0 && <View
+                    style={{
+                        borderBottomColor: '#3C3D3F',
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                    }}
+                />
+            }
+
+            <View
+                style={[(props.level == 0) && {
+                    marginTop: 8,
+                    paddingTop: 4,
+                    paddingLeft: 16,
+                    paddingRight: 16
+                }, (props.level > 0) && {
+                    marginVertical: 4,
+                    paddingTop: 4,
+                    paddingBottom: 4,
+                    borderLeftColor: '#6b5920',
+                    borderLeftWidth: 2,
+                    paddingLeft: 16,
+                    marginLeft: 16,
+                    marginRight: 16
+                }, {
+                    backgroundColor: selectedCommentId == comment.id ? '#6b5920' : 'transparent',
+                }
+                ]}
+
             >
 
-                {
-                    props.level === 0 && <View
-                        style={{
-                            borderBottomColor: '#3C3D3F',
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                        }}
-                    />
-                }
-
-                <View
-                    style={[(props.level == 0) && {
-                        marginTop: 8,
-                        paddingTop: 4
-                    }, (props.level > 0) && {
-                        marginVertical: 4,
-                        paddingTop: 4,
-                        paddingBottom: 4,
-                        paddingLeft: 16,
-                        borderLeftColor: '#6b5920',
-                        borderLeftWidth: 2,
-                    }, {
-                        backgroundColor: selectedCommentId == comment.id ? '#6b5920' : 'transparent',
-                    }
-                    ]}
+                <View style={{
+                    flex: 1,
+                    flexDirection: 'row'
+                }}
 
                 >
-
-                    <View style={{
-                        flex: 1,
-                        flexDirection: 'row'
-                    }}
-
-                    >
-                        <Text style={{
-                            fontWeight: 'bold',
-                            color: 'white'
-                        }}>
-                            {
-                                comment.author_name
-                            }
-                        </Text>
-
+                    <Text style={{
+                        fontWeight: 'bold',
+                        color: 'white'
+                    }}>
                         {
-                            display == 'Normal' &&
-                            <Text style={{
-                                color: '#A3A3A3'
-                            }}> • {
-                                    moment.utc(comment.created_at).local().startOf('seconds').fromNow()
-                                }</Text>
+                            comment.author_name
                         }
-
-                        {
-                            display == 'Inline' && <Animated.Text style={{
-                                color: '#A3A3A3',
-                                flex: 1,
-                                paddingBottom: props.level > 0 ? 0 : 4,
-                            }}
-                                numberOfLines={1}
-                                entering={FadeInDown}
-                            > • {comment.content}
-                            </Animated.Text>
-                        }
-
-                    </View>
-
+                    </Text>
 
                     {
                         display == 'Normal' &&
-                        <Animated.View
-                            entering={switchedOnce ? FadeInDown : undefined}
-                        >
-                            <MarkdownView
-                                rules={{
-                                    quote,
-                                    link
-                                }}
-                                onLinkPress={onLinkPress}
-                                styles={mdstyles}
-                            >
-                                {
-                                    comment.content
-                                }
-                            </MarkdownView>
+                        <Text style={{
+                            color: '#A3A3A3'
+                        }}> • {
+                                moment.utc(comment.created_at).local().startOf('seconds').fromNow()
+                            }</Text>
+                    }
 
-                            {
-                                comment.blinking && <BlinkingCursor />
-                            }
-                        </Animated.View>
+                    {
+                        display == 'Inline' && <Animated.Text style={{
+                            color: '#A3A3A3',
+                            flex: 1,
+                            paddingBottom: props.level > 0 ? 0 : 4,
+                        }}
+                            numberOfLines={1}
+                            entering={FadeInDown}
+                        > • {comment.content}
+                        </Animated.Text>
                     }
 
                 </View>
 
-                <View style={{
-                    display: display == 'Inline' ? 'none' : 'flex'
-                }}>
-                    {
 
-                        <View style={{
-                            marginTop: 4
-                        }}>
-
-
+                {
+                    display == 'Normal' &&
+                    <Animated.View
+                        entering={switchedOnce ? FadeInDown : undefined}
+                    >
+                        <MarkdownView
+                            rules={{
+                                quote,
+                                link
+                            }}
+                            onLinkPress={onLinkPress}
+                            styles={mdstyles}
+                        >
                             {
-                                myCommentIds?.map((c: any, i: number) =>
-                                    <View
-                                        key={c.id}
-                                        style={{
-                                            marginLeft: props.level == 0 ? 0 : 16
-                                        }}
-                                    >
-                                        <MemoComment
-                                            id={c}
-                                            level={props.level + 1}
-                                            shouldActive={props.shouldActive}
-                                        />
-                                    </View>)
+                                comment.content
                             }
+                        </MarkdownView>
 
-                            {
-                                !requestingChildren &&
-                                myCommentIds.length < comment.comment_count && display == 'Normal' &&
-                                <TouchableOpacity style={{
-                                    backgroundColor: '#2C2C2C',
-                                    marginTop: 4,
-                                    marginLeft: 'auto',
-                                    marginRight: 'auto',
-                                    paddingVertical: 4,
-                                    paddingHorizontal: 8,
-                                    borderRadius: 4
-                                }}
-                                    onPress={() => {
-                                        requestChildren()
+                        {
+                            comment.blinking && <BlinkingCursor />
+                        }
+                    </Animated.View>
+                }
+
+            </View>
+
+            <View style={{
+                display: display == 'Inline' ? 'none' : 'flex'
+            }}>
+                {
+
+                    <View style={{
+                        marginTop: 4
+                    }}>
+
+
+                        {
+                            myCommentIds?.map((c: any, i: number) =>
+                                <View
+                                    key={c}
+                                    style={{
+                                        marginLeft: props.level == 0 ? 0 : 16
                                     }}
                                 >
-                                    <Text style={{
-                                        color: '#e6e6e6',
-                                        fontWeight: '500'
-                                    }}>
-                                        Load {comment.comment_count - myCommentIds.length} more
-                                    </Text>
-                                </TouchableOpacity>
-                            }
-                        </View>
-                    }
-                </View>
-            </Pressable>
-        </View>
+                                    <MemoComment
+                                        id={c}
+                                        level={props.level + 1}
+                                        shouldActive={props.shouldActive}
+                                    />
+                                </View>)
+                        }
+
+                        {
+                            !requestingChildren &&
+                            myCommentIds.length < comment.comment_count && display == 'Normal' &&
+                            <TouchableOpacity style={{
+                                backgroundColor: '#2C2C2C',
+                                marginTop: 4,
+                                marginLeft: 'auto',
+                                marginRight: 'auto',
+                                paddingVertical: 4,
+                                paddingHorizontal: 8,
+                                borderRadius: 4
+                            }}
+                                onPress={() => {
+                                    requestChildren()
+                                }}
+                            >
+                                <Text style={{
+                                    color: '#e6e6e6',
+                                    fontWeight: '500'
+                                }}>
+                                    Load {comment.comment_count - myCommentIds.length} more
+                                </Text>
+                            </TouchableOpacity>
+                        }
+                    </View>
+                }
+            </View>
+        </Pressable>
+
     );
 }
 

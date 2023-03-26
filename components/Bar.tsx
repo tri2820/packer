@@ -85,12 +85,12 @@ function Bar(props: any) {
         };
     });
 
-    const overlayStyles = useAnimatedStyle(() => {
-        return {
-            opacity: Math.pow(offset.value / minOffset, 0.3) * 0.8,
-            display: offset.value == 0 ? 'none' : 'flex'
-        };
-    });
+    // const overlayStyles = useAnimatedStyle(() => {
+    //     return {
+    //         opacity: Math.pow(offset.value / minOffset, 0.3) * 0.8,
+    //         display: offset.value == 0 ? 'none' : 'flex'
+    //     };
+    // });
 
 
     const [needReset, setNeedReset] = useState(false);
@@ -145,14 +145,15 @@ function Bar(props: any) {
         <>
 
             {/* Overlay */}
-            <Animated.View
-                style={[{
+            <View
+                style={{
                     backgroundColor: 'black',
+                    opacity: 0.8,
                     height: constants.height,
                     width: constants.width,
-                    position: 'absolute'
-                },
-                    overlayStyles]}
+                    position: 'absolute',
+                    display: focused ? 'flex' : 'none'
+                }}
             >
                 <Pressable onPress={() => {
                     Keyboard.dismiss();
@@ -165,7 +166,7 @@ function Bar(props: any) {
                         height: '100%',
                     }}
                 />
-            </Animated.View>
+            </View>
 
             {/* Sheet */}
             <GestureDetector

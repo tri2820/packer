@@ -62,18 +62,14 @@ function Post(props: any) {
     }, [mode])
 
     const renderItem = ({ item, index }: any) =>
-        <View style={{
-            marginHorizontal: 16
-        }}>
-            <MemoComment
-                shouldActive={props.shouldActive}
-                level={0}
-                id={item}
-            />
-        </View>
+        <MemoComment
+            key={item}
+            shouldActive={props.shouldActive}
+            level={0}
+            id={item}
+        />
 
-
-    const keyExtractor = (item: any) => item.id
+    const keyExtractor = (item: any) => item
     const onScroll = (event: any) => {
         // Hack because onEndReached doesn't work
         const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;

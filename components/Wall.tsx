@@ -15,17 +15,18 @@ const androidPagingFallback = Platform.OS == 'android' && {
 
 function Wall(props: any) {
     const { mode, posts, requestPost } = useContext(MainContext);
+    const myPostIds = posts.map((p: any) => p.id);
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
         return <MemoPost
             height={props.height}
-            id={item.id}
+            id={item}
             shouldActive={props.activePostIndex == index}
             index={index}
         />
     }
 
-    const keyExtractor = (item: any) => item.id
+    const keyExtractor = (item: any) => item
     const onEndReached = () => {
         console.log('wall on end reached')
         requestPost()
@@ -52,7 +53,7 @@ function Wall(props: any) {
             pagingEnabled={true}
             {...androidPagingFallback}
             disableIntervalMomentum
-            data={posts}
+            data={myPostIds}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             onEndReachedThreshold={2}
