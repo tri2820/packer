@@ -17,14 +17,12 @@ function Wall(props: any) {
     const { mode, posts, requestPost } = useContext(MainContext);
     const myPostIds = posts.map((p: any) => p.id);
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
-    const renderItem = ({ index, item }: any) => {
-        return <MemoPost
-            height={props.height}
-            id={item}
-            shouldActive={props.activePostIndex == index}
-            index={index}
-        />
-    }
+    const renderItem = ({ index, item }: any) => <MemoPost
+        height={props.height}
+        id={item}
+        shouldActive={props.activePostIndex == index || props.activePostIndex + 1 == index}
+        scrolledOn={props.activePostIndex == index}
+    />
 
     const keyExtractor = (item: any) => item
     const onEndReached = () => {

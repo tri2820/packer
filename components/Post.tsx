@@ -29,7 +29,7 @@ function Post(props: any) {
     useEffect(() => {
         if (!props.shouldActive) return;
         if (inited) return;
-        console.log('active');
+        console.log('active', props.id);
         (async () => {
             await requestComments(post.id, null);
             setInited(true)
@@ -41,15 +41,15 @@ function Post(props: any) {
     }, []);
 
     useEffect(() => {
-        if (props.shouldActive) {
+        if (props.scrolledOn) {
             setVideoPlaying(true);
             return;
         }
         setVideoPlaying(false);
-    }, [props.shouldActive]);
+    }, [props.scrolledOn]);
 
     useEffect(() => {
-        if (!props.shouldActive) return;
+        if (!props.scrolledOn) return;
         if (mode.tag == 'Normal') {
             ref.current?.scrollToOffset({ offset: -insets.top });
             return;
@@ -64,7 +64,6 @@ function Post(props: any) {
     const renderItem = ({ item, index }: any) =>
         <MemoComment
             key={item}
-            shouldActive={props.shouldActive}
             level={0}
             id={item}
         />
@@ -84,7 +83,7 @@ function Post(props: any) {
         height: props.height
     }}>
         {
-            props.shouldActive &&
+            props.scrolledOn &&
             <Animated.View
                 entering={FadeInDown}>
                 <FlatList
@@ -112,7 +111,7 @@ function Post(props: any) {
                     ListHeaderComponent={<View style={{
                         paddingTop: insets.top
                     }}>
-                        {/* <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text> */}
+                        <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text>
                         <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
                         <View style={{
                             paddingHorizontal: 16

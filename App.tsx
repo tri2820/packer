@@ -172,25 +172,30 @@ const rp = async (sharedAsyncState: any, setData: any) => {
 const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null, count: number) => {
   const key = parent_id ?? post_id;
 
-
   const offset = sharedAsyncState[key] ?? 0;
-  if (offset >= count) return;
+  if (offset >= count) return [];
   sharedAsyncState[key] = offset + 6;
 
   const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 5, postid: post_id, parentid: parent_id })
   if (error) {
     console.log('debug error query comments from post', error)
-    return 'error';
+    return [];
   }
 
   if (data.length > 0) setData((comments: any) => comments.concat(data));
+  return data
 }
 
 const grc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null, count: number) => {
   const key = `status-${parent_id ?? post_id}`;
   if (sharedAsyncState[key] == 'running') return;
   sharedAsyncState[key] = 'running';
-  await rc(sharedAsyncState, setData, post_id, parent_id, count);
+  const comments = await rc(sharedAsyncState, setData, post_id, parent_id, count);
+  if (parent_id == null) {
+    comments.forEach((c: any) => {
+      grc(sharedAsyncState, setData, post_id, c.id, c.comment_count);
+    })
+  }
   sharedAsyncState[key] = 'done';
 }
 
@@ -352,6 +357,7 @@ export default function App() {
     submitComment(text, selectedCommentId, posts[activePostIndex].id);
     setSelectedCommentId(null);
   }
+
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
     const count = parent_id === null ?

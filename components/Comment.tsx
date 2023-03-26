@@ -88,11 +88,6 @@ function Comment(props: any) {
         setRequestingChildren(false)
     }
 
-    useEffect(() => {
-        if (!props.shouldActive) return;
-        if (props.level > 1) return;
-        requestChildren();
-    }, [props.shouldActive])
 
     const switchMode = () => {
         setSwitchedOnce(true);
@@ -236,7 +231,6 @@ function Comment(props: any) {
                                     <MemoComment
                                         id={c}
                                         level={props.level + 1}
-                                        shouldActive={props.shouldActive}
                                     />
                                 </View>)
                         }
