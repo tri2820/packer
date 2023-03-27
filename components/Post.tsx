@@ -23,7 +23,7 @@ function Post(props: any) {
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
     const post = posts.find((post: any) => post.id == props.id);
-    const myCommentIds = comments.filter((c: any) => c.post_id == post.id && c.parent_id == null).map((c: any) => c.id);
+    const myComments = comments.filter((c: any) => c.post_id == post.id && c.parent_id == null);
     const [inited, setInited] = useState(false);
 
     useEffect(() => {
@@ -56,19 +56,21 @@ function Post(props: any) {
         }
 
         if (mode.tag == 'Comment') {
-            myCommentIds.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+            myComments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
             return;
         }
     }, [mode])
 
+    const memoizedComments = React.useMemo(() => comments, [comments]);
     const renderItem = ({ item, index }: any) =>
         <MemoComment
-            key={item}
+            key={item.id}
             level={0}
-            id={item}
+            id={item.id}
+            comments={memoizedComments}
         />
 
-    const keyExtractor = (item: any) => item
+    const keyExtractor = (item: any) => item.id
     const onScroll = (event: any) => {
         // Hack because onEndReached doesn't work
         const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
@@ -101,7 +103,7 @@ function Post(props: any) {
                         />
                     }
                     onScroll={onScroll}
-                    data={myCommentIds}
+                    data={myComments}
                     onEndReached={() => {
                         console.log('on end reached', post.id);
                         requestComments(post.id, null);
@@ -119,7 +121,7 @@ function Post(props: any) {
                             <PostHeader post={post} setMode={setMode} />
                             <KeyTakeaways content={post.keytakeaways} />
                             {
-                                inited && myCommentIds.length == 0 &&
+                                inited && myComments.length == 0 &&
                                 <View style={{
                                     flex: 1,
                                     flexDirection: 'row',
@@ -161,7 +163,7 @@ function Post(props: any) {
                 />
 
                 {
-                    myCommentIds.length > 0 && props.shouldActive &&
+                    myComments.length > 0 && props.shouldActive &&
                     <View style={{
                         position: 'absolute',
                         bottom: 16,

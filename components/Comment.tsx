@@ -65,11 +65,23 @@ const link = {
 }
 
 function Comment(props: any) {
-    const { posts, comments, setMode, selectedCommentId, requestComments, setSelectedCommentId } = useContext(MainContext);
+    const { setMode, selectedCommentId, requestComments, setSelectedCommentId } = useContext(MainContext);
     const [display, setDisplay] = useState<'Normal' | 'Inline'>('Normal');
     const [requestingChildren, setRequestingChildren] = useState(false);
-    const comment = comments.find((c: any) => c.id == props.id);
-    const myCommentIds = comments.filter((c: any) => c.parent_id == comment.id).map((c: any) => c.id);
+    const comment = props.comments.find((c: any) => c.id == props.id);
+    // {
+    //     author_name: 'OK',
+    //     post_id: 'hdiasubdyabus',
+    //     blockRequestChildren: true,
+    //     id: '12y3781g3',
+    //     created_at: new Date(),
+    //     content: 'Gotta spread' as any,
+    //     blinking: false,
+    //     comment_count: 0
+    // }
+
+    const myComments: any[] = props.comments.filter((c: any) => c.parent_id == comment.id);
+    // [];
     const [switchedOnce, setSwitchedOnce] = useState(false);
 
     const onLinkPress = (target: string) => {
@@ -99,7 +111,7 @@ function Comment(props: any) {
         setDisplay('Inline')
     }
 
-    console.log('comment ger render', comment.id)
+    // console.log('comment ger render', comment.id)
 
     return (
         <Pressable
@@ -221,23 +233,24 @@ function Comment(props: any) {
 
 
                         {
-                            myCommentIds?.map((c: any, i: number) =>
+                            myComments?.map((c: any, i: number) =>
                                 <View
-                                    key={c}
+                                    key={c.id}
                                     style={{
                                         marginLeft: props.level == 0 ? 0 : 16
                                     }}
                                 >
                                     <MemoComment
-                                        id={c}
+                                        id={c.id}
                                         level={props.level + 1}
+                                        comments={props.comments}
                                     />
                                 </View>)
                         }
 
                         {
                             !requestingChildren &&
-                            myCommentIds.length < comment.comment_count && display == 'Normal' &&
+                            myComments.length < comment.comment_count && display == 'Normal' &&
                             <TouchableOpacity style={{
                                 backgroundColor: '#2C2C2C',
                                 marginBottom: 8,
@@ -255,7 +268,7 @@ function Comment(props: any) {
                                     color: '#e6e6e6',
                                     fontWeight: '500'
                                 }}>
-                                    Load {comment.comment_count - myCommentIds.length} more
+                                    Load {comment.comment_count - myComments.length} more
                                 </Text>
                             </TouchableOpacity>
                         }

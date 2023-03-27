@@ -28,7 +28,6 @@ const INJECTED_JAVASCRIPT = `(function() {
 
 function Main(props: any) {
   const { mode, setMode } = useContext(MainContext);
-
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
 
@@ -167,12 +166,16 @@ const rp = async (sharedAsyncState: any, setData: any) => {
     return;
   }
   if (data.length > 0) setData((posts: any) => posts.concat(data))
+  data.forEach((p: any) => {
+    sharedAsyncState[`count::${p.id}`] = p.comment_count;
+  })
 }
 
-const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null, count: number) => {
+const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null) => {
   const key = parent_id ?? post_id;
 
   const offset = sharedAsyncState[key] ?? 0;
+  const count = sharedAsyncState[`count::${key}`];
   if (offset >= count) return [];
   sharedAsyncState[key] = offset + 6;
 
@@ -183,17 +186,20 @@ const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_i
   }
 
   if (data.length > 0) setData((comments: any) => comments.concat(data));
+  data.forEach((c: any) => {
+    sharedAsyncState[`count::${c.id}`] = c.comment_count;
+  })
   return data
 }
 
-const grc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null, count: number) => {
+const grc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null) => {
   const key = `status-${parent_id ?? post_id}`;
   if (sharedAsyncState[key] == 'running') return;
   sharedAsyncState[key] = 'running';
-  const comments = await rc(sharedAsyncState, setData, post_id, parent_id, count);
+  const comments = await rc(sharedAsyncState, setData, post_id, parent_id);
   if (parent_id == null) {
     comments.forEach((c: any) => {
-      grc(sharedAsyncState, setData, post_id, c.id, c.comment_count);
+      grc(sharedAsyncState, setData, post_id, c.id);
     })
   }
   sharedAsyncState[key] = 'done';
@@ -217,12 +223,21 @@ export default function App() {
   }, [user])
 
 
+
   useEffect(() => {
     (async () => {
       const userResponse = await supabaseClient.auth.getUser();
-      // console.log('Load user', userResponse.data.user)
+      console.log('Load user', userResponse.data.user)
       setUser(userResponse.data.user)
     })()
+
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      async (_event, session) => {
+        // setSession(session);
+        console.log('User changes', session?.user)
+        setUser(session?.user ?? null);
+      }
+    );
   }, [])
 
 
@@ -237,12 +252,17 @@ export default function App() {
 
   const updateComment = (id: string, key: any, value: any) => {
     setComments((comments: any) => {
-      const comment = comments.find((c: any) => c.id == id);
-      // if (!comment) return comments;
-      const others = comments.filter((c: any) => c.id != id);
-      comment[key] = typeof value === 'function' ? value(comment[key]) : value;
-      const x = [comment, ...others];
-      return x;
+      const index = comments.findIndex((c: any) => c.id == id);
+      comments[index][key] = typeof value === 'function' ? value(comments[index][key]) : value;
+      comments[index] = { ...comments[index] }
+      // let parent_id = comments[index].parent_id;
+
+      // while (parent_id != null) {
+      //   const p_index = comments.findIndex((c: any) => c.id == parent_id);
+      //   comments[p_index] = { ...comments[p_index] }
+      //   parent_id = comments[p_index].parent_id;
+      // }
+      return [...comments];
     })
   }
 
@@ -345,7 +365,7 @@ export default function App() {
 
     const reader = response.body.getReader()
     await read(reader, async (update) => {
-      console.log('update', update);
+      // console.log('update', update);
       updateComment(childId, 'content', (old: string) => old + update);
     });
 
@@ -360,10 +380,7 @@ export default function App() {
 
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
-    const count = parent_id === null ?
-      posts.find((p: any) => p.id == post_id).comment_count :
-      comments.find((c: any) => c.id == parent_id).comment_count;
-    await grc(sharedAsyncState, setComments, post_id, parent_id, count)
+    await grc(sharedAsyncState, setComments, post_id, parent_id)
   }
 
   const requestPost = async () => {
@@ -385,7 +402,7 @@ export default function App() {
   }, [comments])
 
   const memoRequestPost = React.useCallback(requestPost, [])
-  const memoRequestComments = React.useCallback(requestComments, [posts, comments])
+  const memoRequestComments = React.useCallback(requestComments, [])
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedCommentId])
 
 
