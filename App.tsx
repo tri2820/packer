@@ -7,7 +7,7 @@ import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-cont
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar from './components/Bar';
 import Wall from './components/Wall';
-import { constants, loadingView, MainContext, Mode } from './utils';
+import { constants, loadingView, MainContext, Mode, sharedAsyncState } from './utils';
 import React from 'react';
 import * as Haptics from 'expo-haptics';
 import { INIT_DATE, supabaseClient } from './supabaseClient';
@@ -154,11 +154,11 @@ function Main(props: any) {
 }
 const MemoMain = memo(Main);
 
-const sharedAsyncState: any = {}
+
 const rp = async (sharedAsyncState: any, setData: any) => {
   console.log('debug post get requested');
   const offset = sharedAsyncState['main'] ?? 0;
-  sharedAsyncState['main'] = offset + 6;
+  sharedAsyncState['main'] = offset + 5;
 
   const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
   if (error) {
@@ -167,17 +167,20 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   }
   if (data.length > 0) setData((posts: any) => posts.concat(data))
   data.forEach((p: any) => {
-    sharedAsyncState[`count::${p.id}`] = p.comment_count;
+    sharedAsyncState[`count/${p.id}`] = p.comment_count;
   })
 }
 
-const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null) => {
+const rc = async (sharedAsyncState: any, insertData: any, post_id: string, parent_id: string | null) => {
   const key = parent_id ?? post_id;
 
   const offset = sharedAsyncState[key] ?? 0;
-  const count = sharedAsyncState[`count::${key}`];
-  if (offset >= count) return [];
-  sharedAsyncState[key] = offset + 6;
+  const count = sharedAsyncState[`count/${key}`];
+  if (offset >= count) {
+    console.log(`had enough of ${post_id}.${parent_id}`, offset, count);
+    return [];
+  }
+  sharedAsyncState[key] = offset + 5;
 
   const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 5, postid: post_id, parentid: parent_id })
   if (error) {
@@ -185,21 +188,22 @@ const rc = async (sharedAsyncState: any, setData: any, post_id: string, parent_i
     return [];
   }
 
-  if (data.length > 0) setData((comments: any) => comments.concat(data));
   data.forEach((c: any) => {
-    sharedAsyncState[`count::${c.id}`] = c.comment_count;
+    sharedAsyncState[`count/${c.id}`] = c.comment_count;
+    insertData(c);
   })
+  console.log('data.length', data.length)
   return data
 }
 
-const grc = async (sharedAsyncState: any, setData: any, post_id: string, parent_id: string | null) => {
+const grc = async (sharedAsyncState: any, insertData: any, post_id: string, parent_id: string | null) => {
   const key = `status-${parent_id ?? post_id}`;
   if (sharedAsyncState[key] == 'running') return;
   sharedAsyncState[key] = 'running';
-  const comments = await rc(sharedAsyncState, setData, post_id, parent_id);
+  const comments = await rc(sharedAsyncState, insertData, post_id, parent_id);
   if (parent_id == null) {
     comments.forEach((c: any) => {
-      grc(sharedAsyncState, setData, post_id, c.id);
+      grc(sharedAsyncState, insertData, post_id, c.id);
     })
   }
   sharedAsyncState[key] = 'done';
@@ -222,7 +226,35 @@ export default function App() {
     })()
   }, [user])
 
+  const insertComment = (c: any, atHead = false) => {
+    if (c.parent_id == null) {
+      setComments((comments) =>
+        atHead ?
+          [{ ...c, level: 0 }, ...comments] :
+          [...comments, { ...c, level: 0 }]
+      )
+      return;
+    }
 
+    setComments((comments) => {
+      let i = comments.length - 1;
+      // console.log('debug', comments, i, comments[i]);
+      while (i >= 0) {
+        if (comments[i].parent_id == c.parent_id) {
+          comments.splice(i + 1, 0, { ...c, level: comments[i].level })
+          return [...comments]
+        }
+        if (comments[i].id == c.parent_id) {
+          comments.splice(i + 1, 0, { ...c, level: comments[i].level + 1 })
+          return [...comments]
+        }
+        i -= 1;
+      }
+
+      // Should not hit this case
+      return comments
+    })
+  }
 
   useEffect(() => {
     (async () => {
@@ -255,13 +287,6 @@ export default function App() {
       const index = comments.findIndex((c: any) => c.id == id);
       comments[index][key] = typeof value === 'function' ? value(comments[index][key]) : value;
       comments[index] = { ...comments[index] }
-      // let parent_id = comments[index].parent_id;
-
-      // while (parent_id != null) {
-      //   const p_index = comments.findIndex((c: any) => c.id == parent_id);
-      //   comments[p_index] = { ...comments[p_index] }
-      //   parent_id = comments[p_index].parent_id;
-      // }
       return [...comments];
     })
   }
@@ -310,8 +335,8 @@ export default function App() {
       blockRequestChildren: true
     }
 
-
-    setComments((comments) => [placeholderComment, childComment, ...comments])
+    insertComment(placeholderComment, true);
+    insertComment(childComment);
 
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
       // @ts-ignore
@@ -373,14 +398,15 @@ export default function App() {
   }
 
   const onSubmit = (text: string) => {
-    console.log('submitted');
+    console.log('submitted', activePostIndex);
     submitComment(text, selectedCommentId, posts[activePostIndex].id);
     setSelectedCommentId(null);
   }
 
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
-    await grc(sharedAsyncState, setComments, post_id, parent_id)
+    console.log('request comments', post_id, parent_id)
+    await grc(sharedAsyncState, insertComment, post_id, parent_id)
   }
 
   const requestPost = async () => {
@@ -404,7 +430,6 @@ export default function App() {
   const memoRequestPost = React.useCallback(requestPost, [])
   const memoRequestComments = React.useCallback(requestComments, [])
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedCommentId])
-
 
   return (
     <SafeAreaProvider>

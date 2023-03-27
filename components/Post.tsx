@@ -4,7 +4,7 @@ import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableO
 import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
 import Animated, { FadeInDown, FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants } from '../utils';
+import { constants, sharedAsyncState } from '../utils';
 import { LinearGradient } from 'expo-linear-gradient';
 import Comment, { MemoComment } from './Comment';
 import * as Haptics from 'expo-haptics';
@@ -15,6 +15,7 @@ import VideoPlayer from './VideoPlayer';
 import KeyTakeaways from './KeyTakeaways';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MainContext } from '../utils';
+import { MemoLoadCommentButton } from './LoadCommentButton';
 
 function Post(props: any) {
     const { mode, posts, setMode, comments, requestComments } = useContext(MainContext);
@@ -23,7 +24,58 @@ function Post(props: any) {
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
     const post = posts.find((post: any) => post.id == props.id);
-    const myComments = comments.filter((c: any) => c.post_id == post.id && c.parent_id == null);
+    let myComments = comments.filter((c: any) => c.post_id == post.id);
+
+    const commentStates: any = {};
+    myComments.forEach((c: any) => {
+        commentStates[`numComments/${c.id}`] = 0;
+        commentStates[`numComments/${c.parent_id}`] += 1;
+    })
+
+    const splitAt = (comments: any[]) => {
+        if (comments.length == 0) return [];
+        let start = 0;
+        let parent_id = comments[start].parent_id;
+        let i = 1;
+        let result = []
+        while (i < comments.length) {
+            if (comments[i].parent_id == parent_id) {
+                result.push(
+                    comments.slice(start, i)
+                )
+                start = i;
+            }
+            i += 1;
+        }
+        result.push(comments.slice(start))
+        return result
+    }
+
+    const toUIList = (comments: any): any => {
+        if (comments.length == 0) return [];
+        const parent = comments[0];
+        const tail = comments.slice(1);
+        const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`numComments/${parent.id}`];
+        const childrenUILists = splitAt(tail).map(chunks => toUIList(chunks))
+        if (num > 0) {
+            return [
+                parent,
+                childrenUILists,
+                {
+                    type: 'load-comment-button',
+                    num: num,
+                    level: parent.level,
+                    ofId: parent.id,
+                    id: `button/${parent.id}`
+                }
+            ]
+        }
+        return [
+            parent,
+            childrenUILists
+        ]
+    }
+    const uiList = toUIList(myComments).flat(Infinity);
     const [inited, setInited] = useState(false);
 
     useEffect(() => {
@@ -61,25 +113,48 @@ function Post(props: any) {
         }
     }, [mode])
 
-    const memoizedComments = React.useMemo(() => comments, [comments]);
-    const renderItem = ({ item, index }: any) =>
-        <MemoComment
-            key={item.id}
-            level={0}
-            id={item.id}
-            comments={memoizedComments}
-        />
 
-    const keyExtractor = (item: any) => item.id
-    const onScroll = (event: any) => {
-        // Hack because onEndReached doesn't work
-        const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-        const y = event.nativeEvent.contentOffset.y;
-        if (y < end - constants.height / 4) return;
-        // requestComments(post.id, null);
+    const backToApp = React.useCallback((target: string) => setMode({
+        tag: 'App',
+        value: target,
+        insetsColor: 'rgba(0, 0, 0, 0)'
+    }), [])
+
+    const renderItem = ({ item, index }: any) => {
+        return item.type == 'load-comment-button' ?
+            <MemoLoadCommentButton
+                key={item.id}
+                level={item.level}
+                post_id={post.id}
+                ofId={item.ofId}
+                num={item.num}
+            />
+            :
+            <MemoComment key={item.id} comment={item} backToApp={backToApp} />
+        // <View
+
+        //     style={{
+        //         marginLeft: item.level <= 1 ? 0 : (16 * item.level),
+        //     }}
+        // >
+        //     {
+
+        //     }
+        // </View>
     }
 
 
+
+    const keyExtractor = (item: any) => item.id
+    // const onScroll = (event: any) => {
+    //     // Hack because onEndReached doesn't work
+    //     const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+    //     const y = event.nativeEvent.contentOffset.y;
+    //     if (y < end - constants.height / 4) return;
+    //     // requestComments(post.id, null);
+    // }
+
+    // console.log('Render Post')
     return <View style={{
         backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
         height: props.height
@@ -102,8 +177,8 @@ function Post(props: any) {
                             tintColor={'transparent'}
                         />
                     }
-                    onScroll={onScroll}
-                    data={myComments}
+                    // onScroll={onScroll}
+                    data={uiList}
                     onEndReached={() => {
                         console.log('on end reached', post.id);
                         requestComments(post.id, null);

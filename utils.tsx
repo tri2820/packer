@@ -46,3 +46,9 @@ export const MainContext = createContext({
     // mode: { tag: 'Normal' } as Mode,
     // setMode: (() => { }) as any,
 } as any);
+
+export const sharedAsyncState: any = {};
+// export const toUIComments = (comments: any[], index = 0) => {
+//     if (index == comments.length) return 
+//     return [comments[index], toUIComments(comments, index + 1), { type: 'button' }]
+// }
