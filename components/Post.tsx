@@ -99,11 +99,10 @@ function Post(props: any) {
 
     useEffect(() => {
         if (!props.scrolledOn) return;
-        // if (mode.tag == 'Normal') {
-        //     ref.current?.scrollToOffset({ offset: 0 });
-        // ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
-        //     return;
-        // }
+        if (mode.tag == 'Normal') {
+            ref.current?.scrollToOffset({ offset: -insets.top });
+            return;
+        }
 
         if (mode.tag == 'Comment') {
             myComments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
@@ -154,74 +153,72 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
 
-    console.log('render post', post?.id);
+    // console.log('Render Post')
     return <View style={{
         backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
         height: props.height
     }}>
         {
-            props.scrolledOn && <View>
-                <Animated.FlatList
-                    entering={FadeInDown}
-                    showsVerticalScrollIndicator={false}
-                    listKey={post.id}
-                    ref={ref}
-                    scrollEnabled={mode.tag == 'Comment'}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={onRefresh}
-                            colors={['transparent']}
-                            progressBackgroundColor='transparent'
-                            tintColor={'transparent'}
-                        />
-                    }
-                    // onScroll={onScroll}
-                    data={uiList}
-                    onEndReached={() => {
-                        console.log('on end reached', post.id);
-                        requestComments(post.id, null);
-                    }}
-                    keyExtractor={keyExtractor}
-                    renderItem={renderItem}
-                    ListHeaderComponent={
-                        <View style={{
-                            paddingTop: insets.top
-                        }}>
-                            <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
+            props.scrolledOn &&
+            <FlatList
+                showsVerticalScrollIndicator={false}
+                listKey={post.id}
+                ref={ref}
+                scrollEnabled={mode.tag == 'Comment'}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                        colors={['transparent']}
+                        progressBackgroundColor='transparent'
+                        tintColor={'transparent'}
+                    />
+                }
+                // onScroll={onScroll}
+                data={uiList}
+                onEndReached={() => {
+                    console.log('on end reached', post.id);
+                    requestComments(post.id, null);
+                }}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                ListHeaderComponent={<View style={{
+                    paddingTop: insets.top
+                }}>
+                    {/* <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text> */}
+                    <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
+                    <View style={{
+                        paddingHorizontal: 16
+                    }}>
+                        <PostHeader post={post} setMode={setMode} />
+                        <KeyTakeaways content={post.keytakeaways} />
+                        {
+                            loadState == 'done' && myComments.length == 0 &&
                             <View style={{
-                                paddingHorizontal: 16
-                            }}>
-                                <PostHeader post={post} setMode={setMode} />
-                                <KeyTakeaways content={post.keytakeaways} />
-                                {
-                                    loadState == 'done' && myComments.length == 0 &&
-                                    <View style={{
-                                        flex: 1,
-                                        flexDirection: 'row',
-                                        marginLeft: 'auto',
-                                        marginRight: 'auto',
-                                    }}
-                                    // entering={FadeInUp}
-                                    >
-                                        <Ionicons name="chatbubble" size={16} color='#A3A3A3' style={{
-                                            marginRight: 4
-                                        }} />
-                                        <Text style={{
-                                            color: '#A3A3A3',
-                                            marginLeft: 4,
-                                            marginRight: 16 + 4
-                                        }}
-                                        >
-                                            Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!
-                                        </Text>
-                                    </View>
-                                }
+                                flex: 1,
+                                flexDirection: 'row',
+                                marginLeft: 'auto',
+                                marginRight: 'auto',
+                            }}
+                            // entering={FadeInUp}
+                            >
+                                <Ionicons name="chatbubble" size={16} color='#A3A3A3' style={{
+                                    marginRight: 4
+                                }} />
+                                <Text style={{
+                                    color: '#A3A3A3',
+                                    marginLeft: 4,
+                                    marginRight: 16 + 4
+                                }}
+                                >
+                                    Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!
+                                </Text>
                             </View>
-                        </View>
-                    }
-                />
-            </View>
+                        }
+                    </View>
+                </View>
+                }
+            />
         }
 
         {
