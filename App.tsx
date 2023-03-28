@@ -180,9 +180,9 @@ const rc = async (sharedAsyncState: any, insertData: any, post_id: string, paren
     console.log(`had enough of ${post_id}.${parent_id}`, offset, count);
     return [];
   }
-  sharedAsyncState[key] = offset + 5;
+  sharedAsyncState[key] = offset + 2;
 
-  const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 5, postid: post_id, parentid: parent_id })
+  const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 2, postid: post_id, parentid: parent_id })
   if (error) {
     console.log('debug error query comments from post', error)
     return [];
