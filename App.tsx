@@ -421,7 +421,7 @@ export default function App() {
 
   const memoRequestPost = React.useCallback(requestPost, [])
   const memoRequestComments = React.useCallback(requestComments, [])
-  const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedCommentId])
+  const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedCommentId, activePostIndex])
 
   return (
     <SafeAreaProvider>

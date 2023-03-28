@@ -17,6 +17,56 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { MainContext } from '../utils';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 
+// [ba ca da]
+const splitAt = (comments: any[]) => {
+    if (comments.length == 0) return [];
+    let start = 0;
+    let parent_id = comments[start].parent_id;
+    let i = 1;
+    let result = []
+    while (i < comments.length) {
+        if (comments[i].parent_id == parent_id) {
+            result.push(
+                comments.slice(start, i)
+            )
+            start = i;
+        }
+        i += 1;
+    }
+    result.push(comments.slice(start))
+    return result
+}
+
+// (a null [ba ca da])
+const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any): any => {
+    if (comments.length == 0) return [];
+    const parent = comments[0];
+    const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`numComments/${parent.id}`];
+    const button = {
+        type: 'load-comment-button',
+        num: num,
+        level: parent.level,
+        ofId: parent.id,
+        id: `button/${parent.id}`
+    }
+    let childrenUILists = [];
+    if (!hiddenCommentIds.includes(parent.id)) {
+        const tail = comments.slice(1);
+        childrenUILists = splitAt(tail).map(chunks => toUIList(chunks, hiddenCommentIds, commentStates))
+    }
+    if (num > 0) {
+        return [
+            parent,
+            childrenUILists,
+            button
+        ]
+    }
+    return [
+        parent,
+        childrenUILists
+    ]
+}
+
 function Post(props: any) {
     const { mode, post, comments: myComments, setSelectedCommentId, requestComments, setMode } = props;
     const selectedCommentId = null;
@@ -32,57 +82,7 @@ function Post(props: any) {
         commentStates[`numComments/${c.parent_id}`] += 1;
     })
 
-    // [ba ca da]
-    const splitAt = (comments: any[]) => {
-        if (comments.length == 0) return [];
-        let start = 0;
-        let parent_id = comments[start].parent_id;
-        let i = 1;
-        let result = []
-        while (i < comments.length) {
-            if (comments[i].parent_id == parent_id) {
-                result.push(
-                    comments.slice(start, i)
-                )
-                start = i;
-            }
-            i += 1;
-        }
-        result.push(comments.slice(start))
-        return result
-    }
-
-    // (a null [ba ca da])
-    const toUIList = (comments: any): any => {
-        if (comments.length == 0) return [];
-        const parent = comments[0];
-        const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`numComments/${parent.id}`];
-        const button = {
-            type: 'load-comment-button',
-            num: num,
-            level: parent.level,
-            ofId: parent.id,
-            id: `button/${parent.id}`
-        }
-        let childrenUILists = [];
-        if (!hiddenCommentIds.includes(parent.id)) {
-            const tail = comments.slice(1);
-            childrenUILists = splitAt(tail).map(chunks => toUIList(chunks))
-        }
-        if (num > 0) {
-            return [
-                parent,
-                childrenUILists,
-                button
-            ]
-        }
-        return [
-            parent,
-            childrenUILists
-        ]
-    }
-
-    const uiList = splitAt(myComments).map(ch => toUIList(ch)).flat(Infinity);
+    const uiList = splitAt(myComments).map(ch => toUIList(ch, hiddenCommentIds, commentStates)).flat(Infinity);
     const [loadState, setLoadState] = useState<'did_not_load' | 'loading' | 'done'>('did_not_load');
     useEffect(() => {
         setVideoPlaying(props.scrolledOn);
@@ -122,11 +122,11 @@ function Post(props: any) {
 
     const toggle = React.useCallback((commentId: string, show: boolean) => {
         if (show) {
-            setHiddenCommentIds(hiddenCommentIds.filter(id => id != commentId));
+            setHiddenCommentIds((hiddenCommentIds) => hiddenCommentIds.filter(id => id != commentId));
             return
         }
 
-        setHiddenCommentIds(hiddenCommentIds.concat(commentId));
+        setHiddenCommentIds((hiddenCommentIds) => hiddenCommentIds.concat(commentId));
     }, []);
 
     const renderItem = ({ item, index }: any) => {
