@@ -18,9 +18,10 @@ import { MainContext } from '../utils';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 
 function Post(props: any) {
-    const { mode, posts, setMode, comments, requestComments } = useContext(MainContext);
+    const { mode, posts, setMode, comments, selectedCommentId, requestComments, setSelectedCommentId } = useContext(MainContext);
     const [refreshing, setRefreshing] = useState(false);
     const [videoPlaying, setVideoPlaying] = useState(false);
+    const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
     const post = posts.find((post: any) => post.id == props.id);
@@ -32,6 +33,7 @@ function Post(props: any) {
         commentStates[`numComments/${c.parent_id}`] += 1;
     })
 
+    // [ba ca da]
     const splitAt = (comments: any[]) => {
         if (comments.length == 0) return [];
         let start = 0;
@@ -51,23 +53,28 @@ function Post(props: any) {
         return result
     }
 
+    // (a null [ba ca da])
     const toUIList = (comments: any): any => {
         if (comments.length == 0) return [];
         const parent = comments[0];
-        const tail = comments.slice(1);
         const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`numComments/${parent.id}`];
-        const childrenUILists = splitAt(tail).map(chunks => toUIList(chunks))
+        const button = {
+            type: 'load-comment-button',
+            num: num,
+            level: parent.level,
+            ofId: parent.id,
+            id: `button/${parent.id}`
+        }
+        let childrenUILists = [];
+        if (!hiddenCommentIds.includes(parent.id)) {
+            const tail = comments.slice(1);
+            childrenUILists = splitAt(tail).map(chunks => toUIList(chunks))
+        }
         if (num > 0) {
             return [
                 parent,
                 childrenUILists,
-                {
-                    type: 'load-comment-button',
-                    num: num,
-                    level: parent.level,
-                    ofId: parent.id,
-                    id: `button/${parent.id}`
-                }
+                button
             ]
         }
         return [
@@ -75,7 +82,8 @@ function Post(props: any) {
             childrenUILists
         ]
     }
-    const uiList = toUIList(myComments).flat(Infinity);
+
+    const uiList = splitAt(myComments).map(ch => toUIList(ch)).flat(Infinity);
     const [inited, setInited] = useState(false);
 
     useEffect(() => {
@@ -120,6 +128,16 @@ function Post(props: any) {
         insetsColor: 'rgba(0, 0, 0, 0)'
     }), [])
 
+    const memoSetSelectedCommentId = React.useCallback(setSelectedCommentId, []);
+    const toggle = React.useCallback((commentId: string, show: boolean) => {
+        if (show) {
+            setHiddenCommentIds(hiddenCommentIds.filter(id => id != commentId));
+            return
+        }
+
+        setHiddenCommentIds(hiddenCommentIds.concat(commentId));
+    }, []);
+
     const renderItem = ({ item, index }: any) => {
         return item.type == 'load-comment-button' ?
             <MemoLoadCommentButton
@@ -130,17 +148,14 @@ function Post(props: any) {
                 num={item.num}
             />
             :
-            <MemoComment key={item.id} comment={item} backToApp={backToApp} />
-        // <View
-
-        //     style={{
-        //         marginLeft: item.level <= 1 ? 0 : (16 * item.level),
-        //     }}
-        // >
-        //     {
-
-        //     }
-        // </View>
+            <MemoComment
+                key={item.id}
+                comment={item}
+                backToApp={backToApp}
+                setSelectedCommentId={memoSetSelectedCommentId}
+                highlight={item.id == selectedCommentId}
+                toggle={toggle}
+            />
     }
 
 

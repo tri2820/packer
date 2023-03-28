@@ -90,7 +90,7 @@ function Main(props: any) {
       runOnJS(setMode)({ tag: 'Normal' })
     });
 
-  console.log('debug main get rendered')
+
   return (
     <View style={{
       height: constants.height,
@@ -418,14 +418,6 @@ export default function App() {
     inited = true;
     requestPost();
   }, [])
-
-  useEffect(() => {
-    console.log('debug posts.length', posts.length)
-  }, [posts])
-
-  useEffect(() => {
-    console.log('debug comments.length', comments.length)
-  }, [comments])
 
   const memoRequestPost = React.useCallback(requestPost, [])
   const memoRequestComments = React.useCallback(requestComments, [])

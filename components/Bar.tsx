@@ -302,7 +302,8 @@ function Bar(props: any) {
                                         // backgroundColor: 'blue',
                                         color: '#F1F1F1',
                                         height: '100%',
-                                        flexGrow: 1
+                                        width: '100%',
+                                        flex: 1
                                     }}
                                     // returnKeyType='send'
                                     keyboardAppearance='dark'
