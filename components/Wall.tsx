@@ -12,19 +12,33 @@ const androidPagingFallback = Platform.OS == 'android' && {
     pagingEnabled: true,
     decelerationRate: 0
 }
+const theEmptyList: any[] = [];
 
 function Wall(props: any) {
-    const { mode, posts, requestPost } = useContext(MainContext);
-    const myPostIds = posts.map((p: any) => p.id);
-    const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
-    const renderItem = ({ index, item }: any) => <MemoPost
-        height={props.height}
-        id={item}
-        shouldActive={props.activePostIndex == index || props.activePostIndex + 1 == index}
-        scrolledOn={props.activePostIndex == index}
-    />
+    const { mode, posts, requestPost, comments, setMode, setSelectedCommentId, requestComments } = useContext(MainContext);
+    const _setMode = React.useCallback(setMode, []);
+    const _setSelectedCommentId = React.useCallback(setSelectedCommentId, []);
+    const _requestComments = React.useCallback(requestComments, []);
 
-    const keyExtractor = (item: any) => item
+    const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
+    const renderItem = ({ index, item }: any) => {
+        const scrolledOn = props.activePostIndex == index;
+        const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
+        const cs = scrolledOn ? comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
+        return <MemoPost
+            mode={mode}
+            height={props.height}
+            post={shouldActive ? item : null}
+            shouldActive={shouldActive}
+            scrolledOn={scrolledOn}
+            comments={cs}
+            setSelectedCommentId={_setSelectedCommentId}
+            requestComments={_requestComments}
+            setMode={_setMode}
+        />
+    }
+
+    const keyExtractor = (item: any) => item.id
     const onEndReached = () => {
         console.log('wall on end reached')
         requestPost()
@@ -51,15 +65,15 @@ function Wall(props: any) {
             pagingEnabled={true}
             {...androidPagingFallback}
             disableIntervalMomentum
-            data={myPostIds}
+            data={posts}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             onEndReachedThreshold={2}
             onEndReached={onEndReached}
             getItemLayout={getItemLayout}
             onScroll={onScroll}
-            // removeClippedSubviews
-            windowSize={7}
+            removeClippedSubviews
+            windowSize={3}
         />
     );
 }

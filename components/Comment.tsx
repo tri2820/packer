@@ -94,131 +94,129 @@ function Comment(props: any) {
                 marginLeft: props.comment.level <= 1 ? 0 : (16 * props.comment.level)
             }}
             onPress={switchMode}
-        ><Animated.View
-            entering={FadeInDown}
         >
 
-                {
-                    props.comment.level === 0 && <View
-                        style={{
-                            borderBottomColor: '#3C3D3F',
-                            borderBottomWidth: StyleSheet.hairlineWidth,
-                            marginHorizontal: 16
-                        }}
-                    />
-                }
-
-                <View
-                    style={[(props.comment.level == 0) && {
-                        marginTop: 8,
-                        paddingTop: 4,
-                        paddingLeft: 16,
-                        paddingRight: 16
-                    }, (props.comment.level > 0) && {
-                        marginVertical: 4,
-                        paddingTop: 4,
-                        paddingBottom: 4,
-                        borderLeftColor: '#6b5920',
-                        borderLeftWidth: 2,
-                        paddingLeft: 16,
-                        marginLeft: 16,
-                        marginRight: 16
-                    }, {
-                        backgroundColor: props.highlight ? '#6b5920' : 'transparent',
-                    }
-                    ]}
-
-                >
-
-                    <View style={{
-                        flex: 1,
-                        flexDirection: 'row'
+            {
+                props.comment.level === 0 && <View
+                    style={{
+                        borderBottomColor: '#3C3D3F',
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                        marginHorizontal: 16
                     }}
+                />
+            }
 
-                    >
-                        <Text style={{
-                            fontWeight: 'bold',
-                            color: 'white'
-                        }}>
-                            {
-                                props.comment.author_name
-                            }
-                        </Text>
+            <View
+                style={[(props.comment.level == 0) && {
+                    marginTop: 8,
+                    paddingTop: 4,
+                    paddingLeft: 16,
+                    paddingRight: 16
+                }, (props.comment.level > 0) && {
+                    marginVertical: 4,
+                    paddingTop: 4,
+                    paddingBottom: 4,
+                    borderLeftColor: '#6b5920',
+                    borderLeftWidth: 2,
+                    paddingLeft: 16,
+                    marginLeft: 16,
+                    marginRight: 16
+                }, {
+                    backgroundColor: props.highlight ? '#6b5920' : 'transparent',
+                }
+                ]}
 
+            >
+
+                <View style={{
+                    flexDirection: 'row'
+                }}
+                >
+                    <Text style={{
+                        fontWeight: 'bold',
+                        color: 'white'
+                    }}>
                         {
-                            display == 'Normal' &&
-                            <Text style={{
-                                color: '#A3A3A3'
-                            }}> • {
-                                    moment.utc(props.comment.created_at).local().startOf('seconds').fromNow()
-                                }</Text>
+                            props.comment.author_name
                         }
-
-                        {
-                            display == 'Inline' && <Animated.Text style={{
-                                color: '#A3A3A3',
-                                flex: 1,
-                                paddingBottom: props.comment.level > 0 ? 0 : 4,
-                            }}
-                                numberOfLines={1}
-                                entering={FadeInDown}
-                            > • {props.comment.content}
-                            </Animated.Text>
-                        }
-
-                    </View>
-
+                    </Text>
 
                     {
                         display == 'Normal' &&
-                        <Animated.View
-                            entering={switchedOnce ? FadeInDown : undefined}
-                        >
-                            <MarkdownView
-                                rules={{
-                                    quote,
-                                    link
-                                }}
-                                onLinkPress={onLinkPress}
-                                styles={mdstyles}
-                            >
-                                {
-                                    props.comment.content
-                                }
-                            </MarkdownView>
-
-                            {
-                                props.comment.blinking ?
-                                    <BlinkingCursor />
-                                    :
-                                    <TouchableOpacity
-                                        onPress={() => {
-                                            props.setSelectedCommentId(props.comment.id);
-                                        }}
-                                        style={{
-                                            alignSelf: 'flex-end',
-                                            // marginRight: 16,
-                                            flexDirection: 'row',
-                                            alignItems: 'center',
-                                            // backgroundColor: 'blue',
-                                            paddingHorizontal: 8,
-                                            paddingVertical: 4
-                                        }}
-                                    >
-                                        <Octicons name="reply" size={12} color="#A3A3A3" />
-                                        {
-                                            props.comment.level == 0 &&
-                                            <Text style={{
-                                                color: "#A3A3A3",
-                                                marginLeft: 8
-                                            }}>Reply</Text>
-                                        }
-                                    </TouchableOpacity>
-                            }
-                        </Animated.View>
+                        <Text style={{
+                            color: '#A3A3A3'
+                        }}> • {
+                                moment.utc(props.comment.created_at).local().startOf('seconds').fromNow()
+                            }</Text>
                     }
+
+                    {
+                        display == 'Inline' && <Animated.Text style={{
+                            color: '#A3A3A3',
+                            flex: 1,
+                            paddingBottom: props.comment.level > 0 ? 0 : 4,
+                        }}
+                            numberOfLines={1}
+                            entering={FadeInDown}
+                        > • {props.comment.content}
+                        </Animated.Text>
+                    }
+
                 </View>
-            </Animated.View>
+
+
+
+                {
+                    display == 'Normal' &&
+                    <Animated.View
+                        entering={switchedOnce ? FadeInDown : undefined}
+                    >
+
+
+                        <MarkdownView
+                            rules={{
+                                quote,
+                                link
+                            }}
+                            onLinkPress={onLinkPress}
+                            styles={mdstyles}
+                        >
+                            {
+                                props.comment.content
+                            }
+                        </MarkdownView>
+
+                        {
+                            props.comment.blinking ?
+                                <BlinkingCursor />
+                                :
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        props.setSelectedCommentId(props.comment.id);
+                                    }}
+                                    style={{
+                                        alignSelf: 'flex-end',
+                                        // marginRight: 16,
+                                        flexDirection: 'row',
+                                        alignItems: 'center',
+                                        // backgroundColor: 'blue',
+                                        paddingHorizontal: 8,
+                                        paddingVertical: 4
+                                    }}
+                                >
+                                    <Octicons name="reply" size={12} color="#A3A3A3" />
+                                    {
+                                        props.comment.level == 0 &&
+                                        <Text style={{
+                                            color: "#A3A3A3",
+                                            marginLeft: 8
+                                        }}>Reply</Text>
+                                    }
+                                </TouchableOpacity>
+                        }
+                    </Animated.View>
+                }
+            </View>
         </Pressable>
 
     );

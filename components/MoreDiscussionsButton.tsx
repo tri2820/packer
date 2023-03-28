@@ -10,7 +10,7 @@ import Comment from './Comment';
 import * as Haptics from 'expo-haptics';
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 
-function Post(props: any) {
+function MoreDiscussionsButton(props: any) {
     return (
         <TouchableOpacity onPress={props.onPress}>
             <Animated.View style={{
@@ -40,4 +40,4 @@ function Post(props: any) {
     );
 }
 
-export default Post;
+export default MoreDiscussionsButton;

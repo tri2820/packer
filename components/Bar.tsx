@@ -166,14 +166,13 @@ function Bar(props: any) {
         <>
 
             {/* Overlay */}
-            <View
+            {focused && <View
                 style={{
                     backgroundColor: 'black',
                     opacity: 0.8,
                     height: constants.height,
                     width: constants.width,
-                    position: 'absolute',
-                    display: focused ? 'flex' : 'none'
+                    position: 'absolute'
                 }}
             >
                 <Pressable onPress={() => {
@@ -186,11 +185,11 @@ function Bar(props: any) {
                     }}
                 />
             </View>
+            }
 
             {/* Sheet */}
             <GestureDetector
                 gesture={gesture}
-
             >
                 <Animated.View style={[{
                     top: constants.height - props.minBarHeight - insets.bottom,
