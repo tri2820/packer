@@ -100,7 +100,7 @@ function Post(props: any) {
             await requestComments(post.id, null);
             setLoadState('not_loading')
             setTimesLoaded(t => t + 1);
-        }, 500);
+        }, 1000);
     }
 
 

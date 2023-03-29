@@ -13,8 +13,6 @@ import moment from 'moment';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 function PostHeader(props: any) {
-    const { setMode } = useContext(MainContext);
-
     const getSourceName = (source_url: string) => {
         const url = new URL(source_url);
         return normalizedHostname(url.hostname).toUpperCase();
@@ -25,7 +23,7 @@ function PostHeader(props: any) {
     }}>
         <TouchableOpacity
             onPress={() => {
-                setMode({
+                props.setMode({
                     tag: 'App',
                     value: props.post.source_url,
                     insetsColor: 'rgba(0, 0, 0, 0)'

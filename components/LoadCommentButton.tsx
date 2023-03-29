@@ -17,8 +17,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { MainContext } from '../utils';
 
 function LoadCommentButton(props: any) {
-    const { requestComments } = useContext(MainContext);
-
     return <TouchableOpacity style={{
         backgroundColor: '#2C2C2C',
         marginBottom: 8,
@@ -29,7 +27,7 @@ function LoadCommentButton(props: any) {
         borderRadius: 4
     }}
         onPress={async () => {
-            await requestComments(props.post_id, props.ofId);
+            await props.requestComments(props.post_id, props.ofId);
         }}
     >
         <Text style={{
