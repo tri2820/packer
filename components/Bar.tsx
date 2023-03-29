@@ -52,30 +52,33 @@ function Bar(props: any) {
             (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? insets.bottom : 0);
         return {
             height: k,
+            display: offset.value > -40 || focused ? 'flex' : 'none'
         };
     });
 
-    const [showInputBar, setShowInputBar] = useState(true);
-    useDerivedValue(() => {
-        // console.log('props.offset.value', offset.value)
-        runOnJS(setShowInputBar)(offset.value >= -40 || focused)
-        return offset.value
-    })
+    const overlayStyles = useAnimatedStyle(() => {
+        // const k = -(offset.value) - HANDLER_HEIGHT + props.minBarHeight - keyboard.height.value +
+        //     (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? insets.bottom : 0);
+        return {
+            // height: k,
+            display: offset.value > -40 ? 'none' : 'flex',
+            opacity: Math.pow(offset.value / minOffset, 0.3) * 0.8
+        };
+    });
 
     useEffect(() => {
         setText('');
     }, [props.activePostIndex])
 
-    useEffect(() => {
-        if (focused) {
+    const changeState = (state: 'maximize' | 'minimize') => {
+        if (state == 'maximize') {
             offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
             _offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
             return
         }
-
         offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
         _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
-    }, [focused])
+    }
 
     const getSourceName = (source_url: string) => {
         const url = new URL(source_url);
@@ -166,26 +169,28 @@ function Bar(props: any) {
         <>
 
             {/* Overlay */}
-            {focused && <View
-                style={{
+
+            <Animated.View
+                style={[{
                     backgroundColor: 'black',
                     opacity: 0.8,
                     height: constants.height,
                     width: constants.width,
                     position: 'absolute'
-                }}
+                }, overlayStyles]}
             >
                 <Pressable onPress={() => {
                     setSelectedCommentId(null);
+                    changeState('minimize');
                     ref.current?.blur();
                 }}
                     style={{
                         width: '100%',
-                        height: '100%',
+                        height: '100%'
                     }}
                 />
-            </View>
-            }
+            </Animated.View>
+
 
             {/* Sheet */}
             <GestureDetector
@@ -228,19 +233,13 @@ function Bar(props: any) {
                     </View>
 
                     {/* INPUT BAR */}
-                    {showInputBar && <Animated.View
+                    <Animated.View
                         style={[{
                             // backgroundColor: 'red',
                             paddingLeft: 20,
                             paddingRight: 20,
                             width: '100%',
-                            // top: HANDLER_HEIGHT,
-                            // backgroundColor: 'yellow',
-                            // position: 'absolute'
-                        }, inputStyles
-                        ]}
-                        exiting={FadeOutUp.duration(100)}
-                        entering={FadeInDown.duration(100)}
+                        }, inputStyles]}
                     >
                         {/* INPUT */}
                         <View style={{
@@ -282,14 +281,14 @@ function Bar(props: any) {
                                     onFocus={() => {
                                         if (props.user === null) {
                                             ref.current?.blur()
-                                            _offset.value = withSpring(minOffset, { mass: 0.15 })
-                                            offset.value = withSpring(minOffset, { mass: 0.15 })
                                             return;
                                         }
-
-                                        setFocused(true)
+                                        setFocused(true);
                                     }}
-                                    onBlur={() => { setFocused(false) }}
+                                    onBlur={() => {
+                                        setFocused(false);
+                                        changeState('minimize');
+                                    }}
                                     ref={ref}
                                     value={text}
                                     onChangeText={setText}
@@ -374,7 +373,7 @@ function Bar(props: any) {
                         </View>
 
                     </Animated.View>
-                    }
+
 
                     {
                         props.user !== null && !focused && <UserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
