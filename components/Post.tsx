@@ -83,19 +83,36 @@ function Post(props: any) {
     })
 
     const uiList = splitAt(myComments).map(ch => toUIList(ch, hiddenCommentIds, commentStates)).flat(Infinity);
-    const [loadState, setLoadState] = useState<'did_not_load' | 'loading' | 'done'>('did_not_load');
+    const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
+    const [timesLoaded, setTimesLoaded] = useState(0);
+
     useEffect(() => {
         setVideoPlaying(props.scrolledOn);
     }, [props.scrolledOn])
 
-    if (props.shouldActive && loadState == 'did_not_load') {
-        console.log('active', props.id);
-        (async () => {
-            setLoadState('loading')
+    const timer = useRef<any>(null);
+
+    const loadComments = async () => {
+        if (loadState == 'loading') return;
+        setLoadState('loading');
+
+        timer.current = setTimeout(async () => {
             await requestComments(post.id, null);
-            setLoadState('done')
-        })()
+            setLoadState('not_loading')
+            setTimesLoaded(t => t + 1);
+        }, 500);
     }
+
+
+    if (props.shouldActive && timesLoaded == 0) {
+        loadComments();
+    }
+
+    if (!props.shouldActive) {
+        clearTimeout(timer.current);
+        if (loadState == 'loading') setLoadState('not_loading')
+    }
+
 
     useEffect(() => {
         if (!props.scrolledOn) return;
@@ -153,7 +170,7 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
 
-    // console.log('Render Post')
+    console.log('Render Post', post?.id, timesLoaded);
     return <View style={{
         backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
         height: props.height
@@ -177,8 +194,7 @@ function Post(props: any) {
                 // onScroll={onScroll}
                 data={uiList}
                 onEndReached={() => {
-                    console.log('on end reached', post.id);
-                    requestComments(post.id, null);
+                    loadComments();
                 }}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
@@ -193,7 +209,7 @@ function Post(props: any) {
                         <PostHeader post={post} setMode={setMode} />
                         <KeyTakeaways content={post.keytakeaways} />
                         {
-                            loadState == 'done' && myComments.length == 0 &&
+                            timesLoaded > 0 && myComments.length == 0 &&
                             <View style={{
                                 flex: 1,
                                 flexDirection: 'row',

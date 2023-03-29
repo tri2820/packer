@@ -82,7 +82,7 @@ function SignInSection(props: any) {
                 fontWeight: '700',
                 alignSelf: 'center',
                 textAlign: 'center'
-            }}>Explore digital worlds.</Text>
+            }}>Unlock your curiosity.</Text>
 
             <Text style={{
                 color: 'white',

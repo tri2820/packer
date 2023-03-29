@@ -25,8 +25,6 @@ const INJECTED_JAVASCRIPT = `(function() {
     ));
 })();`;
 
-
-
 function Main(props: any) {
   const { mode, setMode } = useContext(MainContext);
   const insets = useSafeAreaInsets();
@@ -90,7 +88,6 @@ function Main(props: any) {
       if (offset.value < 30) return;
       runOnJS(setMode)({ tag: 'Normal' })
     });
-
 
   return (
     <View style={{
@@ -413,7 +410,6 @@ export default function App() {
     submitComment(text, selectedCommentId, posts[activePostIndex].id);
     setSelectedCommentId(null);
   }
-
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
     console.log('request comments', post_id, parent_id)
