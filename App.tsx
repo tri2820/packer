@@ -17,6 +17,7 @@ import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fet
 import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
 // @ts-ignore
 import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
+import { ClipPath } from 'react-native-svg';
 
 const INJECTED_JAVASCRIPT = `(function() {
   window.ReactNativeWebView.postMessage(JSON.stringify(
@@ -157,8 +158,8 @@ const MemoMain = memo(Main);
 
 const rp = async (sharedAsyncState: any, setData: any) => {
   console.log('debug post get requested');
-  const offset = sharedAsyncState['main'] ?? 0;
-  sharedAsyncState['main'] = offset + 5;
+  const offset = sharedAsyncState['offset/main'] ?? 0;
+  sharedAsyncState['offset/main'] = offset + 5;
 
   const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
   if (error) {
@@ -174,38 +175,43 @@ const rp = async (sharedAsyncState: any, setData: any) => {
 const rc = async (sharedAsyncState: any, insertData: any, post_id: string, parent_id: string | null) => {
   const key = parent_id ?? post_id;
 
-  const offset = sharedAsyncState[key] ?? 0;
+  const offset = sharedAsyncState[`offset/${key}`] ?? 0;
   const count = sharedAsyncState[`count/${key}`];
   if (offset >= count) {
     console.log(`had enough of ${post_id}.${parent_id}`, offset, count);
     return [];
   }
-  sharedAsyncState[key] = offset + 2;
 
-  const { data, error } = await supabaseClient.rpc('get_comments', { o: offset, n: 2, postid: post_id, parentid: parent_id })
+  sharedAsyncState[`offset/${key}`] = offset + 5;
+
+  const { data, error } = await supabaseClient.rpc('get_comments_batch', { o: offset, n: 5, postid: post_id, parentid: parent_id, nchildren: 3 })
   if (error) {
     console.log('debug error query comments from post', error)
     return [];
   }
 
+  const newIds = data.map((c: any) => c.id);
   data.forEach((c: any) => {
+    if (newIds.includes(c.parent_id)) sharedAsyncState[`offset/${c.parent_id}`] = 3
     sharedAsyncState[`count/${c.id}`] = c.comment_count;
-    insertData(c);
+    // insertData(c);
   })
-  console.log('data.length', data.length)
-  return data
+  insertData(data);
+  // console.log('data.length', data.length)
+  // return data
 }
 
 const grc = async (sharedAsyncState: any, insertData: any, post_id: string, parent_id: string | null) => {
   const key = `status-${parent_id ?? post_id}`;
   if (sharedAsyncState[key] == 'running') return;
   sharedAsyncState[key] = 'running';
-  const comments = await rc(sharedAsyncState, insertData, post_id, parent_id);
-  if (parent_id == null) {
-    comments.forEach((c: any) => {
-      grc(sharedAsyncState, insertData, post_id, c.id);
-    })
-  }
+  // const comments = 
+  await rc(sharedAsyncState, insertData, post_id, parent_id);
+  // if (parent_id == null) {
+  //   comments.forEach((c: any) => {
+  //     grc(sharedAsyncState, insertData, post_id, c.id);
+  //   })
+  // }
   sharedAsyncState[key] = 'done';
 }
 
@@ -226,40 +232,45 @@ export default function App() {
     })()
   }, [user])
 
-  const insertComment = (c: any, atHead = false) => {
-    if (c.parent_id == null) {
-      setComments((comments) =>
-        atHead ?
-          [{ ...c, level: 0 }, ...comments] :
-          [...comments, { ...c, level: 0 }]
-      )
-      return;
-    }
+  // TODO: set only once
+  const insertComments = (cs: any[], areTopLevel = false) => {
+    const _insert = (c: any, comments: any[]) => {
+      if (areTopLevel) {
+        comments.unshift({ ...c, level: 0 });
+        return;
+      }
 
-    setComments((comments) => {
+      if (c.parent_id == null) {
+        comments.push({ ...c, level: 0 });
+        return;
+      }
+
       let i = comments.length - 1;
-      // console.log('debug', comments, i, comments[i]);
       while (i >= 0) {
         if (comments[i].parent_id == c.parent_id) {
           comments.splice(i + 1, 0, { ...c, level: comments[i].level })
-          return [...comments]
+          return;
         }
         if (comments[i].id == c.parent_id) {
           comments.splice(i + 1, 0, { ...c, level: comments[i].level + 1 })
-          return [...comments]
+          return;
         }
         i -= 1;
       }
+    }
 
-      // Should not hit this case
-      return comments
+
+    setComments((comments) => {
+      const newComments = [...comments];
+      cs.forEach(c => _insert(c, newComments))
+      return newComments;
     })
   }
 
   useEffect(() => {
     (async () => {
       const userResponse = await supabaseClient.auth.getUser();
-      console.log('Load user', userResponse.data.user)
+      console.log('Load user', userResponse.data.user ? 'ok' : userResponse.data.user)
       setUser(userResponse.data.user)
     })()
 
@@ -335,8 +346,8 @@ export default function App() {
       blockRequestChildren: true
     }
 
-    insertComment(placeholderComment, true);
-    insertComment(childComment);
+    insertComments([placeholderComment], true);
+    insertComments([childComment]);
 
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
       // @ts-ignore
@@ -406,7 +417,7 @@ export default function App() {
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
     console.log('request comments', post_id, parent_id)
-    await grc(sharedAsyncState, insertComment, post_id, parent_id)
+    await grc(sharedAsyncState, insertComments, post_id, parent_id)
   }
 
   const requestPost = async () => {
