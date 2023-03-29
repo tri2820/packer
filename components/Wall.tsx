@@ -13,6 +13,9 @@ const androidPagingFallback = Platform.OS == 'android' && {
     decelerationRate: 0
 }
 const theEmptyList: any[] = [];
+const theEmptyMode = {
+    tag: 'Normal'
+};
 
 function Wall(props: any) {
     const { mode, posts, requestPost, comments, setMode, setSelectedCommentId, requestComments } = useContext(MainContext);
@@ -26,7 +29,7 @@ function Wall(props: any) {
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
         const cs = scrolledOn ? comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
         return <MemoPost
-            mode={mode}
+            mode={scrolledOn ? mode : theEmptyMode}
             height={props.height}
             post={shouldActive ? item : null}
             shouldActive={shouldActive}

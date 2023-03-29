@@ -154,6 +154,7 @@ function Post(props: any) {
                 post_id={post.id}
                 ofId={item.ofId}
                 num={item.num}
+                requestComments={requestComments}
             />
             :
             <MemoComment
