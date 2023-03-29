@@ -71,7 +71,7 @@ function Comment(props: any) {
     const [switchedOnce, setSwitchedOnce] = useState(false);
 
     const onLinkPress = (target: string) => {
-        props.backtoApp(target)
+        props.backToApp(target)
     }
 
     const switchMode = () => {
