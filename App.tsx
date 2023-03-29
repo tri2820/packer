@@ -230,23 +230,25 @@ export default function App() {
   }, [user])
 
   // TODO: set only once
-  const insertComments = (cs: any[], areTopLevel = false) => {
+  const insertComments = (cs: any[], atHead = false) => {
     const _insert = (c: any, comments: any[]) => {
-      if (areTopLevel) {
-        comments.unshift({ ...c, level: 0 });
-        return;
-      }
-
       if (c.parent_id == null) {
+        if (atHead) {
+          comments.unshift({ ...c, level: 0 });
+          return;
+        }
+
         comments.push({ ...c, level: 0 });
         return;
       }
 
       let i = comments.length - 1;
       while (i >= 0) {
-        if (comments[i].parent_id == c.parent_id) {
-          comments.splice(i + 1, 0, { ...c, level: comments[i].level })
-          return;
+        if (!atHead) {
+          if (comments[i].parent_id == c.parent_id) {
+            comments.splice(i + 1, 0, { ...c, level: comments[i].level })
+            return;
+          }
         }
         if (comments[i].id == c.parent_id) {
           comments.splice(i + 1, 0, { ...c, level: comments[i].level + 1 })
@@ -300,7 +302,7 @@ export default function App() {
   }
 
   const submitComment = async (text: string, parent_id: string | null, post_id: string) => {
-    console.log('submit content by', user.user_metadata.full_name)
+    console.log('submit content', parent_id, post_id)
     const body = {
       content: text,
       post_id: post_id,
