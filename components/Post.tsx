@@ -49,22 +49,15 @@ const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any):
         ofId: parent.id,
         id: `button/${parent.id}`
     }
-    let childrenUILists = [];
-    if (!hiddenCommentIds.includes(parent.id)) {
-        const tail = comments.slice(1);
-        childrenUILists = splitAt(tail).map(chunks => toUIList(chunks, hiddenCommentIds, commentStates))
+
+    const hidden = hiddenCommentIds.includes(parent.id);
+    if (hidden) {
+        return [parent]
     }
-    if (num > 0) {
-        return [
-            parent,
-            childrenUILists,
-            button
-        ]
-    }
-    return [
-        parent,
-        childrenUILists
-    ]
+
+    const tail = comments.slice(1);
+    const childrenUILists = splitAt(tail).map(chunks => toUIList(chunks, hiddenCommentIds, commentStates))
+    return [parent, childrenUILists, num > 0 ? button : []]
 }
 
 function Post(props: any) {
