@@ -191,6 +191,8 @@ const rc = async (sharedAsyncState: any, insertData: any, post_id: string, paren
   data.forEach((c: any) => {
     if (newIds.includes(c.parent_id)) sharedAsyncState[`offset/${c.parent_id}`] = 3
     sharedAsyncState[`count/${c.id}`] = c.comment_count;
+    sharedAsyncState[`num/${c.id}`] = 0;
+    if (c.parent_id) sharedAsyncState[`num/${c.parent_id}`] += 1;
     // insertData(c);
   })
   insertData(data);

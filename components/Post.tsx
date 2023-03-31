@@ -41,7 +41,7 @@ const splitAt = (comments: any[]) => {
 const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any): any => {
     if (comments.length == 0) return [];
     const parent = comments[0];
-    const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`numComments/${parent.id}`];
+    const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`num/${parent.id}`];
     const button = {
         type: 'load-comment-button',
         num: num,
@@ -69,13 +69,13 @@ function Post(props: any) {
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
 
-    const commentStates: any = {};
-    myComments.forEach((c: any) => {
-        commentStates[`numComments/${c.id}`] = 0;
-        commentStates[`numComments/${c.parent_id}`] += 1;
-    })
+    // const commentStates: any = {};
+    // myComments.forEach((c: any) => {
+    //     commentStates[`numComments/${c.id}`] = 0;
+    //     commentStates[`numComments/${c.parent_id}`] += 1;
+    // })
 
-    const uiList = splitAt(myComments).map(ch => toUIList(ch, hiddenCommentIds, commentStates)).flat(Infinity);
+    const uiList = splitAt(myComments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity);
     const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
     const [timesLoaded, setTimesLoaded] = useState(0);
 
