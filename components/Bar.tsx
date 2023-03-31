@@ -278,15 +278,19 @@ function Bar(props: any) {
                                 <TextInput
                                     multiline
                                     // numberOfLines={4}
+
                                     onFocus={() => {
                                         if (props.user === null) {
                                             ref.current?.blur()
+                                            changeState('maximize');
                                             return;
                                         }
                                         setFocused(true);
                                     }}
                                     onBlur={() => {
+                                        console.log('called');
                                         setFocused(false);
+                                        if (props.user === null) return;
                                         changeState('minimize');
                                     }}
                                     ref={ref}

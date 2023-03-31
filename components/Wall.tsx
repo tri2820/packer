@@ -77,7 +77,7 @@ function Wall(props: any) {
             onScroll={onScroll}
             // DO NOT USE removeClippedSubviews: Making title not clickable
             // removeClippedSubviews
-            windowSize={3}
+            windowSize={7}
         />
     );
 }
