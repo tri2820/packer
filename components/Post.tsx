@@ -1,21 +1,17 @@
-import * as React from 'react';
-import { memo, useContext, useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
-import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import Animated, { FadeInDown, FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, sharedAsyncState } from '../utils';
 import { LinearGradient } from 'expo-linear-gradient';
-import Comment, { MemoComment } from './Comment';
-import * as Haptics from 'expo-haptics';
-import MoreDiscussionsButton from './MoreDiscussionsButton';
-import PostHeader from './PostHeader';
-import { INIT_DATE, supabaseClient } from '../supabaseClient';
-import VideoPlayer from './VideoPlayer';
+import * as React from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { FlatList, RefreshControl } from 'react-native-gesture-handler';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { sharedAsyncState } from '../utils';
+import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import { MainContext } from '../utils';
 import { MemoLoadCommentButton } from './LoadCommentButton';
+import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
+import { MemoNoComment } from './NoComment';
+import PostHeader from './PostHeader';
+import VideoPlayer from './VideoPlayer';
 
 // [ba ca da]
 const splitAt = (comments: any[]) => {
@@ -61,19 +57,12 @@ const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any):
 }
 
 function Post(props: any) {
-    const { mode, post, comments: myComments, setSelectedCommentId, requestComments, setMode } = props;
-    const selectedCommentId = null;
+    const { mode, post, comments: myComments, setSelectedComment, requestComments, setMode } = props;
     const [refreshing, setRefreshing] = useState(false);
     const [videoPlaying, setVideoPlaying] = useState(false);
     const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
-
-    // const commentStates: any = {};
-    // myComments.forEach((c: any) => {
-    //     commentStates[`numComments/${c.id}`] = 0;
-    //     commentStates[`numComments/${c.parent_id}`] += 1;
-    // })
 
     const uiList = splitAt(myComments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity);
     const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
@@ -139,6 +128,10 @@ function Post(props: any) {
         setHiddenCommentIds((hiddenCommentIds) => hiddenCommentIds.concat(commentId));
     }, []);
 
+    const changeModeToComment = React.useCallback(() => {
+        setMode({ tag: 'Comment' })
+    }, [])
+
     const renderItem = ({ item, index }: any) => {
         return item.type == 'load-comment-button' ?
             <MemoLoadCommentButton
@@ -154,17 +147,13 @@ function Post(props: any) {
                 key={item.id}
                 comment={item}
                 backToApp={backToApp}
-                setSelectedCommentId={setSelectedCommentId}
-                highlight={item.id == selectedCommentId}
+                setSelectedComment={setSelectedComment}
                 toggle={toggle}
             />
     }
 
-
-
     const keyExtractor = (item: any) => item.id
 
-    // console.log('Render Post', post?.id, timesLoaded);
     return <View style={{
         backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
         height: props.height
@@ -185,48 +174,21 @@ function Post(props: any) {
                         tintColor={'transparent'}
                     />
                 }
-                // onScroll={onScroll}
                 data={uiList}
-                onEndReached={() => {
-                    loadComments();
-                }}
+                onEndReached={loadComments}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-                ListHeaderComponent={<View style={{
-                    paddingTop: insets.top
-                }}>
-                    {/* <Text style={{ color: 'white' }}>{JSON.stringify(post.id)}</Text> */}
-                    <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
+                ListHeaderComponent={
                     <View style={{
-                        paddingHorizontal: 16
+                        paddingTop: insets.top
                     }}>
-                        <PostHeader post={post} setMode={setMode} />
-                        <KeyTakeaways content={post.keytakeaways} />
-                        {
-                            timesLoaded > 0 && myComments.length == 0 &&
-                            <View style={{
-                                flex: 1,
-                                flexDirection: 'row',
-                                marginLeft: 'auto',
-                                marginRight: 'auto',
-                            }}
-                            // entering={FadeInUp}
-                            >
-                                <Ionicons name="chatbubble" size={16} color='#A3A3A3' style={{
-                                    marginRight: 4
-                                }} />
-                                <Text style={{
-                                    color: '#A3A3A3',
-                                    marginLeft: 4,
-                                    marginRight: 16 + 4
-                                }}
-                                >
-                                    Let's spark the conversation! Be the first to share your thoughts and bring some high energy to this post!
-                                </Text>
-                            </View>
-                        }
+                        <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
+                        <View style={styles.padding}>
+                            <PostHeader post={post} setMode={setMode} />
+                            <KeyTakeaways content={post.keytakeaways} />
+                            {timesLoaded > 0 && myComments.length == 0 && <MemoNoComment />}
+                        </View>
                     </View>
-                </View>
                 }
             />
         }
@@ -234,31 +196,17 @@ function Post(props: any) {
         {
             mode.tag == 'Normal' &&
             <>
-                <LinearGradient colors={['transparent', 'rgba(0, 0, 0, 0.9)']} style={{
-                    width: '100%',
-                    position: 'absolute',
-                    bottom: 0,
-                    height: 128
-                }}
+                <LinearGradient
+                    colors={gradient}
+                    style={styles.gradient}
                     pointerEvents='none'
                 />
-
                 {
                     myComments.length > 0 && props.shouldActive &&
-                    <View style={{
-                        position: 'absolute',
-                        bottom: 16,
-                        alignSelf: 'center',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        // backgroundColor: 'blue'
-                    }}>
-                        <MoreDiscussionsButton onPress={() => {
-                            setMode({ tag: 'Comment' })
-                        }} />
+                    <View style={styles.more_discussion_view}>
+                        <MemoMoreDiscussionsButton onPress={changeModeToComment} />
                     </View>
                 }
-
             </>
         }
     </View >
@@ -266,3 +214,23 @@ function Post(props: any) {
 
 export default Post;
 export const MemoPost = memo(Post);
+const styles = StyleSheet.create({
+    more_discussion_view: {
+        position: 'absolute',
+        bottom: 16,
+        alignSelf: 'center',
+        alignItems: 'center',
+        justifyContent: 'center'
+    },
+    gradient: {
+        width: '100%',
+        position: 'absolute',
+        bottom: 0,
+        height: 128
+    },
+    padding: {
+        paddingHorizontal: 16
+    }
+});
+
+const gradient = ['transparent', 'rgba(0, 0, 0, 0.9)']

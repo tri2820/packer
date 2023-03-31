@@ -1,16 +1,10 @@
-import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground, PanResponder, Alert } from 'react-native';
-import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname } from '../utils';
-import Animated, { Easing, FadeIn, FadeInDown, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { Gesture, GestureDetector, TextInput, FlatList } from 'react-native-gesture-handler';
-import { signIn, signOut } from '../auth';
-import { supabaseClient, upsertProfile } from '../supabaseClient';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
-import LoginSection from './SignInSection';
+import * as React from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList } from 'react-native-gesture-handler';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle } from 'react-native-reanimated';
+import { signOut } from '../auth';
+import { supabaseClient } from '../supabaseClient';
 
 
 function UserList(props: any) {

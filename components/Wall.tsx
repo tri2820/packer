@@ -1,12 +1,9 @@
 import * as React from 'react';
-import { useContext, useRef, useState } from 'react';
-import { Dimensions, Platform, Text, View } from 'react-native';
+import { Platform } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-import Animated, { useDerivedValue } from 'react-native-reanimated';
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, MainContext, normalizedHostname, randomColor } from '../utils';
-import Post, { MemoPost } from './Post';
+import { constants } from '../utils';
+import { MemoPost } from './Post';
 
 const androidPagingFallback = Platform.OS == 'android' && {
     pagingEnabled: true,
@@ -18,9 +15,9 @@ const theEmptyMode = {
 };
 
 function Wall(props: any) {
-    const { mode, posts, requestPost, comments, setMode, setSelectedCommentId, requestComments } = useContext(MainContext);
+    const { mode, posts, requestPost, comments, setMode, setSelectedComment, requestComments } = props;
     const _setMode = React.useCallback(setMode, []);
-    const _setSelectedCommentId = React.useCallback(setSelectedCommentId, []);
+    const _setSelectedComment = React.useCallback(setSelectedComment, []);
     const _requestComments = React.useCallback(requestComments, []);
 
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
@@ -35,7 +32,7 @@ function Wall(props: any) {
             shouldActive={shouldActive}
             scrolledOn={scrolledOn}
             comments={cs}
-            setSelectedCommentId={_setSelectedCommentId}
+            setSelectedComment={_setSelectedComment}
             requestComments={_requestComments}
             setMode={_setMode}
         />

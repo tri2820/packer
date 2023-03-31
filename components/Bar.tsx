@@ -1,31 +1,23 @@
-import * as React from 'react';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { Dimensions, Keyboard, KeyboardAvoidingView, StyleSheet, Pressable, SafeAreaView, Text, Image, View, TouchableOpacity, Linking, Platform, ImageBackground, PanResponder } from 'react-native';
-import { SafeAreaInsetsContext, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, MainContext, normalizedHostname } from '../utils';
-import Animated, { Easing, FadeIn, FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutUp, KeyboardState, runOnJS, runOnUI, useAnimatedKeyboard, useAnimatedProps, useAnimatedReaction, useAnimatedRef, useAnimatedScrollHandler, useAnimatedStyle, useDerivedValue, useScrollViewOffset, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { Gesture, GestureDetector, TextInput, FlatList } from 'react-native-gesture-handler';
-import { signIn } from '../auth';
-import { supabaseClient, upsertProfile } from '../supabaseClient';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { LinearGradient } from 'expo-linear-gradient';
+import * as React from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
+import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { constants, normalizedHostname } from '../utils';
 import SignInSection from './SignInSection';
 import UserList from './UserList';
-import * as Haptics from 'expo-haptics';
 
+const INSETS_OFFSET_BOTTOM = 200;
+const HANDLER_HEIGHT = 20;
 
 function Bar(props: any) {
-    const { mode, setMode, comments, setSelectedCommentId, selectedCommentId } = useContext(MainContext);
-
+    const { mode, setMode, selectingComment, setSelectedComment } = props;
     const [text, setText] = useState('');
-    const [profile, setProfile] = useState<any>(undefined);
-
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
     const MARGIN_TOP = insets.top + 170;
-    const INSETS_OFFSET_BOTTOM = 200;
-    const HANDLER_HEIGHT = 20;
     const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
     const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
     const offset = useSharedValue(0);
@@ -33,9 +25,8 @@ function Bar(props: any) {
     const [focused, setFocused] = useState(false);
     const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
-    // const showHint = useSharedValue(false);
     const ref = useRef<any>(undefined);
-    if (selectedCommentId) {
+    if (selectingComment) {
         ref.current?.focus();
     }
 
@@ -57,10 +48,7 @@ function Bar(props: any) {
     });
 
     const overlayStyles = useAnimatedStyle(() => {
-        // const k = -(offset.value) - HANDLER_HEIGHT + props.minBarHeight - keyboard.height.value +
-        //     (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? insets.bottom : 0);
         return {
-            // height: k,
             display: offset.value > -40 ? 'none' : 'flex',
             opacity: Math.pow(offset.value / minOffset, 0.3) * 0.8
         };
@@ -86,39 +74,22 @@ function Bar(props: any) {
     }
 
     const barStyles = useAnimatedStyle(() => {
-        // ONE
-        // console.log('debug showHint.value', showHint.value == '& ');
-
-        const x = text[0] == '&' && text[1] == ' ' && focused ? 24 : 0
         if
             (
-            // keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING
-            // && 
-            // offset.value > 0 && 
             keyboard.state.value == KeyboardState.OPENING
-            && offset.value > -(keyboard.height.value - insets.bottom + x)
+            && offset.value > -(keyboard.height.value - insets.bottom)
         ) {
-            // ) {
             offset.value = -(keyboard.height.value - insets.bottom)
             _offset.value = -(keyboard.height.value - insets.bottom)
         }
 
         return {
             transform: [{
-                translateY:
-                    // withSpring(
-                    offset.value - x
-                // , { mass: 0.01, overshootClamping: true })
+                translateY: offset.value
             }]
         };
     });
 
-    // const overlayStyles = useAnimatedStyle(() => {
-    //     return {
-    //         opacity: Math.pow(offset.value / minOffset, 0.3) * 0.8,
-    //         display: offset.value == 0 ? 'none' : 'flex'
-    //     };
-    // });
 
     const gesture = Gesture
         .Pan()
@@ -161,218 +132,142 @@ function Bar(props: any) {
         })
 
     const getQuote = () => {
-        const text = comments.find((c: any) => c.id == selectedCommentId).content;
+        const text = props.selectedCommenText;
         return text.length > 30 ? `${text.slice(0, 30)}...` : text;
     }
 
+    const hideInput = () => {
+        setSelectedComment(null);
+        changeState('minimize');
+        ref.current?.blur();
+    }
+
+    const setModeNormal = () => {
+        setMode({ tag: 'Normal' });
+    }
+
+    const onFocus = () => {
+        if (props.user === null) {
+            ref.current?.blur()
+            changeState('maximize');
+            return;
+        }
+        setFocused(true);
+    }
+
+    const onBlur = () => {
+        console.log('called');
+        setFocused(false);
+        if (props.user === null) return;
+        changeState('minimize');
+    }
+
+    const send = () => {
+        if (text.trim().length > 0) {
+            props.onSubmit(text);
+        }
+        ref.current?.blur();
+        setText('');
+    }
+
+    const open = () => {
+        Linking.openURL(mode.value).catch(error =>
+            console.warn('An error occurred: ', error),
+        )
+    }
+
+    const placeHolder = selectingComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
+
     return (
         <>
-
-            {/* Overlay */}
-
-            <Animated.View
-                style={[{
-                    backgroundColor: 'black',
-                    opacity: 0.8,
-                    height: constants.height,
-                    width: constants.width,
-                    position: 'absolute'
-                }, overlayStyles]}
-            >
-                <Pressable onPress={() => {
-                    setSelectedCommentId(null);
-                    changeState('minimize');
-                    ref.current?.blur();
-                }}
-                    style={{
-                        width: '100%',
-                        height: '100%'
-                    }}
-                />
+            <Animated.View style={[styles.overlay, overlayStyles]}>
+                <Pressable onPress={hideInput} style={styles.expand} />
             </Animated.View>
 
 
             {/* Sheet */}
-            <GestureDetector
-                gesture={gesture}
-            >
+            <GestureDetector gesture={gesture}>
                 <Animated.View style={[{
-                    top: constants.height - props.minBarHeight - insets.bottom,
-                    height: HEIGHT,
-                    position: 'absolute',
-                    width: constants.width,
+                    top: props.wallHeight,
                     backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
-                    borderTopWidth: StyleSheet.hairlineWidth,
-                    borderTopColor: '#2A2829',
-                    borderTopLeftRadius: 4,
-                    borderTopRightRadius: 4,
-                }, barStyles]}
+                    height: HEIGHT
+                }, styles.sheet, barStyles]}
                 >
                     {
                         props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={mode} user={props.user} setUser={props.setUser} />
                     }
 
-
-                    {/* HANDLER */}
-                    <View style={{
-                        width: '100%',
-                        height: HANDLER_HEIGHT,
-                        // backgroundColor: 'blue',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        paddingBottom: 4
-                    }}>
-
-                        <View style={{
-                            height: 6,
-                            width: 40,
-                            backgroundColor: '#5D5F64',
-                            borderRadius: 3
-                        }} />
-
+                    <View style={styles.handler}>
+                        <View style={styles.handler_inside} />
                     </View>
 
-                    {/* INPUT BAR */}
                     <Animated.View
-                        style={[{
-                            // backgroundColor: 'red',
-                            paddingLeft: 20,
-                            paddingRight: 20,
-                            width: '100%',
-                        }, inputStyles]}
+                        style={[styles.inputbar, inputStyles]}
                     >
-                        {/* INPUT */}
-                        <View style={{
-                            flex: 1,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            // backgroundColor: 'red'
-                        }}>
+                        <View style={styles.input}>
                             {/* Close Button */}
                             {
                                 (mode.tag == 'Comment' || mode.tag == 'App') &&
                                 !focused &&
-                                <TouchableOpacity onPress={() => {
-                                    setMode({ tag: 'Normal' });
-                                }}>
+                                <TouchableOpacity onPress={setModeNormal}>
                                     <Animated.View style={animatedStyles} >
-                                        <Ionicons name="close" size={26} color='#C2C2C2' style={{
-                                            // padding: 4,
-                                            marginRight: mode.tag == 'Comment' ? 8 : 0,
-                                            // backgroundColor: 'red'
-                                        }} />
+                                        <Ionicons name="close"
+                                            size={26}
+                                            color='#C2C2C2'
+                                            style={{
+                                                marginRight: mode.tag == 'Comment' ? 8 : 0,
+                                            }} />
                                     </Animated.View>
                                 </TouchableOpacity>
                             }
 
 
-                            {mode.tag != 'App' && <View
-                                style={{
-                                    // backgroundColor: 'yellow',
-                                    height: '100%',
-                                    width: '100%',
-                                    flexDirection: 'row',
-                                    alignItems: 'flex-start'
-                                }}
-                            >
-                                <TextInput
-                                    multiline
-                                    // numberOfLines={4}
-
-                                    onFocus={() => {
-                                        if (props.user === null) {
-                                            ref.current?.blur()
-                                            changeState('maximize');
-                                            return;
-                                        }
-                                        setFocused(true);
-                                    }}
-                                    onBlur={() => {
-                                        console.log('called');
-                                        setFocused(false);
-                                        if (props.user === null) return;
-                                        changeState('minimize');
-                                    }}
-                                    ref={ref}
-                                    value={text}
-                                    onChangeText={setText}
-                                    placeholder={
-                                        selectedCommentId ? `Replying to "${getQuote()}"` : 'Add a discussion...'
-                                    }
-                                    placeholderTextColor='#C2C2C2'
-                                    style={{
-                                        // backgroundColor: 'blue',
-                                        color: '#F1F1F1',
-                                        height: '100%',
-                                        width: '100%',
-                                        flex: 1
-                                    }}
-                                    // returnKeyType='send'
-                                    keyboardAppearance='dark'
-                                    // onSubmitEditing={() => {
-
-                                    // }}
-                                    selectionColor='#F2C740'
-                                />
-                                {focused &&
-                                    <TouchableOpacity onPress={() => {
-                                        if (text.trim().length > 0) {
-                                            props.onSubmit(text);
-                                        }
-                                        ref.current?.blur();
-                                        setText('');
-                                    }}
-                                        style={{
-                                            height: props.minBarHeight - HANDLER_HEIGHT,
-                                            width: props.minBarHeight - HANDLER_HEIGHT,
-                                            // backgroundColor: 'red',
-                                            alignItems: 'flex-end',
-                                            justifyContent: 'flex-start'
-                                        }}
-                                    >
-                                        <Ionicons name="send" size={24} color='#F2C740' />
-                                    </TouchableOpacity>
-                                }
-                            </View>}
-
-
                             {
-                                mode.tag == 'App' &&
-                                <View style={{
-                                    // backgroundColor: 'blue',
-                                    width: '100%',
-                                    flex: 1,
-                                    alignItems: 'center',
-                                    // marginRight: 28 + 16
-                                }}>
-                                    <Text style={{
-                                        color: '#C2C2C2',
-                                        fontWeight: '600'
-                                    }}>{
-                                            getSourceName(mode.value)
-                                        }
-                                    </Text>
-                                </View>
-                            }
+                                mode.tag == 'App' ?
+                                    <>
+                                        <View style={styles.sourceNameView}>
+                                            <Text style={styles.sourceName}>{
+                                                getSourceName(mode.value)
+                                            }
+                                            </Text>
+                                        </View>
+                                        <TouchableOpacity onPress={open}>
+                                            {
+                                                Platform.OS == 'ios' ?
+                                                    <Ionicons name='compass-outline' size={26} color='#C2C2C2' />
+                                                    : <Ionicons name='arrow-forward-circle-outline' size={26} color='#C2C2C2' />
+                                            }
+                                        </TouchableOpacity>
+                                    </>
 
-                            {
-                                mode.tag == 'App' &&
-                                <TouchableOpacity onPress={() => {
-                                    Linking.openURL(mode.value).catch(error =>
-                                        console.warn('An error occurred: ', error),
-                                    )
-                                }}>
-                                    <View style={{
-                                        // padding: 4,
-                                    }}>
-                                        {
-                                            Platform.OS == 'ios' ?
-                                                <Ionicons name='compass-outline' size={26} color='#C2C2C2' />
-                                                : <Ionicons name='arrow-forward-circle-outline' size={26} color='#C2C2C2' />
-                                        }
+                                    : <View style={styles.inputHeader}>
+                                        <TextInput
+                                            multiline
+                                            onFocus={onFocus}
+                                            onBlur={onBlur}
+                                            ref={ref}
+                                            value={text}
+                                            onChangeText={setText}
+                                            placeholder={placeHolder}
+                                            placeholderTextColor='#C2C2C2'
+                                            style={styles.textinput}
+                                            keyboardAppearance='dark'
+                                            selectionColor='#F2C740'
+                                        />
 
+                                        {focused &&
+                                            <TouchableOpacity onPress={send}
+                                                style={{
+                                                    height: props.minBarHeight - HANDLER_HEIGHT,
+                                                    width: props.minBarHeight - HANDLER_HEIGHT,
+                                                    alignItems: 'flex-end',
+                                                    justifyContent: 'flex-start'
+                                                }}
+                                            >
+                                                <Ionicons name="send" size={24} color='#F2C740' />
+                                            </TouchableOpacity>
+                                        }
                                     </View>
-                                </TouchableOpacity>
                             }
                         </View>
 
@@ -390,3 +285,69 @@ function Bar(props: any) {
 }
 
 export default Bar;
+const styles = StyleSheet.create({
+    overlay:
+    {
+        backgroundColor: 'black',
+        opacity: 0.8,
+        height: constants.height,
+        width: constants.width,
+        position: 'absolute'
+    },
+    expand: {
+        width: '100%',
+        height: '100%'
+    },
+    handler: {
+        width: '100%',
+        height: HANDLER_HEIGHT,
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        paddingBottom: 4
+    },
+    handler_inside: {
+        height: 6,
+        width: 40,
+        backgroundColor: '#5D5F64',
+        borderRadius: 3
+    },
+    inputbar: {
+        paddingLeft: 20,
+        paddingRight: 20,
+        width: '100%',
+    },
+    sheet: {
+        position: 'absolute',
+        width: constants.width,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: '#2A2829',
+        borderTopLeftRadius: 4,
+        borderTopRightRadius: 4,
+    },
+    input: {
+        flex: 1,
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    inputHeader: {
+        height: '100%',
+        width: '100%',
+        flexDirection: 'row',
+        alignItems: 'flex-start'
+    },
+    textinput: {
+        color: '#F1F1F1',
+        height: '100%',
+        width: '100%',
+        flex: 1
+    },
+    sourceNameView: {
+        width: '100%',
+        flex: 1,
+        alignItems: 'center',
+    },
+    sourceName: {
+        color: '#C2C2C2',
+        fontWeight: '600'
+    }
+})

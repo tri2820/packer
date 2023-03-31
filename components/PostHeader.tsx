@@ -1,16 +1,8 @@
-import * as React from 'react';
-import { useContext, useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
-import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import Animated, { useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, MainContext, normalizedHostname } from '../utils';
-import { LinearGradient } from 'expo-linear-gradient';
-import Comment from './Comment';
-import * as Haptics from 'expo-haptics';
-import MoreDiscussionsButton from './MoreDiscussionsButton';
-import moment from 'moment';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import moment from 'moment';
+import * as React from 'react';
+import { Text, TouchableOpacity, View } from 'react-native';
+import { normalizedHostname } from '../utils';
 
 function PostHeader(props: any) {
     const getSourceName = (source_url: string) => {

@@ -1,4 +1,3 @@
-import { createContext } from "react";
 import { Dimensions, PixelRatio, View } from "react-native";
 
 export const constants = {
@@ -36,16 +35,6 @@ export const loadingView = () => <View style={{
     height: '100%',
     width: '100%',
 }} />
-
-
-export const MainContext = createContext({
-    // posts: [] as any[],
-    // comments: [] as any[],
-    // requestPost: async (post_id: string, parent_id: string | null) => { },
-    // requestComments: async (post_id: string, parent_id: string | null) => { },
-    // mode: { tag: 'Normal' } as Mode,
-    // setMode: (() => { }) as any,
-} as any);
 
 export const sharedAsyncState: any = {};
 // export const toUIComments = (comments: any[], index = 0) => {

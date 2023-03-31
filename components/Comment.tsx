@@ -1,18 +1,11 @@
-import * as React from 'react';
-import { memo, useContext, useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet, Platform, Linking, TouchableOpacity } from 'react-native';
-import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import Animated, { FadeInDown, FadeInUp, FadeOut, FadeOutDown, FadeOutLeft, FadeOutUp, Layout, SequencedTransition, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants } from '../utils';
-import { LinearGradient } from 'expo-linear-gradient';
-import * as Haptics from 'expo-haptics';
-import { State, INIT_DATE, supabaseClient, requestCommentsCount, unitC, C } from '../supabaseClient';
-import { MarkdownRule, MarkdownRules, MarkdownStyles, MarkdownView } from 'react-native-markdown-view'
-import moment from 'moment';
-import BlinkingCursor from './BlinkingCursor';
-import { MainContext } from '../utils';
 import { Octicons } from '@expo/vector-icons';
+import moment from 'moment';
+import * as React from 'react';
+import { memo, useState } from 'react';
+import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import BlinkingCursor from './BlinkingCursor';
 
 
 const quote: MarkdownRule = {
@@ -48,7 +41,6 @@ const quote: MarkdownRule = {
     }
 }
 
-
 const link = {
     order: 0,
     render: (node: any, output: any, state: any, styles: any) => {
@@ -65,10 +57,17 @@ const link = {
     }
 }
 
+const markdownRules = { quote, link }
+
 function Comment(props: any) {
     const [display, setDisplay] = useState<'Normal' | 'Inline'>('Normal');
-
     const [switchedOnce, setSwitchedOnce] = useState(false);
+
+    const created_at = moment
+        .utc(props.comment.created_at)
+        .local()
+        .startOf('seconds')
+        .fromNow()
 
     const onLinkPress = (target: string) => {
         props.backToApp(target)
@@ -86,7 +85,11 @@ function Comment(props: any) {
         props.toggle(props.comment.id, false)
     }
 
-    // console.log('render comment', props.comment.id)
+    const select = () => {
+        props.setSelectedComment(props.comment);
+    }
+
+
     return (
         <Pressable
             style={{
@@ -96,121 +99,56 @@ function Comment(props: any) {
             onPress={switchMode}
         >
 
-            {
-                props.comment.level === 0 && <View
-                    style={{
-                        borderBottomColor: '#3C3D3F',
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                        marginHorizontal: 16
-                    }}
-                />
-            }
+            {props.comment.level === 0 && <View style={styles.hair} />}
 
             <View
-                style={[(props.comment.level == 0) && {
-                    marginTop: 8,
-                    paddingTop: 4,
-                    paddingLeft: 16,
-                    paddingRight: 16
-                }, (props.comment.level > 0) && {
-                    marginVertical: 4,
-                    paddingTop: 4,
-                    paddingBottom: 4,
-                    borderLeftColor: '#6b5920',
-                    borderLeftWidth: 2,
-                    paddingLeft: 16,
-                    marginLeft: 16,
-                    marginRight: 16
-                }, {
-                    backgroundColor: props.highlight ? '#6b5920' : 'transparent',
-                }
-                ]}
-
+                style={props.comment.level == 0 ? styles.level0 : styles.levelMoreThan0}
             >
 
-                <View style={{
-                    flexDirection: 'row'
-                }}
-                >
-                    <Text style={{
-                        fontWeight: 'bold',
-                        color: 'white'
-                    }}>
-                        {
-                            props.comment.author_name
-                        }
+                <View style={styles.header_foot}>
+                    <Text style={styles.author_name}>
+                        {props.comment.author_name}
                     </Text>
 
                     {
-                        display == 'Normal' &&
-                        <Text style={{
-                            color: '#A3A3A3'
-                        }}> • {
-                                moment.utc(props.comment.created_at).local().startOf('seconds').fromNow()
-                            }</Text>
+                        display == 'Normal'
+                            ? <Text style={styles.created_at}> • {created_at}</Text>
+                            : <Animated.Text style={{
+                                color: '#A3A3A3',
+                                flex: 1,
+                                paddingBottom: props.comment.level > 0 ? 0 : 4,
+                            }}
+                                numberOfLines={1}
+                                entering={FadeInDown}
+                            > • {props.comment.content}
+                            </Animated.Text>
                     }
-
-                    {
-                        display == 'Inline' && <Animated.Text style={{
-                            color: '#A3A3A3',
-                            flex: 1,
-                            paddingBottom: props.comment.level > 0 ? 0 : 4,
-                        }}
-                            numberOfLines={1}
-                            entering={FadeInDown}
-                        > • {props.comment.content}
-                        </Animated.Text>
-                    }
-
                 </View>
-
-
 
                 {
                     display == 'Normal' &&
                     <Animated.View
                         entering={switchedOnce ? FadeInDown : undefined}
                     >
-
-
                         <MarkdownView
-                            rules={{
-                                quote,
-                                link
-                            }}
+                            rules={markdownRules}
                             onLinkPress={onLinkPress}
                             styles={mdstyles}
                         >
-                            {
-                                props.comment.content
-                            }
+                            {props.comment.content}
                         </MarkdownView>
 
                         {
-                            props.comment.blinking ?
-                                <BlinkingCursor />
-                                :
-                                <TouchableOpacity
-                                    onPress={() => {
-                                        props.setSelectedCommentId(props.comment.id);
-                                    }}
-                                    style={{
-                                        alignSelf: 'flex-end',
-                                        // marginRight: 16,
-                                        flexDirection: 'row',
-                                        alignItems: 'center',
-                                        // backgroundColor: 'blue',
-                                        paddingHorizontal: 8,
-                                        paddingVertical: 4
-                                    }}
+                            props.comment.blinking
+                                ? <BlinkingCursor />
+                                : <TouchableOpacity
+                                    onPress={select}
+                                    style={styles.reply_button}
                                 >
                                     <Octicons name="reply" size={12} color="#A3A3A3" />
                                     {
                                         props.comment.level == 0 &&
-                                        <Text style={{
-                                            color: "#A3A3A3",
-                                            marginLeft: 8
-                                        }}>Reply</Text>
+                                        <Text style={styles.reply_text}>Reply</Text>
                                     }
                                 </TouchableOpacity>
                         }
@@ -330,6 +268,53 @@ const mdstyles: MarkdownStyles = {
         marginTop: 0,
     },
 }
+
+
+
+const styles = StyleSheet.create({
+    reply_text: {
+        color: "#A3A3A3",
+        marginLeft: 8
+    },
+    reply_button: {
+        alignSelf: 'flex-end',
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 8,
+        paddingVertical: 4
+    },
+    created_at: {
+        color: '#A3A3A3'
+    },
+    hair: {
+        borderBottomColor: '#3C3D3F',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+        marginHorizontal: 16
+    },
+    header_foot: {
+        flexDirection: 'row'
+    },
+    author_name: {
+        fontWeight: 'bold',
+        color: 'white'
+    },
+    level0: {
+        marginTop: 8,
+        paddingTop: 4,
+        paddingLeft: 16,
+        paddingRight: 16
+    },
+    levelMoreThan0: {
+        marginVertical: 4,
+        paddingTop: 4,
+        paddingBottom: 4,
+        borderLeftColor: '#6b5920',
+        borderLeftWidth: 2,
+        paddingLeft: 16,
+        marginLeft: 16,
+        marginRight: 16
+    }
+})
 
 export default Comment;
 export const MemoComment = memo(Comment);
