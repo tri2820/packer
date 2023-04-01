@@ -303,7 +303,6 @@ const styles = StyleSheet.create({
         height: HANDLER_HEIGHT,
         alignItems: 'center',
         justifyContent: 'flex-end',
-        paddingBottom: 4
     },
     handler_inside: {
         height: 6,

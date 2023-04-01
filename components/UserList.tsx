@@ -42,6 +42,13 @@ function UserList(props: any) {
             },
         ]);
 
+    const openSettings = () => {
+        props.setMode('settings')
+    }
+
+    const setModeNormal = () => {
+        props.setMode('normal')
+    }
 
     return (
 
@@ -58,61 +65,30 @@ function UserList(props: any) {
                     exiting={FadeOut}
                 >
                     <View>
-                        <View style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            // backgroundColor: 'blue'
-                        }}>
-                            <Text style={{
-                                color: '#F1F1F1',
-                                fontSize: 24,
-                                fontWeight: '800',
-                                flexGrow: 1
-                            }}>
+                        <View style={styles.header}>
+                            <Text style={styles.heading}>
                                 {
                                     props.user.user_metadata.full_name
                                 }
                             </Text>
 
-                            <TouchableOpacity onPress={() => {
-                                props.setMode('settings')
-                            }} style={{
-                                height: 60,
-                                width: 60,
-                                alignItems: 'flex-end',
-                                justifyContent: 'center',
-                                // backgroundColor: 'red'
-                            }} >
+                            <TouchableOpacity onPress={openSettings} style={styles.icon} >
                                 <Ionicons name="settings-sharp" size={28} color='#C2C2C2' />
                             </TouchableOpacity>
                         </View>
 
-                        <Text style={{
-                            color: '#C2C2C2',
-                            fontWeight: '300',
-                            marginTop: 4
-                        }}>
+                        {/* <Text style={styles.username}>
                             {
                                 // props.user.user_metadata.email
                                 '@default'
                             }
-                        </Text>
+                        </Text> */}
 
-                        <Text style={{
-                            color: '#F1F1F1',
-                            marginTop: 20,
-                            // backgroundColor: 'red'
-                        }}>
+                        <Text style={styles.introduction}>
                             Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
                         </Text>
 
-                        <Text style={{
-                            marginTop: 40,
-                            marginBottom: 4,
-                            color: '#F1F1F1',
-                            fontSize: 24,
-                            fontWeight: '800'
-                        }}>
+                        <Text style={styles.h1}>
                             My Discussions
                         </Text>
                     </View>
@@ -120,24 +96,11 @@ function UserList(props: any) {
                         horizontal={false}
                         showsVerticalScrollIndicator={false}
                         listKey='userList'
-                        style={{
-                            marginTop: 8,
-                            // paddingTop: 12,
-                            // backgroundColor: 'blue',
-                        }}
+                        style={styles.discussions}
                         data={[0, 1, 2, 3, 4]}
                         // keyExtractor={keyExtractor}
                         renderItem={() =>
-                            <View style={{
-                                height: 60,
-                                width: '100%',
-                                // backgroundColor: 'blue',
-                                borderRadius: 8,
-                                marginVertical: 8,
-                                borderStyle: 'dashed',
-                                borderWidth: 2,
-                                borderColor: '#5D5F64'
-                            }}>
+                            <View style={styles.discussion}>
 
                             </View>
                         }
@@ -148,81 +111,37 @@ function UserList(props: any) {
                     exiting={FadeOut}
                 >
                     <View>
-                        <View style={{
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            // backgroundColor: 'blue'
-                        }}>
-                            <Text style={{
-                                color: '#F1F1F1',
-                                fontSize: 24,
-                                fontWeight: '800',
-                                flexGrow: 1
-                            }}>
+                        <View style={styles.header}>
+                            <Text style={styles.heading}>
                                 Settings
                             </Text>
 
-                            <TouchableOpacity onPress={() => {
-                                props.setMode('normal')
-                            }} style={{
-                                height: 60,
-                                width: 60,
-                                alignItems: 'flex-end',
-                                justifyContent: 'center',
-                                // backgroundColor: 'red'
-                            }} >
+                            <TouchableOpacity onPress={setModeNormal} style={styles.icon} >
                                 <Ionicons name="close" size={28} color='#C2C2C2' />
                             </TouchableOpacity>
                         </View>
 
-                        <TouchableOpacity onPress={() => {
-                            signOutAndUpdateProfile()
-                        }} style={{
-                            marginTop: 30,
-                            paddingVertical: 10,
-                            borderRadius: 8,
-                            backgroundColor: '#323032',
-                            alignItems: 'center'
-                        }} >
-                            {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                            <Text style={{
-                                color: '#ed4339',
-                                fontSize: 18
-                            }}>Sign Out</Text>
-                        </TouchableOpacity>
+                        <View style={styles.buttons}>
+                            <TouchableOpacity onPress={signOutAndUpdateProfile} style={styles.button} >
+                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                <Text style={styles.button_text}>Sign Out</Text>
+                            </TouchableOpacity>
 
-                        <View
-                            style={{
-                                marginVertical: 20,
-                                borderBottomColor: '#323032',
-                                borderBottomWidth: StyleSheet.hairlineWidth,
-                            }}
-                        />
+                            <View
+                                style={styles.hair}
+                            />
 
-                        <TouchableOpacity onPress={
-                            createDeleteConfirmationAlert
-                        } style={{
-                            paddingVertical: 8,
-                            paddingHorizontal: 16,
-                            borderRadius: 8,
-                            backgroundColor: '#323032',
-                            alignItems: 'center'
-                        }} >
-                            {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                            <Text style={{
-                                color: '#ed4339',
-                                fontSize: 18
-                            }}>Request account deletion</Text>
-                        </TouchableOpacity>
+                            <TouchableOpacity
+                                onPress={createDeleteConfirmationAlert}
+                                style={styles.button} >
+                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                <Text style={styles.deletion_text}>Request account deletion</Text>
+                            </TouchableOpacity>
 
-                        <Text style={{
-                            color: '#929196',
-                            marginTop: 20,
-                            // backgroundColor: 'red',
-                            textAlign: 'center'
-                        }}>
-                            Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
-                        </Text>
+                            <Text style={styles.deletion_info}>
+                                Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
+                            </Text>
+                        </View>
                     </View>
                 </Animated.View>
             }
@@ -232,3 +151,76 @@ function UserList(props: any) {
 }
 
 export default UserList;
+const styles = StyleSheet.create({
+    username: {
+        color: '#C2C2C2',
+        fontWeight: '300',
+    },
+    introduction: {
+        color: '#F1F1F1',
+        // backgroundColor: 'red'
+    }, h1: {
+        marginTop: 40,
+        marginBottom: 4,
+        color: '#F1F1F1',
+        fontSize: 24,
+        fontWeight: '800'
+    },
+    discussions: {
+        marginTop: 8,
+    },
+    discussion: {
+        height: 60,
+        width: '100%',
+        // backgroundColor: 'blue',
+        borderRadius: 8,
+        marginVertical: 8,
+        borderStyle: 'dashed',
+        borderWidth: 2,
+        borderColor: '#5D5F64'
+    },
+    heading: {
+        color: '#F1F1F1',
+        fontSize: 24,
+        fontWeight: '800',
+        flexGrow: 1
+    },
+    icon: {
+        height: 60,
+        width: 60,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        // backgroundColor: 'red'
+    },
+    header: {
+        flexDirection: 'row',
+        alignItems: 'center'
+    },
+    button: {
+        paddingVertical: 10,
+        borderRadius: 8,
+        backgroundColor: '#323032',
+        alignItems: 'center'
+    },
+    button_text: {
+        color: '#ed4339',
+        fontSize: 18
+    },
+    hair: {
+        marginVertical: 20,
+        borderBottomColor: '#323032',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+    },
+    deletion_info: {
+        color: '#929196',
+        marginTop: 20,
+        textAlign: 'center'
+    },
+    buttons: {
+        marginTop: 16
+    },
+    deletion_text: {
+        color: '#ed4339',
+        fontSize: 18
+    }
+})
