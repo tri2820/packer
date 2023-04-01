@@ -317,11 +317,12 @@ export default function App() {
   }
 
   const submitComment = async (text: string, selectedComment: any, post_id: string) => {
-    console.log('submit content', selectedComment.id, post_id)
+    const parent_id = selectedComment?.id ?? null;
+    console.log('submit content', parent_id, post_id)
     const body = {
       content: text,
       post_id: post_id,
-      parent_id: selectedComment.id,
+      parent_id: parent_id,
       need_bot_comment: true
     }
 
@@ -343,7 +344,7 @@ export default function App() {
       created_at: new Date(),
       content: text,
       author_name: user.user_metadata.full_name,
-      parent_id: selectedComment.id,
+      parent_id: parent_id,
       post_id: post_id,
       blockRequestChildren: true
     }
