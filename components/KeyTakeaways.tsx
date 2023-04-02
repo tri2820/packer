@@ -49,7 +49,7 @@ function KeyTakeaways(props: any) {
                     padding: 2,
                     marginRight: 8,
                 }}>
-                    <FontAwesome5 name='pen' size={16} color="#F2C740" />
+                    <FontAwesome5 name='pen' size={16} color="#FFC542" />
                 </View>
 
                 <Text style={{

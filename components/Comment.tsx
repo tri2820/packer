@@ -226,7 +226,7 @@ const mdstyles: MarkdownStyles = {
         marginTop: 0,
     },
     link: {
-        color: '#F2C740',
+        color: '#FFC542',
         marginTop: 0,
 
     },
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
         marginVertical: 4,
         paddingTop: 4,
         paddingBottom: 4,
-        borderLeftColor: 'white',
+        borderLeftColor: '#FFC542',
         borderLeftWidth: 2,
         paddingLeft: 16,
         marginLeft: 16,

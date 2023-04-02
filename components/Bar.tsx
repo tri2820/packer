@@ -189,7 +189,7 @@ function Bar(props: any) {
             <GestureDetector gesture={gesture}>
                 <Animated.View style={[{
                     top: props.wallHeight,
-                    backgroundColor: mode.tag == 'Comment' ? '#313337' : '#151316',
+                    backgroundColor: mode.tag == 'Comment' ? '#272727' : '#151316',
                     height: HEIGHT
                 }, styles.sheet, barStyles]}
                 >
@@ -252,7 +252,7 @@ function Bar(props: any) {
                                             placeholderTextColor='#C2C2C2'
                                             style={styles.textinput}
                                             keyboardAppearance='dark'
-                                            selectionColor='#F2C740'
+                                            selectionColor='#FFC542'
                                         />
 
                                         {focused &&
@@ -264,7 +264,7 @@ function Bar(props: any) {
                                                     justifyContent: 'flex-start'
                                                 }}
                                             >
-                                                <Ionicons name="send" size={24} color='#F2C740' />
+                                                <Ionicons name="send" size={24} color='#FFC542' />
                                             </TouchableOpacity>
                                         }
                                     </View>

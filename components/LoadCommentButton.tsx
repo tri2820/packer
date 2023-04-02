@@ -15,7 +15,7 @@ function LoadCommentButton(props: any) {
         ? <TouchableOpacity style={
             {
                 marginLeft: props.level <= 1 ? 0 : (16 * props.level) + props.level == 0 ? 0 : (props.level == 1 ? 2 : 18),
-                backgroundColor: props.mode.tag == 'Comment' ? '#2B2D31' : '#2C2C2C',
+                backgroundColor: props.mode.tag == 'Comment' ? '#2e2e2e' : '#1f1c21',
                 marginBottom: 8,
                 alignSelf: 'center',
                 paddingVertical: 8,

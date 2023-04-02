@@ -156,7 +156,7 @@ function Post(props: any) {
     const keyExtractor = (item: any) => item.id
 
     return <View style={{
-        backgroundColor: mode.tag == 'Comment' ? '#313337' : '#151316',
+        backgroundColor: mode.tag == 'Comment' ? '#272727' : '#151316',
         height: props.height
     }}>
         {
