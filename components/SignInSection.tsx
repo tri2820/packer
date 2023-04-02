@@ -71,28 +71,29 @@ function SignInSection(props: any) {
 
             <Text style={styles.text_2}>Together with Packer.</Text>
 
-            <View style={styles.loginButton}>
-                <Ionicons.Button name='logo-apple' style={styles.brandLogo}
-                    iconStyle={styles.brandIconApple}
-                    color='black'
-                    onPress={signInWithApple}>
-                    <Text style={styles.brandText}>
-                        Sign in with Apple
-                    </Text>
-                </Ionicons.Button>
-            </View>
+            <View style={styles.loginButtons}>
+                <View style={styles.loginButton}>
+                    <Ionicons.Button name='logo-apple' style={styles.brandLogo}
+                        iconStyle={styles.brandIconApple}
+                        color='black'
+                        onPress={signInWithApple}>
+                        <Text style={styles.brandText}>
+                            Sign in with Apple
+                        </Text>
+                    </Ionicons.Button>
+                </View>
 
-            <View style={styles.loginButton}>
-                <Ionicons.Button name='logo-google' style={styles.brandLogo}
-                    iconStyle={styles.brandIcon}
-                    color='black'
-                    onPress={signInWithGoogle}>
-                    <Text style={styles.brandText}>
-                        Sign in with Google
-                    </Text>
-                </Ionicons.Button>
+                <View style={styles.loginButton}>
+                    <Ionicons.Button name='logo-google' style={styles.brandLogo}
+                        iconStyle={styles.brandIcon}
+                        color='black'
+                        onPress={signInWithGoogle}>
+                        <Text style={styles.brandText}>
+                            Sign in with Google
+                        </Text>
+                    </Ionicons.Button>
+                </View>
             </View>
-
             <View style={{
                 position: 'absolute',
                 left: 0,
@@ -156,8 +157,11 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         textAlign: 'center'
     },
+    loginButtons: {
+        marginTop: 24
+    },
     loginButton: {
-        marginTop: 32,
+        marginVertical: 10,
         width: 250,
         marginLeft: 'auto',
         marginRight: 'auto',
