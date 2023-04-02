@@ -24,11 +24,7 @@ const quote: MarkdownRule = {
         // console.log('debug render', node, output, styles)
         const tag = <View
             key={state.key}
-            style={{
-                borderLeftColor: '#6F6F6F',
-                borderLeftWidth: 6,
-                marginBottom: -32
-            }}>
+            style={blockQuoteView}>
             <Text
                 style={styles.blockQuote}
             >
@@ -269,7 +265,11 @@ const mdstyles: MarkdownStyles = {
     },
 }
 
-
+const blockQuoteView = {
+    borderLeftColor: '#6F6F6F',
+    borderLeftWidth: 6,
+    marginBottom: -32
+}
 
 const styles = StyleSheet.create({
     reply_text: {
