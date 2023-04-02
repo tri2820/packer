@@ -15,18 +15,17 @@ const theEmptyMode = {
 };
 
 function Wall(props: any) {
-    const { mode, posts, requestPost, comments, setMode, setSelectedComment, requestComments } = props;
-    const _setMode = React.useCallback(setMode, []);
-    const _setSelectedComment = React.useCallback(setSelectedComment, []);
-    const _requestComments = React.useCallback(requestComments, []);
+    const _setMode = React.useCallback(props.setMode, []);
+    const _setSelectedComment = React.useCallback(props.setSelectedComment, []);
+    const _requestComments = React.useCallback(props.requestComments, []);
 
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
         const scrolledOn = props.activePostIndex == index;
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
-        const cs = scrolledOn ? comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
+        const cs = scrolledOn ? props.comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
         return <MemoPost
-            mode={scrolledOn ? mode : theEmptyMode}
+            mode={scrolledOn ? props.mode : theEmptyMode}
             height={props.height}
             post={shouldActive ? item : null}
             shouldActive={shouldActive}
@@ -41,7 +40,7 @@ function Wall(props: any) {
     const keyExtractor = (item: any) => item.id
     const onEndReached = () => {
         console.log('wall on end reached')
-        requestPost()
+        props.requestPost()
     }
     const onScroll = (event: any) => {
         let offset = event.nativeEvent.contentOffset.y;
@@ -60,12 +59,12 @@ function Wall(props: any) {
                 width: constants.width,
                 height: props.height
             }}
-            scrollEnabled={mode.tag == 'Normal'}
+            scrollEnabled={props.mode.tag == 'Normal'}
             // Only works on IOS
             pagingEnabled={true}
             {...androidPagingFallback}
             disableIntervalMomentum
-            data={posts}
+            data={props.posts}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             onEndReachedThreshold={2}

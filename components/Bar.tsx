@@ -13,7 +13,6 @@ const INSETS_OFFSET_BOTTOM = 200;
 const HANDLER_HEIGHT = 20;
 
 function Bar(props: any) {
-    const { mode, setMode, selectedComment, setSelectedComment } = props;
     const [text, setText] = useState('');
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
@@ -26,7 +25,7 @@ function Bar(props: any) {
     const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
     const ref = useRef<any>(undefined);
-    if (selectedComment) {
+    if (props.selectedComment) {
         ref.current?.focus();
     }
 
@@ -124,7 +123,7 @@ function Bar(props: any) {
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 if (value == 0) {
                     runOnJS(setUserListMode)('normal')
-                    if (props.user === null) runOnJS(setSelectedComment)(null)
+                    if (props.user === null) runOnJS(props.setSelectedComment)(null)
                 }
                 return;
             }
@@ -140,13 +139,13 @@ function Bar(props: any) {
     }
 
     const hideInput = () => {
-        setSelectedComment(null);
+        props.setSelectedComment(null);
         changeState('minimize');
         ref.current?.blur();
     }
 
     const setModeNormal = () => {
-        setMode({ tag: 'Normal' });
+        props.setMode({ tag: 'Normal' });
     }
 
     const onFocus = () => {
@@ -167,21 +166,21 @@ function Bar(props: any) {
 
     const send = () => {
         if (text.trim().length > 0) {
-            props.onSubmit(text, selectedComment);
+            props.onSubmit(text, props.selectedComment);
 
         }
         ref.current?.blur();
         setText('');
-        setSelectedComment(null);
+        props.setSelectedComment(null);
     }
 
     const open = () => {
-        Linking.openURL(mode.value).catch(error =>
+        Linking.openURL(props.mode.value).catch(error =>
             console.warn('An error occurred: ', error),
         )
     }
 
-    const placeHolder = selectedComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
+    const placeHolder = props.selectedComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
 
     return (
         <>
@@ -194,12 +193,12 @@ function Bar(props: any) {
             <GestureDetector gesture={gesture}>
                 <Animated.View style={[{
                     top: props.wallHeight,
-                    backgroundColor: mode.tag == 'Comment' ? '#272727' : '#151316',
+                    backgroundColor: props.mode.tag == 'Comment' ? '#272727' : '#151316',
                     height: HEIGHT
                 }, styles.sheet, barStyles]}
                 >
                     {
-                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
+                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
                     }
 
                     <View style={styles.handler}>
@@ -212,7 +211,7 @@ function Bar(props: any) {
                         <View style={styles.input}>
                             {/* Close Button */}
                             {
-                                (mode.tag == 'Comment' || mode.tag == 'App') &&
+                                (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
                                 !focused &&
                                 <TouchableOpacity onPress={setModeNormal}>
                                     <Animated.View style={animatedStyles} >
@@ -220,7 +219,7 @@ function Bar(props: any) {
                                             size={26}
                                             color='#C2C2C2'
                                             style={{
-                                                marginRight: mode.tag == 'Comment' ? 8 : 0,
+                                                marginRight: props.mode.tag == 'Comment' ? 8 : 0,
                                             }} />
                                     </Animated.View>
                                 </TouchableOpacity>
@@ -228,11 +227,11 @@ function Bar(props: any) {
 
 
                             {
-                                mode.tag == 'App' ?
+                                props.mode.tag == 'App' ?
                                     <>
                                         <View style={styles.sourceNameView}>
                                             <Text style={styles.sourceName}>{
-                                                getSourceName(mode.value)
+                                                getSourceName(props.mode.value)
                                             }
                                             </Text>
                                         </View>

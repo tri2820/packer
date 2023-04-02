@@ -24,30 +24,29 @@ const INJECTED_JAVASCRIPT = `(function() {
 })();`;
 
 function Main(props: any) {
-  const { mode, setMode, setSelectedComment, selectedComment } = props;
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
 
   useEffect(() => {
-    if (mode.tag == 'Normal') return;
+    if (props.mode.tag == 'Normal') return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-  }, [mode.tag])
+  }, [props.mode.tag])
 
 
   const onMessage = (event: WebViewMessageEvent) => {
-    if (mode.tag != 'App') return;
-    setMode({
+    if (props.mode.tag != 'App') return;
+    props.setMode({
       tag: 'App',
-      value: mode.value,
+      value: props.mode.value,
       insetsColor: JSON.parse(event.nativeEvent.data)
     })
   }
 
   const statusBarColor = () => {
-    if (mode.tag != 'App') {
+    if (props.mode.tag != 'App') {
       return 'light'
     }
-    const [r, g, b, a] = mode.insetsColor.slice(mode.insetsColor[3] == 'a' ? 6 : 5, -1).split(',').map((s: any) => parseInt(s));
+    const [r, g, b, a] = props.mode.insetsColor.slice(props.mode.insetsColor[3] == 'a' ? 6 : 5, -1).split(',').map((s: any) => parseInt(s));
     if (r == 0 && g == 0 && b == 0) {
       return 'dark'
     }
@@ -68,7 +67,7 @@ function Main(props: any) {
   });
   const gesture = Gesture
     .Pan()
-    .enabled(mode.tag === 'Comment' || mode.tag === 'App')
+    .enabled(props.mode.tag === 'Comment' || props.mode.tag === 'App')
     .onChange((e) => {
 
       if (e.changeX < 0) {
@@ -84,7 +83,7 @@ function Main(props: any) {
     .onEnd((event, success) => {
       offset.value = withSpring(0, { velocity: event.velocityX, damping: 5, mass: 0.1 });
       if (offset.value < 30) return;
-      runOnJS(setMode)({ tag: 'Normal' })
+      runOnJS(props.setMode)({ tag: 'Normal' })
     });
 
   const wallHeight = constants.height - minBarHeight - insets.bottom;
@@ -99,18 +98,18 @@ function Main(props: any) {
         <Animated.View style={animatedStyles}>
           <Wall
             requestComments={props.requestComments}
-            setSelectedComment={setSelectedComment}
-            setMode={setMode}
+            setSelectedComment={props.setSelectedComment}
+            setMode={props.setMode}
             requestPost={props.requestPost}
             posts={props.posts}
             comments={props.comments}
-            mode={mode}
+            mode={props.mode}
             activePostIndex={props.activePostIndex}
             setActivePostIndex={props.setActivePostIndex}
             height={wallHeight}
           />
           {
-            mode.tag === 'App' && <Animated.View style={{
+            props.mode.tag === 'App' && <Animated.View style={{
               position: 'absolute',
               backgroundColor: 'white',
               height: constants.height - insets.bottom - minBarHeight,
@@ -122,15 +121,15 @@ function Main(props: any) {
               <WebView
                 containerStyle={{
                   paddingTop: insets.top,
-                  backgroundColor: mode.insetsColor
+                  backgroundColor: props.mode.insetsColor
                 }}
                 decelerationRate='normal'
-                source={{ uri: mode.value }}
+                source={{ uri: props.mode.value }}
                 onNavigationStateChange={(navState) => {
-                  setMode({
-                    tag: mode.tag,
+                  props.setMode({
+                    tag: props.mode.tag,
                     value: navState.url,
-                    insetsColor: mode.insetsColor
+                    insetsColor: props.mode.insetsColor
                   });
                 }}
                 mediaPlaybackRequiresUserAction={true}
@@ -143,11 +142,11 @@ function Main(props: any) {
           }
 
           <Bar
-            mode={mode}
-            setMode={setMode}
-            selectedCommenText={selectedComment?.content}
-            setSelectedComment={setSelectedComment}
-            selectedComment={selectedComment}
+            mode={props.mode}
+            setMode={props.setMode}
+            selectedCommenText={props.selectedComment?.content}
+            setSelectedComment={props.setSelectedComment}
+            selectedComment={props.selectedComment}
             onSubmit={props.onSubmit}
             user={props.user}
             setUser={props.setUser}

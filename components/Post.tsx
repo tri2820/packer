@@ -57,14 +57,13 @@ const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any):
 }
 
 function Post(props: any) {
-    const { mode, post, comments: myComments, setSelectedComment, requestComments, setMode } = props;
     const [refreshing, setRefreshing] = useState(false);
     const [videoPlaying, setVideoPlaying] = useState(false);
     const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
 
-    const uiList = splitAt(myComments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity);
+    const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity);
     const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
     const [timesLoaded, setTimesLoaded] = useState(0);
 
@@ -79,7 +78,7 @@ function Post(props: any) {
         setLoadState('loading');
 
         timer.current = setTimeout(async () => {
-            await requestComments(post.id, null);
+            await props.requestComments(props.post.id, null);
             setLoadState('not_loading')
             setTimesLoaded(t => t + 1);
         }, 1000);
@@ -98,22 +97,22 @@ function Post(props: any) {
 
     useEffect(() => {
         if (!props.scrolledOn) return;
-        if (mode.tag == 'Normal') {
+        if (props.mode.tag == 'Normal') {
             ref.current?.scrollToOffset({ offset: -insets.top });
             return;
         }
 
-        if (mode.tag == 'Comment') {
-            myComments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+        if (props.mode.tag == 'Comment') {
+            props.comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
             return;
         }
-    }, [mode])
+    }, [props.mode])
 
     const onRefresh = React.useCallback(() => {
-        setMode({ tag: 'Normal' });
+        props.setMode({ tag: 'Normal' });
     }, []);
 
-    const backToApp = React.useCallback((target: string) => setMode({
+    const backToApp = React.useCallback((target: string) => props.setMode({
         tag: 'App',
         value: target,
         insetsColor: 'rgba(0, 0, 0, 0)'
@@ -129,7 +128,7 @@ function Post(props: any) {
     }, []);
 
     const changeModeToComment = React.useCallback(() => {
-        setMode({ tag: 'Comment' })
+        props.setMode({ tag: 'Comment' })
     }, [])
 
     const renderItem = ({ item, index }: any) => {
@@ -137,10 +136,10 @@ function Post(props: any) {
             <MemoLoadCommentButton
                 key={item.id}
                 level={item.level}
-                post_id={post.id}
+                post_id={props.post.id}
                 ofId={item.ofId}
                 num={item.num}
-                requestComments={requestComments}
+                requestComments={props.requestComments}
                 mode={props.mode}
             />
             :
@@ -148,7 +147,7 @@ function Post(props: any) {
                 key={item.id}
                 comment={item}
                 backToApp={backToApp}
-                setSelectedComment={setSelectedComment}
+                setSelectedComment={props.setSelectedComment}
                 toggle={toggle}
             />
     }
@@ -156,16 +155,16 @@ function Post(props: any) {
     const keyExtractor = (item: any) => item.id
 
     return <View style={{
-        backgroundColor: mode.tag == 'Comment' ? '#272727' : '#151316',
+        backgroundColor: props.mode.tag == 'Comment' ? '#272727' : '#151316',
         height: props.height
     }}>
         {
             props.scrolledOn &&
             <FlatList
                 showsVerticalScrollIndicator={false}
-                listKey={post.id}
+                listKey={props.post.id}
                 ref={ref}
-                scrollEnabled={mode.tag == 'Comment'}
+                scrollEnabled={props.mode.tag == 'Comment'}
                 refreshControl={
                     <RefreshControl
                         refreshing={refreshing}
@@ -183,11 +182,11 @@ function Post(props: any) {
                     <View style={{
                         paddingTop: insets.top
                     }}>
-                        <VideoPlayer videoPlaying={videoPlaying} source_url={post.source_url} />
+                        <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
                         <View style={styles.padding}>
-                            <PostHeader post={post} setMode={setMode} />
-                            <KeyTakeaways content={post.keytakeaways} />
-                            {timesLoaded > 0 && myComments.length == 0 && <MemoNoComment />}
+                            <PostHeader post={props.post} setMode={props.setMode} />
+                            <KeyTakeaways content={props.post.keytakeaways} />
+                            {timesLoaded > 0 && props.comments.length == 0 && <MemoNoComment />}
                         </View>
                     </View>
                 }
@@ -195,7 +194,7 @@ function Post(props: any) {
         }
 
         {
-            mode.tag == 'Normal' &&
+            props.mode.tag == 'Normal' &&
             <>
                 <LinearGradient
                     colors={gradient}
@@ -203,7 +202,7 @@ function Post(props: any) {
                     pointerEvents='none'
                 />
                 {
-                    myComments.length > 0 && props.shouldActive &&
+                    props.comments.length > 0 && props.shouldActive &&
                     <View style={styles.more_discussion_view}>
                         <MemoMoreDiscussionsButton onPress={changeModeToComment} />
                     </View>
