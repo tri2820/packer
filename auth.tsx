@@ -7,7 +7,7 @@ export const signIn = async (provider: 'google' | 'apple') => {
         useProxy: false,
         path: '/auth/callback',
     });
-    const authUrl = `${supabaseClientUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${returnUrl}`;
+    const authUrl = `${supabaseClientUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${returnUrl}&prompt=select_account+consent`;
 
     const authSessionResult = await startAsync({
         returnUrl,

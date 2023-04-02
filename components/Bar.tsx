@@ -194,7 +194,7 @@ function Bar(props: any) {
                 }, styles.sheet, barStyles]}
                 >
                     {
-                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={mode} user={props.user} setUser={props.setUser} />
+                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
                     }
 
                     <View style={styles.handler}>
