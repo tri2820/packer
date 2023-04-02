@@ -13,7 +13,7 @@ const INSETS_OFFSET_BOTTOM = 200;
 const HANDLER_HEIGHT = 20;
 
 function Bar(props: any) {
-    const { mode, setMode, selectingComment, setSelectedComment } = props;
+    const { mode, setMode, selectedComment, setSelectedComment } = props;
     const [text, setText] = useState('');
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
@@ -26,7 +26,7 @@ function Bar(props: any) {
     const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
     const ref = useRef<any>(undefined);
-    if (selectingComment) {
+    if (selectedComment) {
         ref.current?.focus();
     }
 
@@ -122,7 +122,10 @@ function Bar(props: any) {
                 const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0;
                 _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
-                if (value == 0) runOnJS(setUserListMode)('normal')
+                if (value == 0) {
+                    runOnJS(setUserListMode)('normal')
+                    if (props.user === null) runOnJS(setSelectedComment)(null)
+                }
                 return;
             }
 
@@ -164,10 +167,12 @@ function Bar(props: any) {
 
     const send = () => {
         if (text.trim().length > 0) {
-            props.onSubmit(text);
+            props.onSubmit(text, selectedComment);
+
         }
         ref.current?.blur();
         setText('');
+        setSelectedComment(null);
     }
 
     const open = () => {
@@ -176,7 +181,7 @@ function Bar(props: any) {
         )
     }
 
-    const placeHolder = selectingComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
+    const placeHolder = selectedComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
 
     return (
         <>

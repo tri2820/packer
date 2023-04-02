@@ -147,7 +147,7 @@ function Main(props: any) {
             setMode={setMode}
             selectedCommenText={selectedComment?.content}
             setSelectedComment={setSelectedComment}
-            selectingComment={selectedComment ? true : false}
+            selectedComment={selectedComment}
             onSubmit={props.onSubmit}
             user={props.user}
             setUser={props.setUser}
@@ -423,10 +423,9 @@ export default function App() {
     updateComment(childId, 'blinking', false)
   }
 
-  const onSubmit = (text: string) => {
+  const onSubmit = (text: string, selectedComment: any) => {
     console.log('submitted', activePostIndex);
     submitComment(text, selectedComment, posts[activePostIndex].id);
-    setSelectedComment(null);
   }
 
   const requestComments = async (post_id: string, parent_id: string | null) => {
