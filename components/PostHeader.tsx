@@ -42,7 +42,7 @@ function PostHeader(props: any) {
             </View>
 
             <Text style={[{
-                color: '#E6E6E6',
+                color: 'white',
                 fontWeight: 'bold',
                 fontSize: 18,
                 marginBottom: 8

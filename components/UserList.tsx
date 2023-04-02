@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     button: {
         paddingVertical: 10,
         borderRadius: 8,
-        backgroundColor: '#323032',
+        backgroundColor: '#2B2D31',
         alignItems: 'center'
     },
     button_text: {
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     },
     hair: {
         marginVertical: 20,
-        borderBottomColor: '#323032',
+        borderBottomColor: '#3C3D3F',
         borderBottomWidth: StyleSheet.hairlineWidth,
     },
     deletion_info: {

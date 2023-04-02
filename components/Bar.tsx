@@ -189,7 +189,7 @@ function Bar(props: any) {
             <GestureDetector gesture={gesture}>
                 <Animated.View style={[{
                     top: props.wallHeight,
-                    backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
+                    backgroundColor: mode.tag == 'Comment' ? '#313337' : '#151316',
                     height: HEIGHT
                 }, styles.sheet, barStyles]}
                 >
@@ -303,12 +303,14 @@ const styles = StyleSheet.create({
         height: HANDLER_HEIGHT,
         alignItems: 'center',
         justifyContent: 'flex-end',
+        // backgroundColor: 'blue'
     },
     handler_inside: {
         height: 6,
         width: 40,
         backgroundColor: '#5D5F64',
-        borderRadius: 3
+        borderRadius: 3,
+        marginBottom: 8
     },
     inputbar: {
         paddingLeft: 20,
@@ -326,13 +328,14 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'flex-start'
     },
     inputHeader: {
         height: '100%',
         width: '100%',
         flexDirection: 'row',
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
+        // backgroundColor: 'red'
     },
     textinput: {
         color: '#F1F1F1',
@@ -344,6 +347,9 @@ const styles = StyleSheet.create({
         width: '100%',
         flex: 1,
         alignItems: 'center',
+        justifyContent: 'center',
+        // backgroundColor: 'red',
+        height: 26
     },
     sourceName: {
         color: '#C2C2C2',

@@ -141,6 +141,7 @@ function Post(props: any) {
                 ofId={item.ofId}
                 num={item.num}
                 requestComments={requestComments}
+                mode={props.mode}
             />
             :
             <MemoComment
@@ -155,7 +156,7 @@ function Post(props: any) {
     const keyExtractor = (item: any) => item.id
 
     return <View style={{
-        backgroundColor: mode.tag == 'Comment' ? '#212121' : '#151316',
+        backgroundColor: mode.tag == 'Comment' ? '#313337' : '#151316',
         height: props.height
     }}>
         {
@@ -217,10 +218,9 @@ export const MemoPost = memo(Post);
 const styles = StyleSheet.create({
     more_discussion_view: {
         position: 'absolute',
-        bottom: 16,
-        alignSelf: 'center',
-        alignItems: 'center',
-        justifyContent: 'center'
+        bottom: 12,
+        right: 16
+        // alignSelf: 'center',
     },
     gradient: {
         width: '100%',

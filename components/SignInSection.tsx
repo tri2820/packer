@@ -56,7 +56,7 @@ function SignInSection(props: any) {
             <ImageBackground style={styles.background}
                 source={require('../assets/loginBackground.jpg')}
             >
-                <LinearGradient colors={['transparent', props.mode.tag == 'Comment' ? '#212121' : '#151316']} style={styles.linear}
+                <LinearGradient colors={['transparent', props.mode.tag == 'Comment' ? '#313337' : '#151316']} style={styles.linear}
                     pointerEvents='none'
                 />
             </ImageBackground>

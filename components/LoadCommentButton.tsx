@@ -13,43 +13,39 @@ function LoadCommentButton(props: any) {
 
     return visible
         ? <TouchableOpacity style={
-            [
-                {
-                    marginLeft: props.level <= 1 ? 0 : (16 * props.level) + props.level == 0 ? 0 : (props.level == 1 ? 2 : 18),
-                },
-                styles.button
-            ]}
+            {
+                marginLeft: props.level <= 1 ? 0 : (16 * props.level) + props.level == 0 ? 0 : (props.level == 1 ? 2 : 18),
+                backgroundColor: props.mode.tag == 'Comment' ? '#2B2D31' : '#2C2C2C',
+                marginBottom: 8,
+                alignSelf: 'center',
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                borderRadius: 4
+
+            }}
             onPress={load}
         >
             <Text style={styles.text}>
-                Load {props.num} more
+                {props.num} more replies
             </Text>
         </TouchableOpacity>
         :
         <ActivityIndicator
             style={styles.loading_indicator}
             size="small"
-            color="#6b5920" />
+        />
 }
 
 export default LoadCommentButton;
 export const MemoLoadCommentButton = memo(LoadCommentButton);
 
 const styles = StyleSheet.create({
-    button: {
-        backgroundColor: '#2C2C2C',
-        marginBottom: 8,
-        alignSelf: 'center',
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 4
-    },
     text: {
-        color: '#e6e6e6',
-        fontWeight: '500'
+        color: '#7E8084',
+        fontWeight: '400'
     },
     loading_indicator: {
-        marginBottom: 8,
+        marginBottom: 5,
         alignSelf: 'center',
         paddingVertical: 8,
         paddingHorizontal: 16
