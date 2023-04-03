@@ -32,6 +32,12 @@ function Wall(props: any) {
             requestComments={_requestComments}
             setMode={_setMode}
         />
+        // <View style={{
+        //     height: props.height,
+        //     width: '100%',
+        //     backgroundColor: randomColor()
+        // }}
+        // />
     }
 
     const keyExtractor = (item: any) => item.id

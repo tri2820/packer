@@ -167,7 +167,7 @@ function Post(props: any) {
                 ref={ref}
                 scrollEnabled={props.mode.tag == 'Comment'}
                 refreshControl={
-                    <RefreshControl
+                    Platform.OS == 'android' ? undefined : <RefreshControl
                         refreshing={refreshing}
                         onRefresh={onRefresh}
                         colors={['transparent']}
