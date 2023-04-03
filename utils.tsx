@@ -1,4 +1,4 @@
-import { Dimensions, PixelRatio, View } from "react-native";
+import { Dimensions, PixelRatio, Platform, View } from "react-native";
 import Constants from 'expo-constants';
 
 export const constants = {
@@ -7,6 +7,17 @@ export const constants = {
     pixelratio: PixelRatio.get(),
     navigationBarHeight: Dimensions.get('screen').height - Dimensions.get('window').height - Constants.statusBarHeight
 }
+
+export function scaledown(size: number) {
+    const newSize = size / PixelRatio.getFontScale();
+    return newSize
+}
+
+export function scaleup(size: number) {
+    const newSize = size * PixelRatio.getFontScale();
+    return newSize
+}
+
 
 interface Normal {
     readonly tag: 'Normal';

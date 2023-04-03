@@ -312,7 +312,7 @@ export default function App() {
 
 
 
-  let inited = false;
+
 
 
   const updateComment = (id: string, key: any, value: any) => {
@@ -445,9 +445,10 @@ export default function App() {
     await rp(sharedAsyncState, setPosts)
   }
 
+  const [inited, setInited] = useState(false);
   useEffect(() => {
     if (inited) return;
-    inited = true;
+    setInited(true);
     requestPost();
   }, [])
 

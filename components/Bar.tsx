@@ -5,7 +5,7 @@ import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View 
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
 import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname } from '../utils';
+import { constants, normalizedHostname, scaleup } from '../utils';
 import SignInSection from './SignInSection';
 import UserList from './UserList';
 import Constants from 'expo-constants';
@@ -18,7 +18,7 @@ function Bar(props: any) {
     const [text, setText] = useState('');
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
-    const MARGIN_TOP = insets.top + 170;
+    const MARGIN_TOP = insets.top + scaleup(170);
     const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
     const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP - (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
     const offset = useSharedValue(0);

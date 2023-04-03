@@ -2,11 +2,11 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { StyleSheet, Image, ImageBackground, Linking, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Image, ImageBackground, Linking, Text, TouchableOpacity, View, Platform } from 'react-native';
 import Animated, { FadeOut, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signIn } from '../auth';
-import { constants } from '../utils';
+import { constants, scaledown, scaleup } from '../utils';
 
 
 function SignInSection(props: any) {
@@ -135,8 +135,8 @@ const styles = StyleSheet.create({
     },
     icon: {
         marginTop: 100,
-        width: 60,
-        height: 60,
+        width: 80,
+        height: 80,
         borderRadius: 4,
         // left: 'auto',
         // right: 'auto',
@@ -145,14 +145,14 @@ const styles = StyleSheet.create({
     text_1: {
         marginTop: 24,
         color: 'white',
-        fontSize: 30,
+        fontSize: scaledown(30),
         fontWeight: '700',
         alignSelf: 'center',
         textAlign: 'center'
     },
     text_2: {
         color: 'white',
-        fontSize: 30,
+        fontSize: scaledown(30),
         fontWeight: '700',
         alignSelf: 'center',
         textAlign: 'center'
@@ -193,12 +193,13 @@ const styles = StyleSheet.create({
     },
     brandText: {
         fontWeight: '600',
-        fontSize: 18,
+        fontSize: scaledown(18),
         // paddingTop: 2,
         // backgroundColor: 'blue'
     },
     docText: {
         color: '#f1f1f1',
-        fontWeight: '300'
+        fontWeight: '300',
+        fontSize: scaledown(16)
     }
 })
