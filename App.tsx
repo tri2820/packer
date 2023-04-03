@@ -1,7 +1,8 @@
+import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
-import { StatusBar } from 'expo-status-bar';
+import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
 import React, { memo, useEffect, useState } from 'react';
-import { View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -9,14 +10,14 @@ import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { constants, Mode, sharedAsyncState } from './utils';
+import { calcStatusBarColor, constants, Mode, sharedAsyncState } from './utils';
 // @ts-ignore
 import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
 // @ts-ignore
 import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
 // @ts-ignore
 import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
-
+import * as NavigationBar from 'expo-navigation-bar';
 const INJECTED_JAVASCRIPT = `(function() {
   window.ReactNativeWebView.postMessage(JSON.stringify(
     window.getComputedStyle( document.documentElement ,null).getPropertyValue('background-color')
@@ -26,6 +27,18 @@ const INJECTED_JAVASCRIPT = `(function() {
 function Main(props: any) {
   const insets = useSafeAreaInsets();
   const minBarHeight = 60;
+  const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
+
+  useEffect(() => {
+    if (props.mode.tag == 'App') return;
+    setWebviewBackgroundColor('rgb(0,0,0)');
+    setStatusBarStyle('light')
+    if (Platform.OS == 'ios') return;
+    const color = props.mode.tag == 'Comment' ? '#272727' : '#151316';
+    NavigationBar.setBackgroundColorAsync(color);
+    setStatusBarBackgroundColor(color, false);
+  }, [props.mode])
+
 
   useEffect(() => {
     if (props.mode.tag == 'Normal') return;
@@ -35,26 +48,15 @@ function Main(props: any) {
 
   const onMessage = (event: WebViewMessageEvent) => {
     if (props.mode.tag != 'App') return;
-    props.setMode({
-      tag: 'App',
-      value: props.mode.value,
-      insetsColor: JSON.parse(event.nativeEvent.data)
-    })
-  }
+    const backgroundColor = JSON.parse(event.nativeEvent.data);
+    console.log('backgroundColor', backgroundColor)
+    setWebviewBackgroundColor(backgroundColor)
 
-  const statusBarColor = () => {
-    if (props.mode.tag != 'App') {
-      return 'light'
-    }
-    const [r, g, b, a] = props.mode.insetsColor.slice(props.mode.insetsColor[3] == 'a' ? 6 : 5, -1).split(',').map((s: any) => parseInt(s));
-    if (r == 0 && g == 0 && b == 0) {
-      return 'dark'
-    }
-    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
-    if (luma < 40) {
-      return 'light'
-    }
-    return 'dark'
+    // TODO: Android this, android that, android with translucent status bar or not
+    if (Platform.OS == 'android') return;
+    const color = calcStatusBarColor(backgroundColor);
+    console.log('color', color)
+    setStatusBarStyle(color)
   }
 
   const offset = useSharedValue(0);
@@ -86,7 +88,15 @@ function Main(props: any) {
       runOnJS(props.setMode)({ tag: 'Normal' })
     });
 
-  const wallHeight = constants.height - minBarHeight - insets.bottom;
+  // Cannot make status bar translucent on android :(
+  // Maybe check if status bar is translucent?
+  const wallHeight = constants.height
+    - (Platform.OS == 'android' ? 50 : 0)
+    - minBarHeight
+    - insets.bottom
+    ;
+
+
 
   return (
     <View style={{
@@ -111,7 +121,8 @@ function Main(props: any) {
           {
             props.mode.tag === 'App' && <Animated.View style={{
               position: 'absolute',
-              backgroundColor: 'white',
+              // Catch transparency
+              backgroundColor: 'black',
               height: constants.height - insets.bottom - minBarHeight,
               width: constants.width,
             }}
@@ -121,15 +132,14 @@ function Main(props: any) {
               <WebView
                 containerStyle={{
                   paddingTop: insets.top,
-                  backgroundColor: props.mode.insetsColor
+                  backgroundColor: webviewBackgroundColor
                 }}
                 decelerationRate='normal'
                 source={{ uri: props.mode.value }}
                 onNavigationStateChange={(navState) => {
                   props.setMode({
-                    tag: props.mode.tag,
-                    value: navState.url,
-                    insetsColor: props.mode.insetsColor
+                    tag: 'App',
+                    value: navState.url
                   });
                 }}
                 mediaPlaybackRequiresUserAction={true}
@@ -157,8 +167,6 @@ function Main(props: any) {
           />
         </Animated.View>
       </GestureDetector>
-
-      <StatusBar style={statusBarColor()} />
     </View>
 
   )

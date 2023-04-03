@@ -115,7 +115,7 @@ function Post(props: any) {
     const backToApp = React.useCallback((target: string) => props.setMode({
         tag: 'App',
         value: target,
-        insetsColor: 'rgba(0, 0, 0, 0)'
+        // insetsColor: 'rgba(0, 0, 0, 0)'
     }), [])
 
     const toggle = React.useCallback((commentId: string, show: boolean) => {
@@ -159,9 +159,9 @@ function Post(props: any) {
         height: props.height
     }}>
         {
-            // Experiment
-            (Platform.OS == 'android' ? props.shouldActive : props.scrolledOn) &&
-            <FlatList
+            props.scrolledOn
+            &&
+            < FlatList
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}

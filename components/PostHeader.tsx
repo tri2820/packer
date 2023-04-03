@@ -18,7 +18,7 @@ function PostHeader(props: any) {
                 props.setMode({
                     tag: 'App',
                     value: props.post.source_url,
-                    insetsColor: 'rgba(0, 0, 0, 0)'
+                    // insetsColor: 'rgba(0, 0, 0, 0)'
                 })
             }}
         >

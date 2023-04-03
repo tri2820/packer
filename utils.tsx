@@ -1,8 +1,8 @@
 import { Dimensions, PixelRatio, View } from "react-native";
 
 export const constants = {
-    width: Dimensions.get('window').width,
-    height: Dimensions.get('window').height,
+    width: Dimensions.get('screen').width,
+    height: Dimensions.get('screen').height,
     pixelratio: PixelRatio.get()
 }
 
@@ -15,7 +15,21 @@ interface Comment {
 interface App {
     readonly tag: 'App';
     readonly value: string;
-    readonly insetsColor: string;
+    // readonly insetsColor: string;
+}
+
+export const calcStatusBarColor = (backgroundColor: any) => {
+    let [r, g, b, a] = backgroundColor.slice(backgroundColor.startsWith('rgba') ? 5 : 4, -1).split(',').map((s: any) => parseInt(s))
+
+    if (r == 0 && g == 0 && b == 0) {
+        return 'light'
+    }
+    const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+    if (luma < 40) {
+        return 'light'
+    }
+
+    return 'dark'
 }
 
 export const randomColor = () => {
