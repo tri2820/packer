@@ -94,7 +94,15 @@ function Main(props: any) {
   // Maybe check if status bar is translucent?
 
 
-  const [wallHeight, setWallHeight] = useState(0);
+  const [wallHeight, setWallHeight] = useState(constants.height
+    - (
+      Platform.OS == 'android'
+        ? constants.statusBarHeight +
+        (navigationBarVisible ? constants.navigationBarHeight : 0)
+        : 0
+    )
+    - insets.bottom
+    - minBarHeight)
 
   useEffect(() => {
     const wallHeight = constants.height
@@ -107,7 +115,7 @@ function Main(props: any) {
       - insets.bottom
       - minBarHeight;
     setWallHeight(wallHeight)
-  }, [navigationBarVisible])
+  }, [navigationBarVisible, insets.bottom])
 
   useEffect(() => {
     (async () => {
