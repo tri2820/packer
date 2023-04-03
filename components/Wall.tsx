@@ -1,14 +1,11 @@
 import * as React from 'react';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
+import Animated from 'react-native-reanimated';
 
-import { constants } from '../utils';
+import { constants, randomColor } from '../utils';
 import { MemoPost } from './Post';
 
-const androidPagingFallback = Platform.OS == 'android' && {
-    pagingEnabled: true,
-    decelerationRate: 0
-}
 const theEmptyList: any[] = [];
 const theEmptyMode = {
     tag: 'Normal'
@@ -53,7 +50,7 @@ function Wall(props: any) {
     }
 
     return (
-        <FlatList
+        <Animated.FlatList
             showsVerticalScrollIndicator={false}
             style={{
                 width: constants.width,
@@ -62,8 +59,6 @@ function Wall(props: any) {
             scrollEnabled={props.mode.tag == 'Normal'}
             // Only works on IOS
             pagingEnabled={true}
-            {...androidPagingFallback}
-            disableIntervalMomentum
             data={props.posts}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
