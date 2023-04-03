@@ -1,9 +1,11 @@
 import { Dimensions, PixelRatio, View } from "react-native";
+import Constants from 'expo-constants';
 
 export const constants = {
     width: Dimensions.get('screen').width,
     height: Dimensions.get('screen').height,
-    pixelratio: PixelRatio.get()
+    pixelratio: PixelRatio.get(),
+    navigationBarHeight: Dimensions.get('screen').height - Dimensions.get('window').height - Constants.statusBarHeight
 }
 
 interface Normal {

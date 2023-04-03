@@ -3,11 +3,13 @@ import * as React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
 import { supabaseClient } from '../supabaseClient';
 
 
 function UserList(props: any) {
+    const insets = useSafeAreaInsets();
     const signOutAndUpdateProfile = async () => {
         const signedOut = await signOut();
         if (!signedOut) return;
@@ -51,99 +53,105 @@ function UserList(props: any) {
     }
 
     return (
-
         <Animated.View style={[{
             marginHorizontal: 20,
             height: props.listHeight,
-            // backgroundColor: 'blue'
+            flex: 1
         }, userStyles]}
             exiting={FadeOut}
         >
-            {props.mode == 'normal' ?
-                <Animated.View
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                >
-                    <View>
-                        <View style={styles.header}>
-                            <Text style={styles.heading}>
-                                {
-                                    props.user.user_metadata.full_name
-                                }
-                            </Text>
+            {
+                props.mode == 'normal'
+                    ? <Animated.View
+                        entering={FadeIn}
+                        exiting={FadeOut}
+                        style={{
+                            // backgroundColor: 'blue',
+                            height: '100%'
+                        }}
+                    >
+                        <View>
+                            <View style={styles.header}>
+                                <Text style={styles.heading}>
+                                    {
+                                        props.user.user_metadata.full_name
+                                    }
+                                </Text>
 
-                            <TouchableOpacity onPress={openSettings} style={styles.icon} >
-                                <Ionicons name="settings-sharp" size={28} color='#C2C2C2' />
-                            </TouchableOpacity>
-                        </View>
-
-                        {/* <Text style={styles.username}>
-                            {
-                                // props.user.user_metadata.email
-                                '@default'
-                            }
-                        </Text> */}
-
-                        <Text style={styles.introduction}>
-                            Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
-                        </Text>
-
-                        <Text style={styles.h1}>
-                            My Discussions
-                        </Text>
-                    </View>
-                    <FlatList
-                        horizontal={false}
-                        showsVerticalScrollIndicator={false}
-                        listKey='userList'
-                        style={styles.discussions}
-                        data={[0, 1, 2, 3, 4]}
-                        // keyExtractor={keyExtractor}
-                        renderItem={() =>
-                            <View style={styles.discussion}>
-
+                                <TouchableOpacity onPress={openSettings} style={styles.icon} >
+                                    <Ionicons name="settings-sharp" size={28} color='#C2C2C2' />
+                                </TouchableOpacity>
                             </View>
-                        }
-                    />
-                </Animated.View> :
-                <Animated.View
-                    entering={FadeIn}
-                    exiting={FadeOut}
-                >
-                    <View>
-                        <View style={styles.header}>
-                            <Text style={styles.heading}>
-                                Settings
+
+                            <Text style={styles.introduction}>
+                                Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
                             </Text>
 
-                            <TouchableOpacity onPress={setModeNormal} style={styles.icon} >
-                                <Ionicons name="close" size={28} color='#C2C2C2' />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.buttons}>
-                            <TouchableOpacity onPress={signOutAndUpdateProfile} style={styles.button} >
-                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                                <Text style={styles.button_text}>Sign Out</Text>
-                            </TouchableOpacity>
-
-                            <View
-                                style={styles.hair}
-                            />
-
-                            <TouchableOpacity
-                                onPress={createDeleteConfirmationAlert}
-                                style={styles.button} >
-                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                                <Text style={styles.deletion_text}>Request account deletion</Text>
-                            </TouchableOpacity>
-
-                            <Text style={styles.deletion_info}>
-                                Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
+                            <Text style={styles.h1}>
+                                My Discussions
                             </Text>
                         </View>
-                    </View>
-                </Animated.View>
+                        {/* <View style={{
+                            backgroundColor: 'blue',
+                            alignSelf: 'stretch',
+                            flex: 1
+                        }}> */}
+                        <FlatList
+                            horizontal={false}
+                            showsVerticalScrollIndicator={false}
+                            listKey='userList'
+                            style={{
+                                marginTop: 8,
+                                marginBottom: insets.bottom,
+                                // backgroundColor: 'red'
+                                // overflow: 'hidden'
+                            }}
+                            data={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+                            // keyExtractor={keyExtractor}
+                            renderItem={() =>
+                                <View style={styles.discussion} />
+                            }
+                        />
+                        {/* </View> */}
+                    </Animated.View> :
+                    <Animated.View
+                        entering={FadeIn}
+                        exiting={FadeOut}
+                    >
+                        <View>
+                            <View style={styles.header}>
+                                <Text style={styles.heading}>
+                                    Settings
+                                </Text>
+
+                                <TouchableOpacity onPress={setModeNormal} style={styles.icon} >
+                                    <Ionicons name="close" size={28} color='#C2C2C2' />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.buttons}>
+                                <TouchableOpacity onPress={signOutAndUpdateProfile} style={styles.button} >
+                                    {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                    <Text style={styles.button_text}>Sign Out</Text>
+                                </TouchableOpacity>
+
+                                <View
+                                    style={styles.hair}
+                                />
+
+                                <TouchableOpacity
+                                    onPress={createDeleteConfirmationAlert}
+                                    style={styles.button} >
+                                    {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                    <Text style={styles.deletion_text}>Request account deletion</Text>
+                                </TouchableOpacity>
+
+                                <Text style={styles.deletion_info}>
+                                    Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
+                                </Text>
+                            </View>
+                        </View>
+                    </Animated.View>
             }
         </Animated.View>
 
@@ -166,9 +174,6 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '800'
     },
-    discussions: {
-        marginTop: 8,
-    },
     discussion: {
         height: 60,
         width: '100%',
@@ -186,15 +191,14 @@ const styles = StyleSheet.create({
         flexGrow: 1
     },
     icon: {
-        height: 60,
-        width: 60,
+        paddingBottom: 16,
         alignItems: 'flex-end',
         justifyContent: 'center',
         // backgroundColor: 'red'
     },
     header: {
         flexDirection: 'row',
-        alignItems: 'center'
+        alignItems: 'flex-start'
     },
     button: {
         paddingVertical: 10,

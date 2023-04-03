@@ -8,8 +8,10 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname } from '../utils';
 import SignInSection from './SignInSection';
 import UserList from './UserList';
+import Constants from 'expo-constants';
 
-const INSETS_OFFSET_BOTTOM = 200;
+
+const INSETS_OFFSET_BOTTOM = 0;
 const HANDLER_HEIGHT = 20;
 
 function Bar(props: any) {
@@ -18,7 +20,7 @@ function Bar(props: any) {
     const keyboard = useAnimatedKeyboard();
     const MARGIN_TOP = insets.top + 170;
     const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
-    const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
+    const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP - (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
     const offset = useSharedValue(0);
     const _offset = useSharedValue(0);
     const [focused, setFocused] = useState(false);
@@ -42,7 +44,8 @@ function Bar(props: any) {
             (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? insets.bottom : 0);
         return {
             height: k,
-            display: offset.value > -40 || focused ? 'flex' : 'none'
+            display: offset.value > -40 || focused ? 'flex' : 'none',
+            // backgroundColor: 'red'
         };
     });
 
@@ -73,13 +76,14 @@ function Bar(props: any) {
     }
 
     const barStyles = useAnimatedStyle(() => {
+        const x = -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
         if
             (
             keyboard.state.value == KeyboardState.OPENING
-            && offset.value > -(keyboard.height.value - insets.bottom)
+            && offset.value > x
         ) {
-            offset.value = -(keyboard.height.value - insets.bottom)
-            _offset.value = -(keyboard.height.value - insets.bottom)
+            offset.value = x
+            _offset.value = x
         }
 
         return {
@@ -96,7 +100,7 @@ function Bar(props: any) {
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
             // TWO
-            const keyboardOffset = -(keyboard.height.value - insets.bottom);
+            const keyboardOffset = -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
             if (keyboardOffset < newValue) {
                 _offset.value = keyboardOffset;
                 offset.value = keyboardOffset;
@@ -118,7 +122,7 @@ function Bar(props: any) {
 
             if (newOffset > minOffset / 2) {
                 // THREE
-                const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -keyboard.height.value + insets.bottom : 0;
+                const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' ? constants.navigationBarHeight : 0)) : 0;
                 _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 if (value == 0) {
@@ -345,7 +349,9 @@ const styles = StyleSheet.create({
         color: '#F1F1F1',
         height: '100%',
         width: '100%',
-        flex: 1
+        flex: 1,
+        // backgroundColor: 'blue',
+        textAlignVertical: 'top'
     },
     sourceNameView: {
         width: '100%',

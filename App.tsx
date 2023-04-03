@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
 import React, { memo, useEffect, useState } from 'react';
 import { Platform, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
@@ -70,6 +70,7 @@ function Main(props: any) {
   const gesture = Gesture
     .Pan()
     .enabled(props.mode.tag === 'Comment' || props.mode.tag === 'App')
+    .activeOffsetX([-50, 50])
     .onChange((e) => {
 
       if (e.changeX < 0) {
@@ -91,7 +92,7 @@ function Main(props: any) {
   // Cannot make status bar translucent on android :(
   // Maybe check if status bar is translucent?
   const wallHeight = constants.height
-    - (Platform.OS == 'android' ? 50 : 0)
+    - (Platform.OS == 'android' ? constants.navigationBarHeight : 0)
     - minBarHeight
     - insets.bottom
     ;
@@ -456,21 +457,23 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <MemoMain
-        onSubmit={memoOnSubmit}
-        setSelectedComment={setSelectedComment}
-        selectedComment={selectedComment}
-        activePostIndex={activePostIndex}
-        setActivePostIndex={setActivePostIndex}
-        user={user}
-        setUser={setUser}
-        posts={posts}
-        requestPost={memoRequestPost}
-        comments={comments}
-        setMode={setMode}
-        requestComments={memoRequestComments}
-        mode={mode}
-      />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <MemoMain
+          onSubmit={memoOnSubmit}
+          setSelectedComment={setSelectedComment}
+          selectedComment={selectedComment}
+          activePostIndex={activePostIndex}
+          setActivePostIndex={setActivePostIndex}
+          user={user}
+          setUser={setUser}
+          posts={posts}
+          requestPost={memoRequestPost}
+          comments={comments}
+          setMode={setMode}
+          requestComments={memoRequestComments}
+          mode={mode}
+        />
+      </GestureHandlerRootView>
     </SafeAreaProvider>
   );
 }
