@@ -26,7 +26,8 @@ const INJECTED_JAVASCRIPT = `(function() {
 
 function Main(props: any) {
   const insets = useSafeAreaInsets();
-  const minBarHeight = 60;
+  const [navigationBarVisible, setNavigationBarVisible] = useState(false);
+  const minBarHeight = 60 + (Platform.OS == 'android' ? (navigationBarVisible ? constants.navigationBarHeight : 32) : 0);
   const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
 
   useEffect(() => {
@@ -92,7 +93,7 @@ function Main(props: any) {
   // Cannot make status bar translucent on android :(
   // Maybe check if status bar is translucent?
 
-  const [navigationBarVisible, setNavigationBarVisible] = useState(false);
+
   const [wallHeight, setWallHeight] = useState(0);
 
   useEffect(() => {

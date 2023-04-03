@@ -3,12 +3,11 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
-import Animated, { FadeInDown, KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup } from '../utils';
 import SignInSection from './SignInSection';
 import UserList from './UserList';
-import Constants from 'expo-constants';
 
 
 const INSETS_OFFSET_BOTTOM = 0;
@@ -24,6 +23,7 @@ function Bar(props: any) {
         + INSETS_OFFSET_BOTTOM
         + (Platform.OS == 'android' ? props.minBarHeight : 0)
     const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
+    const allowShowingUserList = useSharedValue(true);
     const offset = useSharedValue(0);
     const _offset = useSharedValue(0);
     const [focus, setFocus] = useState(false);
@@ -53,7 +53,7 @@ function Bar(props: any) {
                 : 0);
         return {
             height: k,
-            display: offset.value > -40 || focus ? 'flex' : 'none',
+            // display: showUserList ? 'none' : 'flex',
             // backgroundColor: 'blue'
         };
     });
@@ -71,17 +71,19 @@ function Bar(props: any) {
 
     const changeState = (state: 'maximize' | 'minimize') => {
         if (state == 'maximize') {
+            allowShowingUserList.value = false;
             offset.value = minOffset
             _offset.value = minOffset
-            // setTimeout(() => { 
-            setFocus(true)
-            // }, 100);
+            setTimeout(() => {
+                setFocus(true)
+            }, 200);
             return
         }
 
         offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
         _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
         setFocus(false)
+        allowShowingUserList.value = true;
     }
 
     const getSourceName = (source_url: string) => {
@@ -91,7 +93,9 @@ function Bar(props: any) {
 
     const [showUserList, setShowUserList] = useState(false);
     const barStyles = useAnimatedStyle(() => {
-        if (offset.value < -40 && !focus && !showUserList) {
+        if (offset.value < -40 && !focus && !showUserList && allowShowingUserList.value
+            && keyboard.state.value == KeyboardState.CLOSED
+        ) {
             runOnJS(setShowUserList)(true);
         }
         if ((focus || offset.value >= -40) && showUserList) {
@@ -134,9 +138,13 @@ function Bar(props: any) {
 
             if (newOffset > minOffset / 2) {
                 // THREE
-                const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ?
-                    -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' && props.navigationBarVisible ? constants.navigationBarHeight : 0))
-                    : 0;
+                const value =
+                    keyboard.state.value == KeyboardState.OPEN
+                        || keyboard.state.value == KeyboardState.OPENING ?
+                        -(keyboard.height.value - insets.bottom +
+                            (Platform.OS == 'android' ? (props.navigationBarVisible ? constants.navigationBarHeight : -32) : 0)
+                        )
+                        : 0;
                 _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 if (value == 0) {
@@ -155,6 +163,7 @@ function Bar(props: any) {
         const text = props.selectedCommenText;
         return text.length > 30 ? `${text.slice(0, 30)}...` : text;
     }
+
 
     const hideInput = () => {
         props.setSelectedComment(null);
@@ -202,7 +211,9 @@ function Bar(props: any) {
             <GestureDetector gesture={gesture}>
                 <Animated.View style={[{
                     top: props.wallHeight,
-                    backgroundColor: props.mode.tag == 'Comment' ? '#272727' : '#151316',
+                    backgroundColor:
+                        // 'blue',
+                        props.mode.tag == 'Comment' ? '#272727' : '#151316',
                     height: HEIGHT
                 }, styles.sheet,
                     barStyles]}
@@ -215,7 +226,7 @@ function Bar(props: any) {
                         <View style={styles.handler_inside} />
                     </View>
 
-                    <Animated.View
+                    {!showUserList && <Animated.View
                         style={[styles.inputbar, inputStyles]}
                     >
                         <View style={styles.input}>
@@ -274,6 +285,8 @@ function Bar(props: any) {
                                                 })
                                                 }
                                             /> : <Pressable style={{
+                                                // backgroundColor: 'blue',
+                                                paddingTop: 5,
                                                 height: '100%',
                                                 width: '100%',
                                                 flex: 1
@@ -306,7 +319,7 @@ function Bar(props: any) {
                         </View>
 
                     </Animated.View>
-
+                    }
 
                     {
                         showUserList &&
@@ -370,15 +383,14 @@ const styles = StyleSheet.create({
         height: '100%',
         width: '100%',
         flexDirection: 'row',
-        alignItems: 'flex-start',
-        // backgroundColor: 'red'
+        alignItems: 'flex-start'
     },
     textinput: {
         color: '#F1F1F1',
         height: '100%',
         width: '100%',
         flex: 1,
-        // backgroundColor: 'blue',
+        // backgroundColor: 'red',
         textAlignVertical: 'top'
     },
     sourceNameView: {
