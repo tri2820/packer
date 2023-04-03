@@ -53,7 +53,7 @@ function Bar(props: any) {
                 : 0);
         return {
             height: k,
-            // display: showUserList ? 'none' : 'flex',
+            display: offset.value < -40 && !focus ? 'none' : 'flex',
             // backgroundColor: 'blue'
         };
     });
@@ -66,6 +66,12 @@ function Bar(props: any) {
     });
 
     useEffect(() => {
+        if (props.user == null) return;
+        allowShowingUserList.value = true;
+        setShowUserList(true);
+    }, [props.user])
+
+    useEffect(() => {
         setText('');
     }, [props.activePostIndex])
 
@@ -74,6 +80,7 @@ function Bar(props: any) {
             allowShowingUserList.value = false;
             offset.value = minOffset
             _offset.value = minOffset
+            if (props.user == null) return;
             setTimeout(() => {
                 setFocus(true)
             }, 200);
