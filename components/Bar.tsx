@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
-import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup } from '../utils';
 import SignInSection from './SignInSection';
@@ -78,12 +78,19 @@ function Bar(props: any) {
     const changeState = (state: 'maximize' | 'minimize') => {
         if (state == 'maximize') {
             allowShowingUserList.value = false;
-            offset.value = minOffset
-            _offset.value = minOffset
-            if (props.user == null) return;
-            setTimeout(() => {
-                setFocus(true)
-            }, 200);
+
+            if (props.user == null) {
+                offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+                _offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+            } else {
+                offset.value = withTiming(minOffset, { duration: 100 });
+                _offset.value = withTiming(minOffset, { duration: 100 });
+
+                setTimeout(() => {
+                    setFocus(true)
+                }, 300);
+            }
+
             return
         }
 
