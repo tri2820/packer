@@ -91,13 +91,38 @@ function Main(props: any) {
 
   // Cannot make status bar translucent on android :(
   // Maybe check if status bar is translucent?
-  const wallHeight = constants.height
-    - (Platform.OS == 'android' ? constants.navigationBarHeight : 0)
-    - minBarHeight
-    - insets.bottom
-    ;
 
+  const [navigationBarVisible, setNavigationBarVisible] = useState(false);
+  const [wallHeight, setWallHeight] = useState(0);
 
+  useEffect(() => {
+    const wallHeight = constants.height
+      - (
+        Platform.OS == 'android'
+          ? constants.statusBarHeight +
+          (navigationBarVisible ? constants.navigationBarHeight : 0)
+          : 0
+      )
+      - insets.bottom
+      - minBarHeight;
+    setWallHeight(wallHeight)
+  }, [navigationBarVisible])
+
+  useEffect(() => {
+    (async () => {
+      if (Platform.OS == 'ios') return;
+      const visibility = await NavigationBar.getVisibilityAsync();
+      setNavigationBarVisible(visibility == 'visible')
+    })()
+  }, [])
+
+  useEffect(() => {
+    if (Platform.OS != 'android') return;
+    NavigationBar.addVisibilityListener(({ visibility }) => {
+      setNavigationBarVisible(visibility == 'visible')
+    });
+
+  }, [])
 
   return (
     <View style={{
@@ -153,6 +178,7 @@ function Main(props: any) {
           }
 
           <Bar
+            navigationBarVisible={navigationBarVisible}
             mode={props.mode}
             setMode={props.setMode}
             selectedCommenText={props.selectedComment?.content}

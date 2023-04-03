@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
-import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { FadeInDown, KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup } from '../utils';
 import SignInSection from './SignInSection';
@@ -19,11 +19,14 @@ function Bar(props: any) {
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
     const MARGIN_TOP = insets.top + scaleup(170);
-    const HEIGHT = constants.height - MARGIN_TOP + INSETS_OFFSET_BOTTOM;
-    const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP - (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
+    const HEIGHT = constants.height
+        - MARGIN_TOP
+        + INSETS_OFFSET_BOTTOM
+        + (Platform.OS == 'android' ? props.minBarHeight : 0)
+    const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
     const offset = useSharedValue(0);
     const _offset = useSharedValue(0);
-    const [focused, setFocused] = useState(false);
+    const [focus, setFocus] = useState(false);
     const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
     const ref = useRef<any>(undefined);
@@ -40,12 +43,18 @@ function Bar(props: any) {
     });
 
     const inputStyles = useAnimatedStyle(() => {
-        const k = -(offset.value) - HANDLER_HEIGHT + props.minBarHeight - keyboard.height.value +
-            (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? insets.bottom : 0);
+        const k = -(offset.value)
+            - HANDLER_HEIGHT
+            + props.minBarHeight
+            - keyboard.height.value +
+            (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ?
+                insets.bottom
+                - (Platform.OS == 'android' && props.navigationBarVisible ? constants.navigationBarHeight : 0)
+                : 0);
         return {
             height: k,
-            display: offset.value > -40 || focused ? 'flex' : 'none',
-            // backgroundColor: 'red'
+            display: offset.value > -40 || focus ? 'flex' : 'none',
+            // backgroundColor: 'blue'
         };
     });
 
@@ -62,12 +71,17 @@ function Bar(props: any) {
 
     const changeState = (state: 'maximize' | 'minimize') => {
         if (state == 'maximize') {
-            offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
-            _offset.value = withSpring(minOffset, { velocity: 5, mass: 0.2 });
+            offset.value = minOffset
+            _offset.value = minOffset
+            // setTimeout(() => { 
+            setFocus(true)
+            // }, 100);
             return
         }
+
         offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
         _offset.value = withSpring(0, { velocity: 5, mass: 0.2 });
+        setFocus(false)
     }
 
     const getSourceName = (source_url: string) => {
@@ -75,15 +89,13 @@ function Bar(props: any) {
         return normalizedHostname(url.hostname);
     }
 
+    const [showUserList, setShowUserList] = useState(false);
     const barStyles = useAnimatedStyle(() => {
-        const x = -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
-        if
-            (
-            keyboard.state.value == KeyboardState.OPENING
-            && offset.value > x
-        ) {
-            offset.value = x
-            _offset.value = x
+        if (offset.value < -40 && !focus && !showUserList) {
+            runOnJS(setShowUserList)(true);
+        }
+        if ((focus || offset.value >= -40) && showUserList) {
+            runOnJS(setShowUserList)(false);
         }
 
         return {
@@ -100,7 +112,7 @@ function Bar(props: any) {
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
             // TWO
-            const keyboardOffset = -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' ? constants.navigationBarHeight : 0));
+            const keyboardOffset = -(keyboard.height.value - insets.bottom);
             if (keyboardOffset < newValue) {
                 _offset.value = keyboardOffset;
                 offset.value = keyboardOffset;
@@ -122,7 +134,9 @@ function Bar(props: any) {
 
             if (newOffset > minOffset / 2) {
                 // THREE
-                const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ? -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' ? constants.navigationBarHeight : 0)) : 0;
+                const value = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ?
+                    -(keyboard.height.value - insets.bottom + (Platform.OS == 'android' && props.navigationBarVisible ? constants.navigationBarHeight : 0))
+                    : 0;
                 _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 if (value == 0) {
@@ -144,7 +158,10 @@ function Bar(props: any) {
 
     const hideInput = () => {
         props.setSelectedComment(null);
-        changeState('minimize');
+        if (!focus) {
+            changeState('minimize');
+            return;
+        }
         ref.current?.blur();
     }
 
@@ -152,19 +169,7 @@ function Bar(props: any) {
         props.setMode({ tag: 'Normal' });
     }
 
-    const onFocus = () => {
-        if (props.user === null) {
-            ref.current?.blur()
-            changeState('maximize');
-            return;
-        }
-        setFocused(true);
-    }
-
     const onBlur = () => {
-        console.log('called');
-        setFocused(false);
-        if (props.user === null) return;
         changeState('minimize');
     }
 
@@ -199,7 +204,8 @@ function Bar(props: any) {
                     top: props.wallHeight,
                     backgroundColor: props.mode.tag == 'Comment' ? '#272727' : '#151316',
                     height: HEIGHT
-                }, styles.sheet, barStyles]}
+                }, styles.sheet,
+                    barStyles]}
                 >
                     {
                         props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
@@ -216,7 +222,7 @@ function Bar(props: any) {
                             {/* Close Button */}
                             {
                                 (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
-                                !focused &&
+                                !focus &&
                                 <TouchableOpacity onPress={setModeNormal}>
                                     <Animated.View style={animatedStyles} >
                                         <Ionicons name="close"
@@ -249,26 +255,41 @@ function Bar(props: any) {
                                     </>
 
                                     : <View style={styles.inputHeader}>
-                                        <TextInput
-                                            multiline
-                                            onFocus={onFocus}
-                                            onBlur={onBlur}
-                                            ref={ref}
-                                            value={text}
-                                            onChangeText={setText}
-                                            placeholder={placeHolder}
-                                            placeholderTextColor='#C2C2C2'
-                                            style={styles.textinput}
-                                            keyboardAppearance='dark'
-                                            {...(Platform.OS == 'ios' ? {
-                                                selectionColor: '#FFC542'
-                                            } : {
-                                                cursorColor: '#FFC542'
-                                            })
-                                            }
-                                        />
+                                        {focus ?
+                                            <TextInput
+                                                autoFocus
+                                                multiline
+                                                onBlur={onBlur}
+                                                ref={ref}
+                                                value={text}
+                                                onChangeText={setText}
+                                                placeholder={placeHolder}
+                                                placeholderTextColor='#C2C2C2'
+                                                style={styles.textinput}
+                                                keyboardAppearance='dark'
+                                                {...(Platform.OS == 'ios' ? {
+                                                    selectionColor: '#FFC542'
+                                                } : {
+                                                    cursorColor: '#FFC542'
+                                                })
+                                                }
+                                            /> : <Pressable style={{
+                                                height: '100%',
+                                                width: '100%',
+                                                flex: 1
+                                            }}
+                                                onPress={() => {
+                                                    changeState('maximize');
+                                                }}
+                                            >
+                                                <Text style={{
+                                                    color: text == '' ? '#C2C2C2' : '#F1F1F1'
+                                                }}>{text == '' ? placeHolder : text}</Text>
+                                            </Pressable>
+                                        }
 
-                                        {focused &&
+                                        {
+                                            focus &&
                                             <TouchableOpacity onPress={send}
                                                 style={{
                                                     height: props.minBarHeight - HANDLER_HEIGHT,
@@ -288,7 +309,9 @@ function Bar(props: any) {
 
 
                     {
-                        props.user !== null && !focused && <UserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        showUserList &&
+                        props.user !== null &&
+                        <UserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>

@@ -16,12 +16,6 @@ function UserList(props: any) {
         props.setUser(null);
     }
 
-    const userStyles = useAnimatedStyle(() => {
-        return {
-            display: props.offset.value == 0 ? 'none' : 'flex',
-            opacity: Math.pow(props.offset.value / props.minOffset, 0.3)
-        };
-    });
 
     const createDeleteConfirmationAlert = () =>
         Alert.alert(
@@ -53,18 +47,17 @@ function UserList(props: any) {
     }
 
     return (
-        <Animated.View style={[{
+        <View style={{
             marginHorizontal: 20,
             height: props.listHeight,
             flex: 1
-        }, userStyles]}
-            exiting={FadeOut}
+        }}
         >
             {
                 props.mode == 'normal'
                     ? <Animated.View
                         entering={FadeIn}
-                        exiting={FadeOut}
+                        exiting={FadeOut.duration(200)}
                         style={{
                             // backgroundColor: 'blue',
                             height: '100%'
@@ -153,7 +146,7 @@ function UserList(props: any) {
                         </View>
                     </Animated.View>
             }
-        </Animated.View>
+        </View>
 
     );
 }

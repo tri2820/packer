@@ -5,7 +5,8 @@ export const constants = {
     width: Dimensions.get('screen').width,
     height: Dimensions.get('screen').height,
     pixelratio: PixelRatio.get(),
-    navigationBarHeight: Dimensions.get('screen').height - Dimensions.get('window').height - Constants.statusBarHeight
+    navigationBarHeight: Dimensions.get('screen').height - Dimensions.get('window').height - Constants.statusBarHeight,
+    statusBarHeight: Constants.statusBarHeight
 }
 
 export function scaledown(size: number) {
