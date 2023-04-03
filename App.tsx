@@ -117,13 +117,13 @@ function Main(props: any) {
     })()
   }, [])
 
-  useEffect(() => {
-    if (Platform.OS != 'android') return;
-    NavigationBar.addVisibilityListener(({ visibility }) => {
-      setNavigationBarVisible(visibility == 'visible')
-    });
+  // useEffect(() => {
+  //   if (Platform.OS != 'android') return;
+  //   NavigationBar.addVisibilityListener(({ visibility }) => {
+  //     setNavigationBarVisible(visibility == 'visible')
+  //   });
 
-  }, [])
+  // }, [])
 
   return (
     <View style={{
