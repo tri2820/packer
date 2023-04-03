@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sharedAsyncState } from '../utils';
@@ -159,7 +159,8 @@ function Post(props: any) {
         height: props.height
     }}>
         {
-            props.scrolledOn &&
+            // Experiment
+            (Platform.OS == 'android' ? props.shouldActive : props.scrolledOn) &&
             <FlatList
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
