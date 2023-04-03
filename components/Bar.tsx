@@ -200,6 +200,11 @@ function Bar(props: any) {
 
     const placeHolder = props.selectedComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
 
+    useEffect(() => {
+        if (props.selectedComment == null) return;
+        changeState('maximize')
+    }, [props.selectedComment])
+
     return (
         <>
             <Animated.View style={[styles.overlay, overlayStyles]}>
@@ -297,7 +302,7 @@ function Bar(props: any) {
                                             >
                                                 <Text style={{
                                                     color: text == '' ? '#C2C2C2' : '#F1F1F1'
-                                                }}>{text == '' ? placeHolder : text}</Text>
+                                                }}>{text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)}</Text>
                                             </Pressable>
                                         }
 
