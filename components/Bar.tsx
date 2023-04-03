@@ -260,7 +260,12 @@ function Bar(props: any) {
                                             placeholderTextColor='#C2C2C2'
                                             style={styles.textinput}
                                             keyboardAppearance='dark'
-                                            selectionColor='#FFC542'
+                                            {...(Platform.OS == 'ios' ? {
+                                                selectionColor: '#FFC542'
+                                            } : {
+                                                cursorColor: '#FFC542'
+                                            })
+                                            }
                                         />
 
                                         {focused &&
