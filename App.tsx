@@ -27,7 +27,7 @@ const INJECTED_JAVASCRIPT = `(function() {
 function Main(props: any) {
   const insets = useSafeAreaInsets();
   const [navigationBarVisible, setNavigationBarVisible] = useState(false);
-  const minBarHeight = 60 + (Platform.OS == 'android' ? (navigationBarVisible ? constants.navigationBarHeight : 32) : 0);
+  const minBarHeight = 60 + (Platform.OS == 'android' ? (navigationBarVisible ? 0 : 32) : 0);
   const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
 
   useEffect(() => {
