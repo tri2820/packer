@@ -153,10 +153,6 @@ function UserList(props: any) {
 
 export default UserList;
 const styles = StyleSheet.create({
-    username: {
-        color: '#C2C2C2',
-        fontWeight: '300',
-    },
     introduction: {
         color: '#F1F1F1',
         // backgroundColor: 'red'
@@ -178,25 +174,28 @@ const styles = StyleSheet.create({
         borderColor: '#5D5F64'
     },
     heading: {
+        paddingTop: 8,
+        // backgroundColor: 'blue',
         color: '#F1F1F1',
         fontSize: 24,
         fontWeight: '800',
         flexGrow: 1
     },
     icon: {
-        paddingBottom: 16,
+        paddingTop: 8,
+        paddingBottom: 20,
         alignItems: 'flex-end',
-        justifyContent: 'center',
+        justifyContent: 'flex-start',
         // backgroundColor: 'red'
     },
     header: {
         flexDirection: 'row',
-        alignItems: 'flex-start'
+        alignItems: 'flex-start',
     },
     button: {
         paddingVertical: 10,
         borderRadius: 8,
-        backgroundColor: '#2e2e2e',
+        backgroundColor: '#323233',
         alignItems: 'center'
     },
     button_text: {

@@ -107,8 +107,11 @@ function Bar(props: any) {
 
     const [showUserList, setShowUserList] = useState(false);
     const barStyles = useAnimatedStyle(() => {
+        // console.log('offset.value', offset.value, focus, showUserList, allowShowingUserList.value, keyboard.state.value, KeyboardState.UNKNOWN)
         if (offset.value < -40 && !focus && !showUserList && allowShowingUserList.value
-            && keyboard.state.value == KeyboardState.CLOSED
+            &&
+            (keyboard.state.value == KeyboardState.CLOSED
+                || keyboard.state.value == KeyboardState.UNKNOWN)
         ) {
             runOnJS(setShowUserList)(true);
         }

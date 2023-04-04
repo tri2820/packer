@@ -5,15 +5,11 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 function MoreDiscussionsButton(props: any) {
     return (
-        <TouchableOpacity onPress={props.onPress}>
-            <View style={styles.view}
-            // entering={FadeInDown}
-            >
-                {/* <FontAwesome5 name='expand' color='angle-double-down' size={16} /> */}
-                <FontAwesome5 name="angle-double-down" size={14} color="black" />
-                {/* <MaterialCommunityIcons name='chevron-double-down' size={16} /> */}
-                <Text style={styles.text}>More</Text>
-            </View>
+        <TouchableOpacity onPress={props.onPress} style={styles.view}>
+            {/* <FontAwesome5 name='expand' color='angle-double-down' size={16} /> */}
+            <FontAwesome5 name="angle-double-down" size={14} color="black" />
+            {/* <MaterialCommunityIcons name='chevron-double-down' size={16} /> */}
+            <Text style={styles.text}>More</Text>
         </TouchableOpacity>
     );
 }

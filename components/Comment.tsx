@@ -166,7 +166,7 @@ const mdstyles: MarkdownStyles = {
     codeBlock: {
         fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
         color: '#e6e6e6',
-        backgroundColor: '#2B2D31',
+        backgroundColor: '#212326',
         padding: 8,
         borderRadius: 4,
         borderColor: '#1E1F22',
