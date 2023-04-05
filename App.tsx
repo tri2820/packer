@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
 import React, { memo, useEffect, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, View, Text } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,6 +18,8 @@ import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/
 // @ts-ignore
 import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
 import * as NavigationBar from 'expo-navigation-bar';
+
+import { MenuProvider } from 'react-native-popup-menu';
 
 import AppLoading from 'expo-app-loading';
 const INJECTED_JAVASCRIPT = `(function() {
@@ -42,6 +44,7 @@ import {
   Rubik_800ExtraBold_Italic,
   Rubik_900Black_Italic,
 } from '@expo-google-fonts/rubik';
+// import { MenuView } from '@react-native-menu/menu';
 
 
 function Main(props: any) {
@@ -291,7 +294,90 @@ const grc = async (sharedAsyncState: any, insertData: any, post_id: string, pare
   sharedAsyncState[key] = 'done';
 }
 
-export default function App() {
+
+// const App = () => {
+//   return (
+//     <View style={{ width: 600, height: 600 }}>
+//       <MenuView
+//         title="Menu Title"
+//         onPressAction={({ nativeEvent }) => {
+//           console.warn(JSON.stringify(nativeEvent));
+//         }}
+//         actions={[
+//           {
+//             title: 'what',
+//             id: 'add',
+//             titleColor: '#2367A2',
+//             image: Platform.select({
+//               ios: 'plus',
+//               android: 'ic_menu_add',
+//             }),
+//             imageColor: '#2367A2',
+//             subactions: [
+//               {
+//                 id: 'nested1',
+//                 title: 'Nested action',
+//                 titleColor: 'rgba(250,180,100,0.5)',
+//                 subtitle: 'State is mixed',
+//                 image: Platform.select({
+//                   ios: 'heart.fill',
+//                   android: 'ic_menu_today',
+//                 }),
+//                 imageColor: 'rgba(100,200,250,0.3)',
+//                 state: 'mixed',
+//               },
+//               {
+//                 id: 'nestedDestructive',
+//                 title: 'Destructive Action',
+//                 attributes: {
+//                   destructive: true,
+//                 },
+//                 image: Platform.select({
+//                   ios: 'trash',
+//                   android: 'ic_menu_delete',
+//                 }),
+//               },
+//             ],
+//           },
+//           {
+//             id: 'share',
+//             title: 'Share Action',
+//             titleColor: '#46F289',
+//             subtitle: 'Share action on SNS',
+//             image: Platform.select({
+//               ios: 'square.and.arrow.up',
+//               android: 'ic_menu_share',
+//             }),
+//             imageColor: '#46F289',
+//             state: 'on',
+//           },
+//           {
+//             id: 'destructive',
+//             title: 'Destructive Action',
+//             attributes: {
+//               destructive: true,
+//             },
+//             image: Platform.select({
+//               ios: 'trash',
+//               android: 'ic_menu_delete',
+//             }),
+//           },
+//         ]}
+//         shouldOpenOnLongPress={true}
+//       >
+//         <View style={{
+//           width: 300,
+//           height: 100,
+//         }}>
+//           <Text>Test</Text>
+//         </View>
+//       </MenuView>
+//     </View>
+//   );
+// };
+
+
+function Loader() {
   const [posts, setPosts] = useState<any[]>([]);
   const [comments, setComments] = useState<any[]>([]);
   const [selectedComment, setSelectedComment] = useState<any>(null);
@@ -299,6 +385,246 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
 
+  useEffect(() => {
+    // console.log('props.user changed', props.user)
+    if (user == null) return
+    // Cancel account deletion
+    (async () => {
+      const { error } = await supabaseClient.from('deletions').delete().eq('user_id', user.id)
+    })()
+  }, [user])
+
+  // TODO: set only once
+  const insertComments = (cs: any[], atHead = false) => {
+    const _insert = (c: any, comments: any[]) => {
+      if (c.parent_id == null) {
+        if (atHead) {
+          comments.unshift({ ...c, level: 0 });
+          return;
+        }
+
+        comments.push({ ...c, level: 0 });
+        return;
+      }
+
+      let i = comments.length - 1;
+      while (i >= 0) {
+        if (!atHead) {
+          if (comments[i].parent_id == c.parent_id) {
+            comments.splice(i + 1, 0, { ...c, level: comments[i].level })
+            return;
+          }
+        }
+        if (comments[i].id == c.parent_id) {
+          comments.splice(i + 1, 0, { ...c, level: comments[i].level + 1 })
+          return;
+        }
+        i -= 1;
+      }
+    }
+
+
+    setComments((comments) => {
+      const newComments = [...comments];
+      cs.forEach(c => _insert(c, newComments))
+      return newComments;
+    })
+  }
+
+  useEffect(() => {
+    (async () => {
+      const userResponse = await supabaseClient.auth.getUser();
+      console.log('Load user', userResponse.data.user ? 'ok' : userResponse.data.user)
+      setUser(userResponse.data.user)
+    })()
+
+    const { data: authListener } = supabaseClient.auth.onAuthStateChange(
+      async (_event, session) => {
+        // setSession(session);
+        console.log('User changes', session?.user)
+        setUser(session?.user ?? null);
+      }
+    );
+  }, [])
+
+
+  useEffect(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+  }, [user])
+
+
+
+
+
+
+  const updateComment = (id: string, key: any, value: any) => {
+    setComments((comments: any) => {
+      const index = comments.findIndex((c: any) => c.id == id);
+      comments[index][key] = typeof value === 'function' ? value(comments[index][key]) : value;
+      comments[index] = { ...comments[index] }
+      return [...comments];
+    })
+  }
+
+  const submitComment = async (text: string, selectedComment: any, post_id: string) => {
+    const parent_id = selectedComment?.id ?? null;
+    console.log('submit content', parent_id, post_id)
+    const body = {
+      content: text,
+      post_id: post_id,
+      parent_id: parent_id,
+      need_bot_comment: true
+    }
+
+    polyfillEncoding()
+    polyfillReadableStream()
+    polyfillFetch()
+
+    const { data } = await supabaseClient.auth.getSession();
+    const accessToken = data.session?.access_token;
+    if (!accessToken) {
+      console.log('Access Token is', accessToken)
+      return
+    }
+
+    const placeholderId = `placeholder-${Math.random()}`;
+    const placeholderComment = {
+      // Could get from header
+      id: placeholderId,
+      created_at: new Date(),
+      content: text,
+      author_name: user.user_metadata.full_name,
+      parent_id: parent_id,
+      post_id: post_id,
+      blockRequestChildren: true
+    }
+
+    const childPlaceholderId = `placeholder-${Math.random()}`;
+    const childComment = {
+      id: childPlaceholderId,
+      created_at: new Date(),
+      content: '',
+      author_name: 'Packer',
+      parent_id: placeholderId,
+      post_id: post_id,
+      blinking: true,
+      blockRequestChildren: true
+    }
+
+    insertComments([placeholderComment], true);
+    insertComments([childComment]);
+
+    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
+      // @ts-ignore
+      reactNative: { textStreaming: true },
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`
+      },
+      body: JSON.stringify(body)
+    })
+
+    const newId = response.headers.get("comment_id");
+    const childId = response.headers.get("child_id")
+    console.log('debug comment_id', newId)
+    console.log('debug childId', childId)
+
+    if (!response.body || !response.ok || !childId) {
+      console.log('ERROR: response', response)
+      return
+    }
+
+    updateComment(childPlaceholderId, 'id', childId)
+    updateComment(childId, 'parent_id', newId)
+    updateComment(placeholderId, 'id', newId)
+
+    const utf8Decoder = new TextDecoder('utf-8')
+
+    const decodeResponse = (response?: Uint8Array) => {
+      if (!response) {
+        return ''
+      }
+
+      const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
+      const decodedText = utf8Decoder.decode(response)
+      const matches: string[] = []
+
+      let match
+      while ((match = pattern.exec(decodedText)) !== null) {
+        matches.push(JSON.parse(match[1]).content)
+      }
+      return matches.join('')
+    }
+
+    async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
+      const { value, done } = await reader.read()
+      if (done) return
+      const delta = decodeResponse(value)
+      partialUpdate(delta);
+      await read(reader, partialUpdate)
+    }
+
+    const reader = response.body.getReader()
+    await read(reader, async (update) => {
+      // console.log('update', update);
+      updateComment(childId, 'content', (old: string) => old + update);
+    });
+
+    updateComment(childId, 'blinking', false)
+  }
+
+  const onSubmit = (text: string, selectedComment: any) => {
+    console.log('submitted', activePostIndex);
+    // +1 Due to welcome screen
+    submitComment(text, selectedComment, posts[activePostIndex - 1].id);
+  }
+
+  const requestComments = async (post_id: string, parent_id: string | null) => {
+    console.log('request comments', post_id, parent_id)
+    await grc(sharedAsyncState, insertComments, post_id, parent_id)
+  }
+
+  const requestPost = async () => {
+    await rp(sharedAsyncState, setPosts)
+  }
+
+  const [inited, setInited] = useState(false);
+  useEffect(() => {
+    if (inited) return;
+    setInited(true);
+    requestPost();
+  }, [])
+
+  const memoRequestPost = React.useCallback(requestPost, [])
+  const memoRequestComments = React.useCallback(requestComments, [])
+  const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
+
+  return (
+    <SafeAreaProvider>
+      <MenuProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <MemoMain
+            onSubmit={memoOnSubmit}
+            setSelectedComment={setSelectedComment}
+            selectedComment={selectedComment}
+            activePostIndex={activePostIndex}
+            setActivePostIndex={setActivePostIndex}
+            user={user}
+            setUser={setUser}
+            posts={posts}
+            requestPost={memoRequestPost}
+            comments={comments}
+            setMode={setMode}
+            requestComments={memoRequestComments}
+            mode={mode}
+          />
+        </GestureHandlerRootView>
+      </MenuProvider>
+    </SafeAreaProvider>
+  );
+}
+
+export default function App() {
   let [fontsLoaded] = useFonts({
     Rubik_300Light,
     Rubik_400Regular,
@@ -318,242 +644,7 @@ export default function App() {
   if (!fontsLoaded) {
     return <AppLoading />;
   } else {
-
-    useEffect(() => {
-      // console.log('props.user changed', props.user)
-      if (user == null) return
-      // Cancel account deletion
-      (async () => {
-        const { error } = await supabaseClient.from('deletions').delete().eq('user_id', user.id)
-      })()
-    }, [user])
-
-    // TODO: set only once
-    const insertComments = (cs: any[], atHead = false) => {
-      const _insert = (c: any, comments: any[]) => {
-        if (c.parent_id == null) {
-          if (atHead) {
-            comments.unshift({ ...c, level: 0 });
-            return;
-          }
-
-          comments.push({ ...c, level: 0 });
-          return;
-        }
-
-        let i = comments.length - 1;
-        while (i >= 0) {
-          if (!atHead) {
-            if (comments[i].parent_id == c.parent_id) {
-              comments.splice(i + 1, 0, { ...c, level: comments[i].level })
-              return;
-            }
-          }
-          if (comments[i].id == c.parent_id) {
-            comments.splice(i + 1, 0, { ...c, level: comments[i].level + 1 })
-            return;
-          }
-          i -= 1;
-        }
-      }
-
-
-      setComments((comments) => {
-        const newComments = [...comments];
-        cs.forEach(c => _insert(c, newComments))
-        return newComments;
-      })
-    }
-
-    useEffect(() => {
-      (async () => {
-        const userResponse = await supabaseClient.auth.getUser();
-        console.log('Load user', userResponse.data.user ? 'ok' : userResponse.data.user)
-        setUser(userResponse.data.user)
-      })()
-
-      const { data: authListener } = supabaseClient.auth.onAuthStateChange(
-        async (_event, session) => {
-          // setSession(session);
-          console.log('User changes', session?.user)
-          setUser(session?.user ?? null);
-        }
-      );
-    }, [])
-
-
-    useEffect(() => {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-    }, [user])
-
-
-
-
-
-
-    const updateComment = (id: string, key: any, value: any) => {
-      setComments((comments: any) => {
-        const index = comments.findIndex((c: any) => c.id == id);
-        comments[index][key] = typeof value === 'function' ? value(comments[index][key]) : value;
-        comments[index] = { ...comments[index] }
-        return [...comments];
-      })
-    }
-
-    const submitComment = async (text: string, selectedComment: any, post_id: string) => {
-      const parent_id = selectedComment?.id ?? null;
-      console.log('submit content', parent_id, post_id)
-      const body = {
-        content: text,
-        post_id: post_id,
-        parent_id: parent_id,
-        need_bot_comment: true
-      }
-
-      polyfillEncoding()
-      polyfillReadableStream()
-      polyfillFetch()
-
-      const { data } = await supabaseClient.auth.getSession();
-      const accessToken = data.session?.access_token;
-      if (!accessToken) {
-        console.log('Access Token is', accessToken)
-        return
-      }
-
-      const placeholderId = `placeholder-${Math.random()}`;
-      const placeholderComment = {
-        // Could get from header
-        id: placeholderId,
-        created_at: new Date(),
-        content: text,
-        author_name: user.user_metadata.full_name,
-        parent_id: parent_id,
-        post_id: post_id,
-        blockRequestChildren: true
-      }
-
-      const childPlaceholderId = `placeholder-${Math.random()}`;
-      const childComment = {
-        id: childPlaceholderId,
-        created_at: new Date(),
-        content: '',
-        author_name: 'Packer',
-        parent_id: placeholderId,
-        post_id: post_id,
-        blinking: true,
-        blockRequestChildren: true
-      }
-
-      insertComments([placeholderComment], true);
-      insertComments([childComment]);
-
-      const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
-        // @ts-ignore
-        reactNative: { textStreaming: true },
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify(body)
-      })
-
-      const newId = response.headers.get("comment_id");
-      const childId = response.headers.get("child_id")
-      console.log('debug comment_id', newId)
-      console.log('debug childId', childId)
-
-      if (!response.body || !response.ok || !childId) {
-        console.log('ERROR: response', response)
-        return
-      }
-
-      updateComment(childPlaceholderId, 'id', childId)
-      updateComment(childId, 'parent_id', newId)
-      updateComment(placeholderId, 'id', newId)
-
-      const utf8Decoder = new TextDecoder('utf-8')
-
-      const decodeResponse = (response?: Uint8Array) => {
-        if (!response) {
-          return ''
-        }
-
-        const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
-        const decodedText = utf8Decoder.decode(response)
-        const matches: string[] = []
-
-        let match
-        while ((match = pattern.exec(decodedText)) !== null) {
-          matches.push(JSON.parse(match[1]).content)
-        }
-        return matches.join('')
-      }
-
-      async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
-        const { value, done } = await reader.read()
-        if (done) return
-        const delta = decodeResponse(value)
-        partialUpdate(delta);
-        await read(reader, partialUpdate)
-      }
-
-      const reader = response.body.getReader()
-      await read(reader, async (update) => {
-        // console.log('update', update);
-        updateComment(childId, 'content', (old: string) => old + update);
-      });
-
-      updateComment(childId, 'blinking', false)
-    }
-
-    const onSubmit = (text: string, selectedComment: any) => {
-      console.log('submitted', activePostIndex);
-      // +1 Due to welcome screen
-      submitComment(text, selectedComment, posts[activePostIndex - 1].id);
-    }
-
-    const requestComments = async (post_id: string, parent_id: string | null) => {
-      console.log('request comments', post_id, parent_id)
-      await grc(sharedAsyncState, insertComments, post_id, parent_id)
-    }
-
-    const requestPost = async () => {
-      await rp(sharedAsyncState, setPosts)
-    }
-
-    const [inited, setInited] = useState(false);
-    useEffect(() => {
-      if (inited) return;
-      setInited(true);
-      requestPost();
-    }, [])
-
-    const memoRequestPost = React.useCallback(requestPost, [])
-    const memoRequestComments = React.useCallback(requestComments, [])
-    const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
-
-    return (
-      <SafeAreaProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <MemoMain
-            onSubmit={memoOnSubmit}
-            setSelectedComment={setSelectedComment}
-            selectedComment={selectedComment}
-            activePostIndex={activePostIndex}
-            setActivePostIndex={setActivePostIndex}
-            user={user}
-            setUser={setUser}
-            posts={posts}
-            requestPost={memoRequestPost}
-            comments={comments}
-            setMode={setMode}
-            requestComments={memoRequestComments}
-            mode={mode}
-          />
-        </GestureHandlerRootView>
-      </SafeAreaProvider>
-    );
+    return <Loader />
   }
 }
 

@@ -3,6 +3,7 @@ import moment from 'moment';
 import * as React from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { normalizedHostname } from '../utils';
+import { MemoReportMenu } from './ReportMenu';
 
 function PostHeader(props: any) {
     const getSourceName = (source_url: string) => {
@@ -40,7 +41,6 @@ function PostHeader(props: any) {
                     }
                 </Text>
             </View>
-
             <Text style={[{
                 color: 'white',
                 // fontWeight: 'bold',
@@ -54,16 +54,33 @@ function PostHeader(props: any) {
             </Text>
         </TouchableOpacity>
 
-        <Text style={{
-            color: '#A3A3A3',
-            marginBottom: 4
+        <View style={{
+            marginBottom: 4,
+            flexDirection: 'row',
+            // backgroundColor: 'blue',
+            alignItems: 'center'
         }}>
             <Text style={{
+                color: '#A3A3A3',
                 fontFamily: 'Rubik_700Bold'
-            }}>{props.post.author_name}</Text> • {
-                moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
-            }
-        </Text>
+            }}>{props.post.author_name}</Text>
+
+            <Text style={{
+                color: '#A3A3A3'
+            }}> • {
+                    moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
+                }</Text>
+
+            <View style={{
+                marginLeft: 'auto',
+                marginRight: 0,
+            }}>
+                <MemoReportMenu triggerOuterWrapper={{
+                    // backgroundColor: 'red',
+                    paddingLeft: 8
+                }} />
+            </View>
+        </View>
 
     </View>);
 }

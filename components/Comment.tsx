@@ -6,6 +6,7 @@ import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'r
 import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import BlinkingCursor from './BlinkingCursor';
+import { MemoReportMenu } from './ReportMenu';
 
 
 const quote: MarkdownRule = {
@@ -137,16 +138,29 @@ function Comment(props: any) {
                         {
                             props.comment.blinking
                                 ? <BlinkingCursor />
-                                : <TouchableOpacity
-                                    onPress={select}
-                                    style={styles.reply_button}
-                                >
-                                    <Octicons name="reply" size={12} color="#A3A3A3" />
-                                    {
-                                        props.comment.level == 0 &&
-                                        <Text style={styles.reply_text}>Reply</Text>
-                                    }
-                                </TouchableOpacity>
+                                :
+                                <View style={{
+                                    flexDirection: 'row',
+                                    alignItems: 'center',
+                                    alignSelf: 'flex-end',
+                                }}>
+                                    <MemoReportMenu triggerOuterWrapper={{
+                                        // backgroundColor: 'red',
+                                        paddingHorizontal: 8,
+                                        paddingVertical: 4,
+                                    }} />
+
+                                    <TouchableOpacity
+                                        onPress={select}
+                                        style={styles.reply_button}
+                                    >
+                                        <Octicons name="reply" size={12} color="#A3A3A3" />
+                                        {
+                                            props.comment.level == 0 &&
+                                            <Text style={styles.reply_text}>Reply</Text>
+                                        }
+                                    </TouchableOpacity>
+                                </View>
                         }
                     </Animated.View>
                 }
@@ -279,7 +293,6 @@ const styles = StyleSheet.create({
         marginLeft: 8
     },
     reply_button: {
-        alignSelf: 'flex-end',
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,

@@ -39,12 +39,12 @@ function WelcomePost(props: any) {
                         marginVertical: 4,
                         color: 'white',
                         fontSize: 20,
-                    }}>1. Learn while chatting</Text>
+                    }}>1. Read News</Text>
                     <Text style={{
                         marginVertical: 4,
                         color: 'white',
                         fontSize: 20,
-                    }}>2. Discover and enjoy</Text>
+                    }}>2. Learn by chatting</Text>
                     <Text style={{
                         marginVertical: 4,
                         color: 'white',
