@@ -48,6 +48,10 @@ function SignInSection(props: any) {
         Linking.openURL('https://github.com/tri2820/packer-policies/blob/main/terms_and_conditions.md')
     }
 
+    const openEULA = () => {
+        Linking.openURL('https://github.com/tri2820/packer-policies/blob/main/EULA.md')
+    }
+
     return (
         <Animated.View
             style={[animatedStyles, styles.view]}
@@ -98,18 +102,20 @@ function SignInSection(props: any) {
                 position: 'absolute',
                 left: 0,
                 right: 0,
-                bottom: insets.bottom + props.INSETS_OFFSET_BOTTOM + 40,
+                bottom: insets.bottom + props.INSETS_OFFSET_BOTTOM + 20,
                 alignItems: 'center',
             }}>
-                <TouchableOpacity onPress={openPrivacyPolicy}>
-                    <Text style={styles.docText}>Privacy Policy</Text>
+                <Text style={styles.docHeader}>By signing in, you agree with our</Text>
+                <TouchableOpacity onPress={openEULA}>
+                    <Text style={styles.docText}>End-user license agreement</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity onPress={openTermsAndConditions}>
-                    <Text style={[{
-                        marginTop: 4
-                    }, styles.docText]}>
+                    <Text style={styles.docText}>
                         Terms & Conditions</Text>
+                </TouchableOpacity>
+                <TouchableOpacity onPress={openPrivacyPolicy}>
+                    <Text style={styles.docText}>Privacy Policy</Text>
                 </TouchableOpacity>
             </View>
         </Animated.View>
@@ -199,9 +205,16 @@ const styles = StyleSheet.create({
         // paddingTop: 2,
         // backgroundColor: 'blue'
     },
-    docText: {
-        color: '#f1f1f1',
+    docHeader: {
+        color: '#A3A3A3',
         fontWeight: '300',
-        fontSize: scaledown(16)
+        fontSize: scaledown(16),
+        marginBottom: 8,
+    },
+    docText: {
+        color: '#A3A3A3',
+        fontWeight: '300',
+        fontSize: scaledown(12),
+        marginVertical: 4
     }
 })
