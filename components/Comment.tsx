@@ -144,11 +144,13 @@ function Comment(props: any) {
                                     alignItems: 'center',
                                     alignSelf: 'flex-end',
                                 }}>
-                                    <MemoReportMenu triggerOuterWrapper={{
-                                        // backgroundColor: 'red',
-                                        paddingHorizontal: 8,
-                                        paddingVertical: 4,
-                                    }} />
+                                    <MemoReportMenu
+                                        comment={props.comment}
+                                        triggerOuterWrapper={{
+                                            // backgroundColor: 'red',
+                                            paddingHorizontal: 8,
+                                            paddingVertical: 4,
+                                        }} />
 
                                     <TouchableOpacity
                                         onPress={select}

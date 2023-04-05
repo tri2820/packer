@@ -10,6 +10,10 @@ import {
 
 function ReportMenu(props: any) {
 
+    const report = (reason: string) => {
+        showThanksReporting()
+    }
+
     const showThanksReporting = () => {
         Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
     }
@@ -22,19 +26,19 @@ function ReportMenu(props: any) {
         Alert.alert('Report Content', 'Please select the option that best describes the problem.', [
             {
                 text: 'Spam',
-                onPress: showThanksReporting,
+                onPress: () => report('spam'),
             },
             {
                 text: 'Abuse or harassment',
-                onPress: showThanksReporting,
+                onPress: () => report('abuse_or_harassment'),
             },
             {
                 text: 'Harmful misinformation',
-                onPress: showThanksReporting,
+                onPress: () => report('misinformation'),
             },
             {
                 text: 'Something else',
-                onPress: showThanksReporting,
+                onPress: () => report('else'),
             },
             {
                 text: 'Cancel',
