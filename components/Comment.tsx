@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     author_name: {
-        fontWeight: 'bold',
+        fontFamily: 'Rubik_700Bold',
         color: 'white'
     },
     level0: {

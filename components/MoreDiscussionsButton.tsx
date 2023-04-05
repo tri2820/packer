@@ -9,7 +9,7 @@ function MoreDiscussionsButton(props: any) {
             {/* <FontAwesome5 name='expand' color='angle-double-down' size={16} /> */}
             <FontAwesome5 name="angle-double-down" size={14} color="black" />
             {/* <MaterialCommunityIcons name='chevron-double-down' size={16} /> */}
-            <Text style={styles.text}>More</Text>
+            <Text style={styles.text}>See all chats</Text>
         </TouchableOpacity>
     );
 }

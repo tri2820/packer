@@ -215,7 +215,7 @@ function Bar(props: any) {
         )
     }
 
-    const placeHolder = props.selectedComment ? `Replying to "${getQuote()}"` : 'Add a discussion...'
+    const placeHolder = props.selectedComment ? `Replying to "${getQuote()}"` : 'Chat with Packer...'
 
     useEffect(() => {
         if (props.selectedComment == null) return;

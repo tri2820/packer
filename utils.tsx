@@ -1,5 +1,6 @@
 import { Dimensions, PixelRatio, Platform, View } from "react-native";
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
 export const constants = {
     width: Dimensions.get('screen').width,
@@ -69,3 +70,21 @@ export const sharedAsyncState: any = {};
 //     if (index == comments.length) return 
 //     return [comments[index], toUIComments(comments, index + 1), { type: 'button' }]
 // }
+
+const storeData = async (key: string, value: any) => {
+    try {
+        const jsonValue = JSON.stringify(value)
+        await AsyncStorage.setItem(key, jsonValue)
+    } catch (e) {
+        console.log('error storeData1', e)
+    }
+}
+
+const getData = async (key: string) => {
+    try {
+        const jsonValue = await AsyncStorage.getItem(key)
+        return jsonValue != null ? JSON.parse(jsonValue) : null;
+    } catch (e) {
+        console.log('error getData', e)
+    }
+}

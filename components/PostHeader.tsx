@@ -43,9 +43,10 @@ function PostHeader(props: any) {
 
             <Text style={[{
                 color: 'white',
-                fontWeight: 'bold',
+                // fontWeight: 'bold',
                 fontSize: 18,
-                marginBottom: 8
+                marginBottom: 8,
+                fontFamily: 'Rubik_700Bold'
             },
                 // animatedStyles
             ]}>
@@ -58,7 +59,7 @@ function PostHeader(props: any) {
             marginBottom: 4
         }}>
             <Text style={{
-                fontWeight: 'bold',
+                fontFamily: 'Rubik_700Bold'
             }}>{props.post.author_name}</Text> • {
                 moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
             }

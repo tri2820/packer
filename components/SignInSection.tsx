@@ -146,16 +146,18 @@ const styles = StyleSheet.create({
         marginTop: 24,
         color: 'white',
         fontSize: scaledown(30),
-        fontWeight: '700',
+        // fontWeight: '700',
         alignSelf: 'center',
-        textAlign: 'center'
+        textAlign: 'center',
+        fontFamily: 'Rubik_700Bold',
     },
     text_2: {
         color: 'white',
         fontSize: scaledown(30),
-        fontWeight: '700',
+        // fontWeight: '700',
         alignSelf: 'center',
-        textAlign: 'center'
+        textAlign: 'center',
+        fontFamily: 'Rubik_700Bold',
     },
     loginButtons: {
         marginTop: 24

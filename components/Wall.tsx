@@ -1,5 +1,7 @@
+import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { Platform, View } from 'react-native';
+import { memo } from 'react';
+import { Platform, Text, View, Image, StyleSheet } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import Animated from 'react-native-reanimated';
 
@@ -11,13 +13,78 @@ const theEmptyMode = {
     tag: 'Normal'
 };
 
+function WelcomePost(props: any) {
+    return (
+        <View style={{
+            height: props.height,
+            width: '100%',
+            backgroundColor: '#151316',
+            alignItems: 'center'
+        }}>
+            <View style={{
+                marginTop: 200,
+                marginBottom: 40,
+                alignItems: 'center'
+            }}>
+
+                <Text style={{
+                    color: 'white',
+                    fontSize: 48,
+                    fontFamily: 'Rubik_900Black',
+                }}>PACKER</Text>
+                <View style={{
+                    marginTop: 8
+                }}>
+                    <Text style={{
+                        marginVertical: 4,
+                        color: 'white',
+                        fontSize: 20,
+                    }}>1. Learn while chatting</Text>
+                    <Text style={{
+                        marginVertical: 4,
+                        color: 'white',
+                        fontSize: 20,
+                    }}>2. Discover and enjoy</Text>
+                    <Text style={{
+                        marginVertical: 4,
+                        color: 'white',
+                        fontSize: 20,
+                    }}>3. Swipe this way</Text>
+                </View>
+            </View>
+            <Image
+                style={{
+                    width: 140,
+                    height: 140,
+                }}
+                resizeMode="contain"
+                source={require('../assets/Point_down.png')}
+            />
+
+            <LinearGradient
+                colors={gradient}
+                style={styles.gradient}
+                pointerEvents='none'
+            />
+
+        </View>
+    )
+}
+const MemoWelcomePost = memo(WelcomePost);
+
 function Wall(props: any) {
     const _setMode = React.useCallback(props.setMode, []);
     const _setSelectedComment = React.useCallback(props.setSelectedComment, []);
     const _requestComments = React.useCallback(props.requestComments, []);
+    const welcomeData = { type: 'welcomePost', id: 'welcome' }
+    const data = [welcomeData, ...props.posts]
 
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
+        if (item.type == 'welcomePost') {
+            return <MemoWelcomePost height={props.height} />
+        }
+
         const scrolledOn = props.activePostIndex == index;
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
         const cs = scrolledOn ? props.comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
@@ -32,12 +99,6 @@ function Wall(props: any) {
             requestComments={_requestComments}
             setMode={_setMode}
         />
-        // <View style={{
-        //     height: props.height,
-        //     width: '100%',
-        //     backgroundColor: randomColor()
-        // }}
-        // />
     }
 
     const keyExtractor = (item: any) => item.id
@@ -65,7 +126,7 @@ function Wall(props: any) {
             scrollEnabled={props.mode.tag == 'Normal'}
             // Only works on IOS
             pagingEnabled={true}
-            data={props.posts}
+            data={data}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             onEndReachedThreshold={2}
@@ -80,3 +141,14 @@ function Wall(props: any) {
 }
 
 export default Wall;
+
+const styles = StyleSheet.create({
+    gradient: {
+        width: '100%',
+        position: 'absolute',
+        bottom: 0,
+        height: 128
+    }
+});
+
+const gradient = ['transparent', 'rgba(0, 0, 0, 0.9)']
