@@ -1,9 +1,9 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { Platform, Text, View, Image, StyleSheet } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
-import Animated from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 
 import { constants, randomColor } from '../utils';
 import { MemoPost } from './Post';
@@ -13,7 +13,27 @@ const theEmptyMode = {
     tag: 'Normal'
 };
 
+
+
 function WelcomePost(props: any) {
+    const translateY = useSharedValue(0);
+
+    const animatedStyles = useAnimatedStyle(() => {
+        return {
+            width: 140,
+            height: 140,
+            transform: [{ translateY: translateY.value }]
+        }
+    });
+
+    useEffect(() => {
+        translateY.value = withRepeat(
+            withTiming(-20, { duration: 500 }),
+            -1,
+            true
+        );
+    }, []);
+
     return (
         <View style={{
             height: props.height,
@@ -39,12 +59,12 @@ function WelcomePost(props: any) {
                         marginVertical: 4,
                         color: 'white',
                         fontSize: 20,
-                    }}>1. Read News</Text>
+                    }}>1. Chat with Packer</Text>
                     <Text style={{
                         marginVertical: 4,
                         color: 'white',
                         fontSize: 20,
-                    }}>2. Learn by chatting</Text>
+                    }}>2. Discover the real story</Text>
                     <Text style={{
                         marginVertical: 4,
                         color: 'white',
@@ -52,11 +72,8 @@ function WelcomePost(props: any) {
                     }}>3. Swipe this way</Text>
                 </View>
             </View>
-            <Image
-                style={{
-                    width: 140,
-                    height: 140,
-                }}
+            <Animated.Image
+                style={animatedStyles}
                 resizeMode="contain"
                 source={require('../assets/Point_down.png')}
             />

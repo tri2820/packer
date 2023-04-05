@@ -1,7 +1,7 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
-import { Text, View, StyleSheet } from 'react-native';
+import { Text, View, StyleSheet, Alert } from 'react-native';
 
 // somewhere in your app
 import {
@@ -9,6 +9,53 @@ import {
 } from 'react-native-popup-menu';
 
 function ReportMenu(props: any) {
+
+    const showThanksReporting = () => {
+        Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
+    }
+
+    const showBlocked = () => {
+        Alert.alert('User is blocked')
+    }
+
+    const showReportMenu = () =>
+        Alert.alert('Report Content', 'Please select the option that best describes the problem.', [
+            {
+                text: 'Spam',
+                onPress: showThanksReporting,
+            },
+            {
+                text: 'Abuse or harassment',
+                onPress: showThanksReporting,
+            },
+            {
+                text: 'Harmful misinformation',
+                onPress: showThanksReporting,
+            },
+            {
+                text: 'Something else',
+                onPress: showThanksReporting,
+            },
+            {
+                text: 'Cancel',
+                style: 'cancel',
+            },
+        ])
+
+
+    const showBlockMenu = () =>
+        Alert.alert('Confirm blocking user', 'You will no longer receive content posted by this user.', [
+            {
+                text: 'Block',
+                onPress: showBlocked,
+            },
+            {
+                text: 'Cancel',
+                style: 'cancel',
+            },
+        ])
+
+
     return (
         <Menu>
             <MenuTrigger customStyles={{
@@ -17,17 +64,15 @@ function ReportMenu(props: any) {
                     activeOpacity: 0.2
                 }
             }}>
-                <MaterialCommunityIcons name="dots-horizontal" size={16} color='#A3A3A3' />
+                {/* <MaterialCommunityIcons name="dots-horizontal" size={16} color='#A3A3A3' /> */}
+                <Ionicons name="ellipsis-horizontal" size={14} color="#A3A3A3" />
             </MenuTrigger>
             <MenuOptions
                 optionsContainerStyle={{
-                    // borderWidth: 10
                     shadowColor: 'black',
                     shadowOpacity: 0.7,
                     shadowOffset: { width: 0, height: 0 },
                     shadowRadius: 10,
-                    // borderWidth: 1,
-                    // borderRadius: 10
                 }}
                 customStyles={{
                     optionsWrapper: {
@@ -47,17 +92,27 @@ function ReportMenu(props: any) {
 
                     }
                 }}>
-                <MenuOption onSelect={() => alert(`Report`)} >
-                    <MaterialIcons name="report" size={24} color="#B7B9BE" />
+                <MenuOption onSelect={showReportMenu} >
+                    <Ionicons name="flag" size={24} color="#B7B9BE" />
                     <Text style={{
                         fontSize: 16,
                         color: '#B7B9BE',
                         fontWeight: '600',
-                        marginLeft: 5
+                        marginLeft: 8
                     }}>Report</Text>
                 </MenuOption>
+                <MenuOption onSelect={showBlockMenu} >
+                    <Ionicons name="md-eye-off" size={24} color="#B7B9BE" />
+                    {/* <Ionicons name="flag" size={24} color="#B7B9BE" /> */}
+                    <Text style={{
+                        fontSize: 16,
+                        color: '#B7B9BE',
+                        fontWeight: '600',
+                        marginLeft: 8
+                    }}>Block user</Text>
+                </MenuOption>
             </MenuOptions>
-        </Menu>
+        </Menu >
     );
 }
 
