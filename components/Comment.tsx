@@ -145,10 +145,6 @@ function Comment(props: any) {
                                     alignSelf: 'flex-end',
                                 }}>
                                     <MemoContentMenu
-                                        author={{
-                                            name: props.comment.author_name,
-                                            id: props.comment.author_id
-                                        }}
                                         comment={props.comment}
                                         triggerOuterWrapper={{
                                             // backgroundColor: 'red',

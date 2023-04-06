@@ -46,12 +46,19 @@ function ContentMenu(props: any) {
         Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
     }
 
-    const block = () => {
-        showBlocked()
-    }
+    const block = async (blockee: string, user: any) => {
+        const { data, error } = await supabaseClient.from('user_blocks_user').upsert({
+            blocker: user.id,
+            blockee: blockee
+        })
 
-    const showBlocked = () => {
-        Alert.alert('User is blocked')
+        console.log('debug block', data, error);
+        if (error) {
+            Alert.alert('Cannot block.', 'An error happened.')
+            return
+        }
+
+        Alert.alert('User blocked successfully', 'You will no longer receive content posted by this user.')
     }
 
     const showReportMenu = async () => {
@@ -88,19 +95,22 @@ function ContentMenu(props: any) {
 
 
     const showBlockMenu = async () => {
-        console.log(props)
         const { data, error } = await supabaseClient.auth.getUser();
-        if (data == null || error) {
+        if (data.user == null || error) {
             Alert.alert('Cannot block', 'Please sign in first.')
             return;
         }
+        console.log('debug props', props)
+        const author_id = props.comment?.author_id ?? props.post?.author_id;
 
-        if (!props.author.id) {
+        if (!author_id) {
             Alert.alert('Cannot block', 'Author is not a Packer user. Please consider reporting the content instead.')
             return
         }
 
-        if (props.author.id == 'self' || props.author.id == data.user.id) {
+        if (author_id == 'self'
+            // || author_id == data.user.id
+        ) {
             Alert.alert('Cannot block', 'You cannot block yourself 🙂')
             return
         }
@@ -109,7 +119,7 @@ function ContentMenu(props: any) {
         Alert.alert('Confirm blocking user', 'You will no longer receive content posted by this user.', [
             {
                 text: 'Block',
-                onPress: block,
+                onPress: () => block(author_id, data.user),
             },
             {
                 text: 'Cancel',

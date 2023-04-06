@@ -76,10 +76,6 @@ function PostHeader(props: any) {
                 marginRight: 0,
             }}>
                 <MemoContentMenu
-                    author={{
-                        name: props.post.author_name,
-                        id: props.post.author_id
-                    }}
                     post={props.post}
                     triggerOuterWrapper={{
                         // backgroundColor: 'red',
