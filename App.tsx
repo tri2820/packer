@@ -496,7 +496,8 @@ function Loader() {
       author_name: user.user_metadata.full_name,
       parent_id: parent_id,
       post_id: post_id,
-      blockRequestChildren: true
+      blockRequestChildren: true,
+      author_id: 'self'
     }
 
     const childPlaceholderId = `placeholder-${Math.random()}`;
@@ -508,7 +509,8 @@ function Loader() {
       parent_id: placeholderId,
       post_id: post_id,
       blinking: true,
-      blockRequestChildren: true
+      blockRequestChildren: true,
+      author_id: null
     }
 
     insertComments([placeholderComment], true);
@@ -574,6 +576,7 @@ function Loader() {
   }
 
   const onSubmit = (text: string, selectedComment: any) => {
+    if (activePostIndex == 0) return;
     console.log('submitted', activePostIndex);
     // +1 Due to welcome screen
     submitComment(text, selectedComment, posts[activePostIndex - 1].id);

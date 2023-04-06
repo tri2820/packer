@@ -64,7 +64,7 @@ function WelcomePost(props: any) {
                         marginVertical: 4,
                         color: 'white',
                         fontSize: 20,
-                    }}>2. Discover the real story</Text>
+                    }}>2. Dive deep into topics</Text>
                     <Text style={{
                         marginVertical: 4,
                         color: 'white',

@@ -7,8 +7,9 @@ import { Text, View, StyleSheet, Alert } from 'react-native';
 import {
     Menu, MenuOption, MenuOptions, MenuTrigger
 } from 'react-native-popup-menu';
+import { supabaseClient } from '../supabaseClient';
 
-function ReportMenu(props: any) {
+function ContentMenu(props: any) {
 
     const report = (reason: string) => {
         showThanksReporting()
@@ -22,7 +23,13 @@ function ReportMenu(props: any) {
         Alert.alert('User is blocked')
     }
 
-    const showReportMenu = () =>
+    const showReportMenu = async () => {
+        const { data, error } = await supabaseClient.auth.getUser();
+        if (data == null || error) {
+            Alert.alert('Cannot report', 'Please sign in first.')
+            return;
+        }
+
         Alert.alert('Report Content', 'Please select the option that best describes the problem.', [
             {
                 text: 'Spam',
@@ -45,9 +52,29 @@ function ReportMenu(props: any) {
                 style: 'cancel',
             },
         ])
+    }
 
 
-    const showBlockMenu = () =>
+
+    const showBlockMenu = async () => {
+        console.log(props)
+        const { data, error } = await supabaseClient.auth.getUser();
+        if (data == null || error) {
+            Alert.alert('Cannot block', 'Please sign in first.')
+            return;
+        }
+
+        if (!props.author.id) {
+            Alert.alert('Cannot block', 'Author is not a Packer user. Please consider reporting the content instead.')
+            return
+        }
+
+        if (props.author.id == 'self' || props.author.id == data.user.id) {
+            Alert.alert('Cannot block', 'You cannot block yourself 🙂')
+            return
+        }
+
+
         Alert.alert('Confirm blocking user', 'You will no longer receive content posted by this user.', [
             {
                 text: 'Block',
@@ -58,6 +85,8 @@ function ReportMenu(props: any) {
                 style: 'cancel',
             },
         ])
+    }
+
 
 
     return (
@@ -121,6 +150,6 @@ function ReportMenu(props: any) {
 }
 
 
-export default ReportMenu;
+export default ContentMenu;
 
-export const MemoReportMenu = React.memo(ReportMenu);
+export const MemoContentMenu = React.memo(ContentMenu);

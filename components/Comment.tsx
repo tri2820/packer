@@ -6,7 +6,7 @@ import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'r
 import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import BlinkingCursor from './BlinkingCursor';
-import { MemoReportMenu } from './ReportMenu';
+import { MemoContentMenu } from './ReportMenu';
 
 
 const quote: MarkdownRule = {
@@ -144,8 +144,11 @@ function Comment(props: any) {
                                     alignItems: 'center',
                                     alignSelf: 'flex-end',
                                 }}>
-                                    <MemoReportMenu
-                                        comment={props.comment}
+                                    <MemoContentMenu
+                                        author={{
+                                            name: props.comment.author_name,
+                                            id: props.comment.author_id
+                                        }}
                                         triggerOuterWrapper={{
                                             // backgroundColor: 'red',
                                             paddingHorizontal: 8,
@@ -312,7 +315,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row'
     },
     author_name: {
-        fontFamily: 'Rubik_700Bold',
+        fontFamily: 'Rubik_500Medium',
         color: 'white'
     },
     level0: {

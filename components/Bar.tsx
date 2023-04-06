@@ -202,7 +202,6 @@ function Bar(props: any) {
     const send = () => {
         if (text.trim().length > 0) {
             props.onSubmit(text, props.selectedComment);
-
         }
         ref.current?.blur();
         setText('');
