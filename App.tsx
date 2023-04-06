@@ -7,7 +7,7 @@ import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-g
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import Bar from './components/Bar';
+import Bar, { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
 import { calcStatusBarColor, constants, Mode, sharedAsyncState } from './utils';
@@ -149,14 +149,6 @@ function Main(props: any) {
     })()
   }, [])
 
-  // useEffect(() => {
-  //   if (Platform.OS != 'android') return;
-  //   NavigationBar.addVisibilityListener(({ visibility }) => {
-  //     setNavigationBarVisible(visibility == 'visible')
-  //   });
-
-  // }, [])
-
   return (
     <View style={{
       height: constants.height,
@@ -210,17 +202,17 @@ function Main(props: any) {
             </Animated.View>
           }
 
-          <Bar
+          <MemoBar
+            activePostIndex={props.activePostIndex}
+            onSubmit={props.onSubmit}
+
             navigationBarVisible={navigationBarVisible}
             mode={props.mode}
             setMode={props.setMode}
-            selectedCommenText={props.selectedComment?.content}
             setSelectedComment={props.setSelectedComment}
             selectedComment={props.selectedComment}
-            onSubmit={props.onSubmit}
             user={props.user}
             setUser={props.setUser}
-            activePostIndex={props.activePostIndex}
             minBarHeight={minBarHeight}
             offset={offset}
             wallHeight={wallHeight}
@@ -259,9 +251,9 @@ const rc = async (sharedAsyncState: any, insertData: any, post_id: string, paren
     return [];
   }
 
-  sharedAsyncState[`offset/${key}`] = offset + 5;
+  sharedAsyncState[`offset/${key}`] = offset + 3;
 
-  const { data, error } = await supabaseClient.rpc('get_comments_batch', { o: offset, n: 5, postid: post_id, parentid: parent_id, nchildren: 3 })
+  const { data, error } = await supabaseClient.rpc('get_comments_batch', { o: offset, n: 3, postid: post_id, parentid: parent_id, nchildren: 3 })
   if (error) {
     console.log('debug error query comments from post', error)
     return [];
@@ -293,89 +285,6 @@ const grc = async (sharedAsyncState: any, insertData: any, post_id: string, pare
   // }
   sharedAsyncState[key] = 'done';
 }
-
-
-// const App = () => {
-//   return (
-//     <View style={{ width: 600, height: 600 }}>
-//       <MenuView
-//         title="Menu Title"
-//         onPressAction={({ nativeEvent }) => {
-//           console.warn(JSON.stringify(nativeEvent));
-//         }}
-//         actions={[
-//           {
-//             title: 'what',
-//             id: 'add',
-//             titleColor: '#2367A2',
-//             image: Platform.select({
-//               ios: 'plus',
-//               android: 'ic_menu_add',
-//             }),
-//             imageColor: '#2367A2',
-//             subactions: [
-//               {
-//                 id: 'nested1',
-//                 title: 'Nested action',
-//                 titleColor: 'rgba(250,180,100,0.5)',
-//                 subtitle: 'State is mixed',
-//                 image: Platform.select({
-//                   ios: 'heart.fill',
-//                   android: 'ic_menu_today',
-//                 }),
-//                 imageColor: 'rgba(100,200,250,0.3)',
-//                 state: 'mixed',
-//               },
-//               {
-//                 id: 'nestedDestructive',
-//                 title: 'Destructive Action',
-//                 attributes: {
-//                   destructive: true,
-//                 },
-//                 image: Platform.select({
-//                   ios: 'trash',
-//                   android: 'ic_menu_delete',
-//                 }),
-//               },
-//             ],
-//           },
-//           {
-//             id: 'share',
-//             title: 'Share Action',
-//             titleColor: '#46F289',
-//             subtitle: 'Share action on SNS',
-//             image: Platform.select({
-//               ios: 'square.and.arrow.up',
-//               android: 'ic_menu_share',
-//             }),
-//             imageColor: '#46F289',
-//             state: 'on',
-//           },
-//           {
-//             id: 'destructive',
-//             title: 'Destructive Action',
-//             attributes: {
-//               destructive: true,
-//             },
-//             image: Platform.select({
-//               ios: 'trash',
-//               android: 'ic_menu_delete',
-//             }),
-//           },
-//         ]}
-//         shouldOpenOnLongPress={true}
-//       >
-//         <View style={{
-//           width: 300,
-//           height: 100,
-//         }}>
-//           <Text>Test</Text>
-//         </View>
-//       </MenuView>
-//     </View>
-//   );
-// };
-
 
 function Loader() {
   const [posts, setPosts] = useState<any[]>([]);

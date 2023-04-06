@@ -2,6 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
+import { memo } from 'react';
 import { StyleSheet, Image, ImageBackground, Linking, Text, TouchableOpacity, View, Platform } from 'react-native';
 import Animated, { FadeOut, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -52,6 +53,7 @@ function SignInSection(props: any) {
         Linking.openURL('https://github.com/tri2820/packer-policies/blob/main/EULA.md')
     }
 
+    // console.log('debug sign in section')
     return (
         <Animated.View
             style={[animatedStyles, styles.view]}
@@ -218,3 +220,6 @@ const styles = StyleSheet.create({
         marginVertical: 4
     }
 })
+
+
+export const MemoSignInSection = memo(SignInSection);

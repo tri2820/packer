@@ -154,6 +154,7 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
 
+    // console.log('debug render post', props.post?.id)
     return <View style={{
         backgroundColor: props.mode.tag == 'Comment' ? '#272727' : '#151316',
         height: props.height
@@ -175,10 +176,12 @@ function Post(props: any) {
                         tintColor={'transparent'}
                     />
                 }
+                scrollEventThrottle={6}
                 data={uiList}
                 onEndReached={loadComments}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
+                windowSize={5}
                 ListHeaderComponent={
                     <View style={{
                         paddingTop: insets.top

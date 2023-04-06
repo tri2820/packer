@@ -1,5 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
+import { memo } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle } from 'react-native-reanimated';
@@ -46,6 +47,7 @@ function UserList(props: any) {
         props.setMode('normal')
     }
 
+    // console.log('debug userlist')
     return (
         <View style={{
             marginHorizontal: 20,
@@ -220,3 +222,6 @@ const styles = StyleSheet.create({
         fontSize: 18
     }
 })
+
+
+export const MemoUserList = memo(UserList);

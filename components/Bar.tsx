@@ -1,13 +1,13 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
 import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup } from '../utils';
-import SignInSection from './SignInSection';
-import UserList from './UserList';
+import SignInSection, { MemoSignInSection } from './SignInSection';
+import UserList, { MemoUserList } from './UserList';
 
 
 const INSETS_OFFSET_BOTTOM = 0;
@@ -177,7 +177,7 @@ function Bar(props: any) {
         })
 
     const getQuote = () => {
-        const text = props.selectedCommenText;
+        const text = props.selectedComment.content;
         return text.length > 30 ? `${text.slice(0, 30)}...` : text;
     }
 
@@ -199,13 +199,13 @@ function Bar(props: any) {
         changeState('minimize');
     }
 
-    const send = () => {
+    const send = async () => {
         if (text.trim().length > 0) {
             props.onSubmit(text, props.selectedComment);
         }
-        ref.current?.blur();
-        setText('');
         props.setSelectedComment(null);
+        setText('');
+        ref.current?.blur();
     }
 
     const open = () => {
@@ -221,6 +221,7 @@ function Bar(props: any) {
         changeState('maximize')
     }, [props.selectedComment])
 
+    // console.log('debug bar')
     return (
         <>
             <Animated.View style={[styles.overlay, overlayStyles]}>
@@ -240,7 +241,7 @@ function Bar(props: any) {
                     barStyles]}
                 >
                     {
-                        props.user === null && <SignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
+                        props.user === null && <MemoSignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
                     }
 
                     <View style={styles.handler}>
@@ -305,13 +306,7 @@ function Bar(props: any) {
                                                     cursorColor: '#FFC542'
                                                 })
                                                 }
-                                            /> : <Pressable style={{
-                                                // backgroundColor: 'blue',
-                                                paddingTop: 5,
-                                                height: '100%',
-                                                width: '100%',
-                                                flex: 1
-                                            }}
+                                            /> : <Pressable style={styles.press}
                                                 onPress={() => {
                                                     changeState('maximize');
                                                 }}
@@ -345,7 +340,7 @@ function Bar(props: any) {
                     {
                         showUserList &&
                         props.user !== null &&
-                        <UserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        <MemoUserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>
@@ -356,6 +351,12 @@ function Bar(props: any) {
 
 export default Bar;
 const styles = StyleSheet.create({
+    press: {
+        paddingTop: 5,
+        height: '100%',
+        width: '100%',
+        flex: 1
+    },
     overlay:
     {
         backgroundColor: 'black',
@@ -427,3 +428,5 @@ const styles = StyleSheet.create({
         fontWeight: '600'
     }
 })
+
+export const MemoBar = memo(Bar);

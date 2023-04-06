@@ -86,7 +86,7 @@ function Comment(props: any) {
         props.setSelectedComment(props.comment);
     }
 
-
+    // console.log('debug render comment', props.comment.id)
     return (
         <Pressable
             style={{
@@ -146,11 +146,7 @@ function Comment(props: any) {
                                 }}>
                                     <MemoContentMenu
                                         comment={props.comment}
-                                        triggerOuterWrapper={{
-                                            // backgroundColor: 'red',
-                                            paddingHorizontal: 8,
-                                            paddingVertical: 4,
-                                        }} />
+                                        triggerOuterWrapper={styles.triggerOuterWrapper} />
 
                                     <TouchableOpacity
                                         onPress={select}
@@ -173,6 +169,7 @@ function Comment(props: any) {
 }
 
 const mdstyles: MarkdownStyles = {
+
     blockQuote: {
         color: '#A3A3A3',
         opacity: 1,
@@ -290,6 +287,10 @@ const blockQuoteView = {
 }
 
 const styles = StyleSheet.create({
+    triggerOuterWrapper: {
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+    },
     reply_text: {
         color: "#A3A3A3",
         marginLeft: 8

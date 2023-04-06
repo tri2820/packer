@@ -150,6 +150,7 @@ function Wall(props: any) {
             onEndReached={onEndReached}
             getItemLayout={getItemLayout}
             onScroll={onScroll}
+            scrollEventThrottle={6}
             // DO NOT USE removeClippedSubviews: Making title not clickable
             // removeClippedSubviews
             windowSize={7}
