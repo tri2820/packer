@@ -149,6 +149,7 @@ function Comment(props: any) {
                                             name: props.comment.author_name,
                                             id: props.comment.author_id
                                         }}
+                                        comment={props.comment}
                                         triggerOuterWrapper={{
                                             // backgroundColor: 'red',
                                             paddingHorizontal: 8,

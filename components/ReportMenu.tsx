@@ -11,12 +11,43 @@ import { supabaseClient } from '../supabaseClient';
 
 function ContentMenu(props: any) {
 
-    const report = (reason: string) => {
-        showThanksReporting()
+    const report = async (user: any, reason: string) => {
+        if (props.post) {
+            const { data, error } = await supabaseClient.from('reported_posts').upsert({
+                reporter_id: user.id,
+                reason: reason,
+                post_id: props.post.id
+            })
+            console.log('debug report', data, error);
+            if (error) {
+                Alert.alert('Cannot submit report', 'An error happened.')
+                return;
+            }
+
+            Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
+            return;
+        }
+        if (!props.comment) {
+            console.log('warn report function called with props.comment, returns early', props.comment);
+            return;
+        }
+
+        const { data, error } = await supabaseClient.from('reported_comments').upsert({
+            reporter_id: user.id,
+            reason: reason,
+            comment_id: props.comment.id
+        })
+        console.log('debug report', data, error);
+        if (error) {
+            Alert.alert('Cannot submit report', 'An error happened.')
+            return;
+        }
+
+        Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
     }
 
-    const showThanksReporting = () => {
-        Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
+    const block = () => {
+        showBlocked()
     }
 
     const showBlocked = () => {
@@ -25,7 +56,7 @@ function ContentMenu(props: any) {
 
     const showReportMenu = async () => {
         const { data, error } = await supabaseClient.auth.getUser();
-        if (data == null || error) {
+        if (!data.user || error) {
             Alert.alert('Cannot report', 'Please sign in first.')
             return;
         }
@@ -33,19 +64,19 @@ function ContentMenu(props: any) {
         Alert.alert('Report Content', 'Please select the option that best describes the problem.', [
             {
                 text: 'Spam',
-                onPress: () => report('spam'),
+                onPress: () => report(data.user, 'spam'),
             },
             {
                 text: 'Abuse or harassment',
-                onPress: () => report('abuse_or_harassment'),
+                onPress: () => report(data.user, 'abuse_or_harassment'),
             },
             {
                 text: 'Harmful misinformation',
-                onPress: () => report('misinformation'),
+                onPress: () => report(data.user, 'misinformation'),
             },
             {
                 text: 'Something else',
-                onPress: () => report('else'),
+                onPress: () => report(data.user, 'else'),
             },
             {
                 text: 'Cancel',
@@ -78,7 +109,7 @@ function ContentMenu(props: any) {
         Alert.alert('Confirm blocking user', 'You will no longer receive content posted by this user.', [
             {
                 text: 'Block',
-                onPress: showBlocked,
+                onPress: block,
             },
             {
                 text: 'Cancel',

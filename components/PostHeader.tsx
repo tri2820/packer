@@ -80,6 +80,7 @@ function PostHeader(props: any) {
                         name: props.post.author_name,
                         id: props.post.author_id
                     }}
+                    post={props.post}
                     triggerOuterWrapper={{
                         // backgroundColor: 'red',
                         paddingLeft: 8
