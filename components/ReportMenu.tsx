@@ -47,7 +47,7 @@ function ContentMenu(props: any) {
     }
 
     const block = async (blockee: string, user: any) => {
-        const { data, error } = await supabaseClient.from('user_blocks_user').upsert({
+        const { data, error } = await supabaseClient.from('user_blocks_user').insert({
             blocker: user.id,
             blockee: blockee
         })
@@ -58,7 +58,7 @@ function ContentMenu(props: any) {
             return
         }
 
-        Alert.alert('User blocked successfully', 'You will no longer receive content posted by this user.')
+        Alert.alert('User blocked successfully', 'You will no longer receive content created by this user.')
     }
 
     const showReportMenu = async () => {
@@ -109,14 +109,14 @@ function ContentMenu(props: any) {
         }
 
         if (author_id == 'self'
-            // || author_id == data.user.id
+            || author_id == data.user.id
         ) {
             Alert.alert('Cannot block', 'You cannot block yourself 🙂')
             return
         }
 
 
-        Alert.alert('Confirm blocking user', 'You will no longer receive content posted by this user.', [
+        Alert.alert('Confirm blocking user', 'You will no longer receive content created by this user.', [
             {
                 text: 'Block',
                 onPress: () => block(author_id, data.user),
