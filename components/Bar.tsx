@@ -55,7 +55,7 @@ function Bar(props: any) {
 
         return {
             height: k,
-            display: offset.value < -40 && (allowShowingUserList.value || props.user == null) ? 'none' : 'flex',
+            display: offset.value < -40 && (allowShowingUserList.value || props.user == null) ? 'none' : (!showUserList ? 'flex' : 'none'),
             // backgroundColor: 'blue'
         };
     });
@@ -235,7 +235,6 @@ function Bar(props: any) {
                     </View>
 
                     {
-                        !showUserList &&
                         <Animated.View
                             style={[styles.inputbar, inputStyles]}
                         >

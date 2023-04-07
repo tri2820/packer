@@ -45,6 +45,10 @@ function InputSend(props: any) {
         props.changeState('maximize');
     }
 
+    useEffect(() => {
+        console.log('debug text', text)
+    }, [text])
+
     const blur = () => {
         if (text.trim().length == 0) {
             setText('')
@@ -53,6 +57,7 @@ function InputSend(props: any) {
         props.onBlur()
     }
 
+    // console.log('render')
     return (
         <>
             {
