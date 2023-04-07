@@ -1,7 +1,7 @@
 import { Octicons } from '@expo/vector-icons';
 import moment from 'moment';
 import * as React from 'react';
-import { memo, useState } from 'react';
+import { memo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
 import Animated, { FadeInDown } from 'react-native-reanimated';
@@ -59,7 +59,10 @@ const markdownRules = { quote, link }
 function Comment(props: any) {
     const [display, setDisplay] = useState<'Normal' | 'Inline'>('Normal');
     const [switchedOnce, setSwitchedOnce] = useState(false);
-
+    const menuref = useRef<any>(null)
+    const openMenu = () => {
+        menuref.current.open();
+    }
     const created_at = moment
         .utc(props.comment.created_at)
         .local()
@@ -88,12 +91,13 @@ function Comment(props: any) {
 
     // console.log('debug render comment', props.comment.id)
     return (
-        <Pressable
+        <TouchableOpacity
             style={{
                 paddingBottom: 8,
                 marginLeft: props.comment.level <= 1 ? 0 : (16 * props.comment.level)
             }}
             onPress={switchMode}
+            onLongPress={openMenu}
         >
 
             {props.comment.level === 0 && <View style={styles.hair} />}
@@ -145,6 +149,7 @@ function Comment(props: any) {
                                     alignSelf: 'flex-end',
                                 }}>
                                     <MemoContentMenu
+                                        menuref={menuref}
                                         comment={props.comment}
                                         triggerOuterWrapper={styles.triggerOuterWrapper} />
 
@@ -163,7 +168,7 @@ function Comment(props: any) {
                     </Animated.View>
                 }
             </View>
-        </Pressable>
+        </TouchableOpacity>
 
     );
 }

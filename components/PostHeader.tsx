@@ -1,6 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import * as React from 'react';
+import { useRef } from 'react';
 import { Text, TouchableOpacity, View } from 'react-native';
 import { normalizedHostname } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
@@ -10,7 +11,10 @@ function PostHeader(props: any) {
         const url = new URL(source_url);
         return normalizedHostname(url.hostname).toUpperCase();
     }
-
+    const menuref = useRef<any>(null)
+    const openMenu = () => {
+        menuref.current.open();
+    }
     return (<View style={{
         marginBottom: 8
     }}>
@@ -22,6 +26,7 @@ function PostHeader(props: any) {
                     // insetsColor: 'rgba(0, 0, 0, 0)'
                 })
             }}
+            onLongPress={openMenu}
         >
             <View style={{
                 marginBottom: 8,
@@ -76,6 +81,7 @@ function PostHeader(props: any) {
                 marginRight: 0,
             }}>
                 <MemoContentMenu
+                    menuref={menuref}
                     post={props.post}
                     triggerOuterWrapper={{
                         // backgroundColor: 'red',
