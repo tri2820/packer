@@ -2,6 +2,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { Text, View, StyleSheet, Alert } from 'react-native';
+import * as Clipboard from 'expo-clipboard';
 
 // somewhere in your app
 import {
@@ -10,6 +11,16 @@ import {
 import { supabaseClient } from '../supabaseClient';
 
 function ContentMenu(props: any) {
+    const copyToClipboard = () => {
+        const text = props.post?.title ?? props.comment?.content;
+        if (text && text.length > 0) {
+            Clipboard.setStringAsync(text);
+            Alert.alert('Copied Text')
+            return;
+        }
+
+        Alert.alert('Cannot Copy ☹️')
+    };
 
     const report = async (user: any, reason: string) => {
         if (props.post) {
@@ -166,6 +177,15 @@ function ContentMenu(props: any) {
 
                     }
                 }}>
+                <MenuOption onSelect={copyToClipboard} >
+                    <Ionicons name="copy" size={24} color="#B7B9BE" />
+                    <Text style={{
+                        fontSize: 16,
+                        color: '#B7B9BE',
+                        fontWeight: '600',
+                        marginLeft: 8
+                    }}>Copy Text</Text>
+                </MenuOption>
                 <MenuOption onSelect={showReportMenu} >
                     <Ionicons name="flag" size={24} color="#B7B9BE" />
                     <Text style={{
@@ -183,7 +203,7 @@ function ContentMenu(props: any) {
                         color: '#B7B9BE',
                         fontWeight: '600',
                         marginLeft: 8
-                    }}>Block user</Text>
+                    }}>Block User</Text>
                 </MenuOption>
             </MenuOptions>
         </Menu >

@@ -516,29 +516,29 @@ function Loader() {
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
 
   return (
-    <MenuProvider >
-      <SafeAreaProvider>
-        <MenuProvider>
-          <GestureHandlerRootView>
-            <MemoMain
-              onSubmit={memoOnSubmit}
-              setSelectedComment={setSelectedComment}
-              selectedComment={selectedComment}
-              activePostIndex={activePostIndex}
-              setActivePostIndex={setActivePostIndex}
-              user={user}
-              setUser={setUser}
-              posts={posts}
-              requestPost={memoRequestPost}
-              comments={comments}
-              setMode={setMode}
-              requestComments={memoRequestComments}
-              mode={mode}
-            />
-          </GestureHandlerRootView>
-        </MenuProvider>
-      </SafeAreaProvider>
-    </MenuProvider>
+    // <MenuProvider >
+    <SafeAreaProvider>
+      <MenuProvider>
+        <GestureHandlerRootView>
+          <MemoMain
+            onSubmit={memoOnSubmit}
+            setSelectedComment={setSelectedComment}
+            selectedComment={selectedComment}
+            activePostIndex={activePostIndex}
+            setActivePostIndex={setActivePostIndex}
+            user={user}
+            setUser={setUser}
+            posts={posts}
+            requestPost={memoRequestPost}
+            comments={comments}
+            setMode={setMode}
+            requestComments={memoRequestComments}
+            mode={mode}
+          />
+        </GestureHandlerRootView>
+      </MenuProvider>
+    </SafeAreaProvider>
+    // </MenuProvider>
   );
 }
 

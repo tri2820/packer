@@ -41,7 +41,8 @@
     "react-native-youtube-iframe": "^2.2.2",
     "text-decoding": "^1.0.0",
     "uuid": "^9.0.0",
-    "web-streams-polyfill": "^3.2.1"
+    "web-streams-polyfill": "^3.2.1",
+    "expo-clipboard": "~4.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
