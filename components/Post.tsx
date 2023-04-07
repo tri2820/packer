@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { Platform, Text, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { sharedAsyncState } from '../utils';
+import { constants, sharedAsyncState } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -92,7 +92,8 @@ function Post(props: any) {
     const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
 
     const loadComments = async () => {
-        console.log('debug on end reached')
+
+        console.log('call load comments')
         if (loadState == 'loading') return;
         setLoadState('loading');
 
@@ -178,6 +179,14 @@ function Post(props: any) {
             />
     }
 
+    const onScroll = (event: any) => {
+        // Hack because onEndReached doesn't work
+        const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+        const y = event.nativeEvent.contentOffset.y;
+        if (y < end - constants.height * 0.05) return;
+        loadComments();
+    }
+
     const keyExtractor = (item: any) => item.id
     const header = <ListHeader
         scrolledOn={props.scrolledOn}
@@ -193,24 +202,26 @@ function Post(props: any) {
         progressBackgroundColor='transparent'
         tintColor={'transparent'}
     />
-    const footer = props.post && timesLoaded > 0
-        && sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
-        ?
-        <>
-            <ActivityIndicator
-                style={styles.loading_indicator}
-                size="small"
-            />
-            <View>
+    const footer = props.post
+        ? <>
+            {
+
+                sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
+                && <ActivityIndicator
+                    style={styles.loading_indicator}
+                    size="small"
+                />
+            }
+            {
+                sharedAsyncState[`count/${props.post.id}`] > 0 &&
                 <Text style={{
                     color: '#A3A3A3',
                     alignSelf: 'center'
                 }}>
-                    {numTopLevelComments}/{sharedAsyncState[`count/${props.post.id}`]}
+                    {numTopLevelComments}/{sharedAsyncState[`count/${props.post.id}`]} comments
                 </Text>
-            </View>
-        </>
-        : undefined
+            }
+        </> : undefined
 
     // console.log('debug render post', props.post?.id)
     return <View style={{
@@ -221,9 +232,14 @@ function Post(props: any) {
             props.scrolledOn
             &&
             <FlatList
+                // See, for windowSize, if I set this to a number, 2 for example, there are comments at the end not rendered.
+                //  This might be because we have nested list (affect onEndReached also)
+                // Here it's set to 21 by default, is there a performance impact?
+                // Nevertheless there is now a limit (21) that comments will not get rendered, but it's really long so meh for now
+                // windowSize={1}
                 initialNumToRender={1}
                 maxToRenderPerBatch={3}
-                updateCellsBatchingPeriod={200}
+                updateCellsBatchingPeriod={300}
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}
@@ -231,10 +247,10 @@ function Post(props: any) {
                 refreshControl={refresh}
                 scrollEventThrottle={6}
                 data={uiList}
-                onEndReached={loadComments}
+                onScroll={onScroll}
+                // onEndReached={loadComments}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-                windowSize={5}
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
             />
