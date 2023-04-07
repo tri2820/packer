@@ -31,9 +31,9 @@ function Bar(props: any) {
     const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
     const inputref = useRef<any>(undefined);
-    if (props.selectedComment) {
-        inputref.current?.focus();
-    }
+    // if (props.selectedComment) {
+    //     inputref.current?.focus();
+    // }
 
     const animatedStyles = useAnimatedStyle(() => {
         return {
@@ -124,8 +124,9 @@ function Bar(props: any) {
 
         return {
             transform: [{
-                translateY: offset.value
-            }]
+                translateY: offset.value,
+            }],
+            display: props.activePostIndex == 0 ? 'none' : 'flex'
         };
     });
 
@@ -180,7 +181,7 @@ function Bar(props: any) {
         })
 
     const hideInput = () => {
-        props.setSelectedComment(null);
+        // props.setSelectedComment(null);
         if (!focus) {
             changeState('minimize');
             return;
@@ -281,6 +282,7 @@ function Bar(props: any) {
                                                 onBlur={onBlur}
                                                 inputref={inputref}
                                                 selectedComment={props.selectedComment}
+                                                setSelectedComment={props.setSelectedComment}
                                                 changeState={changeState}
                                                 onSubmit={props.onSubmit}
                                                 activePostIndex={props.activePostIndex}

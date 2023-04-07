@@ -1,4 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Octicons from '@expo/vector-icons/Octicons';
 import * as React from 'react';
 import { memo, useEffect, useState } from 'react';
 import { Platform, Text, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
@@ -27,54 +28,75 @@ function InputSend(props: any) {
         props.inputref.current?.blur();
     }
 
-    const placeHolder = props.activePostIndex == 0 ? 'Down the rabbit hole we go! 🐰' :
+    const placeHolder =
+        // props.activePostIndex == 0 ?
+        //     'Down the rabbit hole we go!' :
         (props.selectedComment ?
             `Replying to "${getQuote()}"` :
             'Chat with Packer...')
 
     const press = () => {
-        if (props.activePostIndex == 0) {
-            props.wallref.current?.scrollToIndex({ index: 1 })
-            return;
-        }
+        // if (props.activePostIndex == 0) {
+        // props.wallref.current?.scrollToIndex({ index: 1 })
+        // return;
+        // }
         props.changeState('maximize');
     }
 
+    const blur = () => {
+        if (text.trim().length == 0) {
+            setText('')
+            props.setSelectedComment(null)
+        }
+        props.onBlur()
+    }
+
     return (
-        props.focus ?
-            <>
-                <TextInput
-                    autoFocus
-                    multiline
-                    onBlur={props.onBlur}
-                    ref={props.inputref}
-                    value={text}
-                    onChangeText={setText}
-                    placeholder={placeHolder}
-                    placeholderTextColor='#C2C2C2'
-                    style={styles.textinput}
-                    keyboardAppearance='dark'
-                    {...(Platform.OS == 'ios' ? {
-                        selectionColor: '#FFC542'
-                    } : {
-                        cursorColor: '#FFC542'
-                    })
-                    }
-                />
-                <TouchableOpacity onPress={send}>
-                    <Ionicons name="send" size={24} color='#FFC542' />
-                </TouchableOpacity>
-            </> :
-            <Pressable style={styles.press}
-                onPress={press}
-            >
-                <Text style={{
-                    color: text == '' ? '#C2C2C2' : '#F1F1F1'
-                }}>{
-                        text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)
-                    }
-                </Text>
-            </Pressable>
+        <>
+            {
+                props.selectedComment &&
+                <Octicons name="reply" size={12} style={{
+                    marginTop: 7,
+                    marginRight: 8
+                }} color="#A3A3A3" />
+            }
+
+            {props.focus ?
+                <>
+                    <TextInput
+                        autoFocus
+                        multiline
+                        onBlur={blur}
+                        ref={props.inputref}
+                        value={text}
+                        onChangeText={setText}
+                        placeholder={placeHolder}
+                        placeholderTextColor='#C2C2C2'
+                        style={styles.textinput}
+                        keyboardAppearance='dark'
+                        {...(Platform.OS == 'ios' ? {
+                            selectionColor: '#FFC542'
+                        } : {
+                            cursorColor: '#FFC542'
+                        })
+                        }
+                    />
+                    <TouchableOpacity onPress={send}>
+                        <Ionicons name="send" size={24} color='#FFC542' />
+                    </TouchableOpacity>
+                </> :
+                <Pressable style={styles.press}
+                    onPress={press}
+                >
+                    <Text style={{
+                        color: text == '' ? '#C2C2C2' : '#F1F1F1'
+                    }}>{
+                            text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)
+                        }
+                    </Text>
+                </Pressable>
+            }
+        </>
     );
 }
 

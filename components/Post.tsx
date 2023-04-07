@@ -13,6 +13,28 @@ import { MemoNoComment } from './NoComment';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
 
+
+function ListHeader(props: any) {
+    const insets = useSafeAreaInsets();
+    const [videoPlaying, setVideoPlaying] = useState(false);
+
+    useEffect(() => {
+        setVideoPlaying(props.scrolledOn);
+    }, [props.scrolledOn])
+
+
+    return <View style={{
+        paddingTop: insets.top
+    }}>
+        <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
+        <View style={styles.padding}>
+            <PostHeader post={props.post} setMode={props.setMode} />
+            <KeyTakeaways content={props.post.keytakeaways} />
+            {props.timesLoaded > 0 && props.comments.length == 0 && <MemoNoComment />}
+        </View>
+    </View>
+}
+
 // [ba ca da]
 const splitAt = (comments: any[]) => {
     if (comments.length == 0) return [];
@@ -57,8 +79,7 @@ const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any):
 }
 
 function Post(props: any) {
-    const [refreshing, setRefreshing] = useState(false);
-    const [videoPlaying, setVideoPlaying] = useState(false);
+    const [refreshing, _] = useState(false);
     const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
@@ -67,9 +88,6 @@ function Post(props: any) {
     const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
     const [timesLoaded, setTimesLoaded] = useState(0);
 
-    useEffect(() => {
-        setVideoPlaying(props.scrolledOn);
-    }, [props.scrolledOn])
 
     const timer = useRef<any>(null);
 
@@ -153,6 +171,20 @@ function Post(props: any) {
     }
 
     const keyExtractor = (item: any) => item.id
+    const header = <ListHeader
+        scrolledOn={props.scrolledOn}
+        post={props.post}
+        comments={props.comments}
+        setMode={props.setMode}
+        timesLoaded={timesLoaded}
+    />
+    const refresh = Platform.OS == 'android' ? undefined : <RefreshControl
+        refreshing={refreshing}
+        onRefresh={onRefresh}
+        colors={['transparent']}
+        progressBackgroundColor='transparent'
+        tintColor={'transparent'}
+    />
 
     // console.log('debug render post', props.post?.id)
     return <View style={{
@@ -162,38 +194,22 @@ function Post(props: any) {
         {
             props.scrolledOn
             &&
-            < FlatList
+            <FlatList
+                initialNumToRender={1}
+                maxToRenderPerBatch={1}
+                updateCellsBatchingPeriod={100}
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}
                 scrollEnabled={props.mode.tag == 'Comment'}
-                refreshControl={
-                    Platform.OS == 'android' ? undefined : <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
-                        colors={['transparent']}
-                        progressBackgroundColor='transparent'
-                        tintColor={'transparent'}
-                    />
-                }
+                refreshControl={refresh}
                 scrollEventThrottle={6}
                 data={uiList}
                 onEndReached={loadComments}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 windowSize={5}
-                ListHeaderComponent={
-                    <View style={{
-                        paddingTop: insets.top
-                    }}>
-                        <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
-                        <View style={styles.padding}>
-                            <PostHeader post={props.post} setMode={props.setMode} />
-                            <KeyTakeaways content={props.post.keytakeaways} />
-                            {timesLoaded > 0 && props.comments.length == 0 && <MemoNoComment />}
-                        </View>
-                    </View>
-                }
+                ListHeaderComponent={header}
             />
         }
 

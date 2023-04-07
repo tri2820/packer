@@ -203,6 +203,7 @@ function Main(props: any) {
             </Animated.View>
           }
 
+
           <MemoBar
             activePostIndex={props.activePostIndex}
             onSubmit={props.onSubmit}
@@ -218,6 +219,7 @@ function Main(props: any) {
             offset={offset}
             wallHeight={wallHeight}
           />
+
         </Animated.View>
       </GestureDetector>
     </View>
@@ -516,7 +518,7 @@ function Loader() {
   return (
     <SafeAreaProvider>
       <MenuProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureHandlerRootView>
           <MemoMain
             onSubmit={memoOnSubmit}
             setSelectedComment={setSelectedComment}

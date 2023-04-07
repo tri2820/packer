@@ -1,11 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { memo, useEffect, useRef } from 'react';
-import { Platform, Text, View, Image, StyleSheet } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
+import { memo, useEffect } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 
-import { constants, randomColor } from '../utils';
+import { constants } from '../utils';
 import { MemoPost } from './Post';
 
 const theEmptyList: any[] = [];
@@ -133,14 +132,20 @@ function Wall(props: any) {
         props.setActivePostIndex(Math.floor(offset / props.height) + 1);
     }
 
+    const liststyle = {
+        width: constants.width,
+        height: props.height
+    }
+
     return (
         <Animated.FlatList
             ref={props.wallref}
+            windowSize={2}
+            initialNumToRender={1}
+            maxToRenderPerBatch={2}
+            updateCellsBatchingPeriod={100}
             showsVerticalScrollIndicator={false}
-            style={{
-                width: constants.width,
-                height: props.height
-            }}
+            style={liststyle}
             scrollEnabled={props.mode.tag == 'Normal'}
             // Only works on IOS
             pagingEnabled={true}
@@ -152,9 +157,9 @@ function Wall(props: any) {
             getItemLayout={getItemLayout}
             onScroll={onScroll}
             scrollEventThrottle={6}
-            // DO NOT USE removeClippedSubviews: Making title not clickable
-            // removeClippedSubviews
-            windowSize={7}
+        // DO NOT USE removeClippedSubviews: Making title not clickable
+        // removeClippedSubviews
+        // windowSize={7}
         />
     );
 }
