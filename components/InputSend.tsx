@@ -18,6 +18,7 @@ function InputSend(props: any) {
 
     useEffect(() => {
         setText('');
+        props.setSelectedComment(null)
     }, [props.activePostIndex])
 
     const send = async () => {
@@ -25,6 +26,7 @@ function InputSend(props: any) {
             props.onSubmit(text, props.selectedComment);
         }
         setText('');
+        props.setSelectedComment(null)
         props.inputref.current?.blur();
     }
 
