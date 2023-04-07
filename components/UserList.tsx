@@ -83,7 +83,7 @@ function UserList(props: any) {
                             </Text>
 
                             <Text style={styles.h1}>
-                                My Discussions
+                                My Chats
                             </Text>
                         </View>
                         {/* <View style={{
