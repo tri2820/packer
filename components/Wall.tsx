@@ -1,6 +1,6 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { memo, useEffect } from 'react';
+import { memo, useEffect, useRef } from 'react';
 import { Platform, Text, View, Image, StyleSheet } from 'react-native';
 import { FlatList } from 'react-native-gesture-handler';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
@@ -135,6 +135,7 @@ function Wall(props: any) {
 
     return (
         <Animated.FlatList
+            ref={props.wallref}
             showsVerticalScrollIndicator={false}
             style={{
                 width: constants.width,

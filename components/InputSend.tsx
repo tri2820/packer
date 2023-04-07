@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Platform, Text, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { constants } from '../utils';
@@ -15,16 +15,30 @@ function InputSend(props: any) {
         return text.length > 30 ? `${text.slice(0, 30)}...` : text;
     }
 
+    useEffect(() => {
+        setText('');
+    }, [props.activePostIndex])
+
     const send = async () => {
         if (text.trim().length > 0) {
             props.onSubmit(text, props.selectedComment);
         }
-        props.setSelectedComment(null);
         setText('');
         props.inputref.current?.blur();
     }
 
-    const placeHolder = props.selectedComment ? `Replying to "${getQuote()}"` : 'Chat with Packer...'
+    const placeHolder = props.activePostIndex == 0 ? 'Down the rabbit hole we go! 🐰' :
+        (props.selectedComment ?
+            `Replying to "${getQuote()}"` :
+            'Chat with Packer...')
+
+    const press = () => {
+        if (props.activePostIndex == 0) {
+            props.wallref.current?.scrollToIndex({ index: 1 })
+            return;
+        }
+        props.changeState('maximize');
+    }
 
     return (
         props.focus ?
@@ -52,9 +66,7 @@ function InputSend(props: any) {
                 </TouchableOpacity>
             </> :
             <Pressable style={styles.press}
-                onPress={() => {
-                    props.changeState('maximize');
-                }}
+                onPress={press}
             >
                 <Text style={{
                     color: text == '' ? '#C2C2C2' : '#F1F1F1'

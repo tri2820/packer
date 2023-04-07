@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useEffect, useRef, useState } from 'react';
 import { Platform, View, Text } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -52,7 +52,7 @@ function Main(props: any) {
   const [navigationBarVisible, setNavigationBarVisible] = useState(false);
   const minBarHeight = 60 + (Platform.OS == 'android' ? (navigationBarVisible ? 0 : 32) : 0);
   const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
-
+  const wallref = useRef<any>(undefined);
 
   useEffect(() => {
     if (props.mode.tag == 'App') return;
@@ -158,6 +158,7 @@ function Main(props: any) {
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
+            wallref={wallref}
             requestComments={props.requestComments}
             setSelectedComment={props.setSelectedComment}
             setMode={props.setMode}
@@ -205,7 +206,7 @@ function Main(props: any) {
           <MemoBar
             activePostIndex={props.activePostIndex}
             onSubmit={props.onSubmit}
-
+            wallref={wallref}
             navigationBarVisible={navigationBarVisible}
             mode={props.mode}
             setMode={props.setMode}
@@ -489,6 +490,7 @@ function Loader() {
     console.log('submitted', activePostIndex);
     // +1 Due to welcome screen
     submitComment(text, selectedComment, posts[activePostIndex - 1].id);
+    setSelectedComment(null);
   }
 
   const requestComments = async (post_id: string, parent_id: string | null) => {

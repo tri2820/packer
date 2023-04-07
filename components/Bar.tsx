@@ -73,9 +73,6 @@ function Bar(props: any) {
         setShowUserList(true);
     }, [props.user])
 
-    // useEffect(() => {
-    //     setText('');
-    // }, [props.activePostIndex])
 
     const changeState = (state: 'maximize' | 'minimize') => {
         if (state == 'maximize') {
@@ -182,12 +179,6 @@ function Bar(props: any) {
 
         })
 
-    const getQuote = () => {
-        const text = props.selectedComment.content;
-        return text.length > 30 ? `${text.slice(0, 30)}...` : text;
-    }
-
-
     const hideInput = () => {
         props.setSelectedComment(null);
         if (!focus) {
@@ -285,13 +276,14 @@ function Bar(props: any) {
 
                                         : <View style={styles.inputHeader}>
                                             <MemoInputSend
+                                                wallref={props.wallref}
                                                 focus={focus}
                                                 onBlur={onBlur}
                                                 inputref={inputref}
-                                                setSelectedComment={props.setSelectedComment}
                                                 selectedComment={props.selectedComment}
                                                 changeState={changeState}
                                                 onSubmit={props.onSubmit}
+                                                activePostIndex={props.activePostIndex}
                                             />
                                         </View>
                                 }
