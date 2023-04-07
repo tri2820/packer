@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { Platform, Text, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { sharedAsyncState } from '../utils';
@@ -30,7 +30,7 @@ function ListHeader(props: any) {
         <View style={styles.padding}>
             <PostHeader post={props.post} setMode={props.setMode} />
             <KeyTakeaways content={props.post.keytakeaways} />
-            {props.timesLoaded > 0 && props.comments.length == 0 && <MemoNoComment />}
+            {props.timesLoaded > 0 && props.numTopLevelComments == 0 && <MemoNoComment />}
         </View>
     </View>
 }
@@ -87,11 +87,12 @@ function Post(props: any) {
 
     const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
     const [timesLoaded, setTimesLoaded] = useState(0);
-
+    const numTopLevelComments = props.comments.filter((c: any) => c.parent_id == null).length;
     const timer = useRef<any>(null);
     const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
 
     const loadComments = async () => {
+        console.log('debug on end reached')
         if (loadState == 'loading') return;
         setLoadState('loading');
 
@@ -181,7 +182,7 @@ function Post(props: any) {
     const header = <ListHeader
         scrolledOn={props.scrolledOn}
         post={props.post}
-        comments={props.comments}
+        numTopLevelComments={numTopLevelComments}
         setMode={props.setMode}
         timesLoaded={timesLoaded}
     />
@@ -192,6 +193,24 @@ function Post(props: any) {
         progressBackgroundColor='transparent'
         tintColor={'transparent'}
     />
+    const footer = props.post && timesLoaded > 0
+        && sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
+        ?
+        <>
+            <ActivityIndicator
+                style={styles.loading_indicator}
+                size="small"
+            />
+            <View>
+                <Text style={{
+                    color: '#A3A3A3',
+                    alignSelf: 'center'
+                }}>
+                    {numTopLevelComments}/{sharedAsyncState[`count/${props.post.id}`]}
+                </Text>
+            </View>
+        </>
+        : undefined
 
     // console.log('debug render post', props.post?.id)
     return <View style={{
@@ -202,9 +221,9 @@ function Post(props: any) {
             props.scrolledOn
             &&
             <FlatList
-                initialNumToRender={3}
+                initialNumToRender={1}
                 maxToRenderPerBatch={3}
-                updateCellsBatchingPeriod={300}
+                updateCellsBatchingPeriod={200}
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}
@@ -217,6 +236,7 @@ function Post(props: any) {
                 renderItem={renderItem}
                 windowSize={5}
                 ListHeaderComponent={header}
+                ListFooterComponent={footer}
             />
         }
 
@@ -242,6 +262,12 @@ function Post(props: any) {
 export default Post;
 export const MemoPost = memo(Post);
 const styles = StyleSheet.create({
+    loading_indicator: {
+        marginBottom: 5,
+        alignSelf: 'center',
+        paddingVertical: 8,
+        paddingHorizontal: 16
+    },
     more_discussion_view: {
         position: 'absolute',
         bottom: 12,

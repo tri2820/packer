@@ -92,8 +92,8 @@ function Wall(props: any) {
     const _setMode = React.useCallback(props.setMode, []);
     const _setSelectedComment = React.useCallback(props.setSelectedComment, []);
     const _requestComments = React.useCallback(props.requestComments, []);
-    const welcomeData = { type: 'welcomePost', id: 'welcome' }
-    const data = [welcomeData, ...props.posts]
+    // const welcomeData = 
+    // const data = [welcomeData, ...props.posts]
 
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
@@ -149,7 +149,7 @@ function Wall(props: any) {
             scrollEnabled={props.mode.tag == 'Normal'}
             // Only works on IOS
             pagingEnabled={true}
-            data={data}
+            data={props.posts}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             onEndReachedThreshold={2}

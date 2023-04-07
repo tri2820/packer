@@ -290,7 +290,7 @@ const grc = async (sharedAsyncState: any, insertData: any, post_id: string, pare
 }
 
 function Loader() {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<any[]>([{ type: 'welcomePost', id: 'welcome' }]);
   const [comments, setComments] = useState<any[]>([]);
   const [selectedComment, setSelectedComment] = useState<any>(null);
   const [activePostIndex, setActivePostIndex] = useState(0);
