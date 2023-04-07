@@ -57,7 +57,6 @@ const link = {
 const markdownRules = { quote, link }
 
 function Comment(props: any) {
-    const [display, setDisplay] = useState<'Normal' | 'Inline'>('Normal');
     const [switchedOnce, setSwitchedOnce] = useState(false);
     const menuref = useRef<any>(null)
     const openMenu = () => {
@@ -75,13 +74,11 @@ function Comment(props: any) {
 
     const switchMode = () => {
         setSwitchedOnce(true);
-        if (display == 'Inline') {
-            setDisplay('Normal')
+        if (props.hidden) {
             props.toggle(props.comment.id, true)
             return;
         }
 
-        setDisplay('Inline')
         props.toggle(props.comment.id, false)
     }
 
@@ -112,7 +109,7 @@ function Comment(props: any) {
                     </Text>
 
                     {
-                        display == 'Normal'
+                        !props.hidden
                             ? <Text style={styles.created_at}> • {created_at}</Text>
                             : <Animated.Text style={{
                                 color: '#A3A3A3',
@@ -127,7 +124,7 @@ function Comment(props: any) {
                 </View>
 
                 {
-                    display == 'Normal' &&
+                    !props.hidden &&
                     <Animated.View
                         entering={switchedOnce ? FadeInDown : undefined}
                     >

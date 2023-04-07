@@ -68,8 +68,9 @@ const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any):
         id: `button/${parent.id}`
     }
 
-    const hidden = hiddenCommentIds.includes(parent.id);
+    const hidden = hiddenCommentIds[parent.id] == true;
     if (hidden) {
+        console.log('debug hidden')
         return [parent]
     }
 
@@ -80,16 +81,15 @@ const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any):
 
 function Post(props: any) {
     const [refreshing, _] = useState(false);
-    const [hiddenCommentIds, setHiddenCommentIds] = useState<string[]>([]);
+    const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
 
-    const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity);
     const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
     const [timesLoaded, setTimesLoaded] = useState(0);
 
-
     const timer = useRef<any>(null);
+    const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
 
     const loadComments = async () => {
         if (loadState == 'loading') return;
@@ -138,11 +138,17 @@ function Post(props: any) {
 
     const toggle = React.useCallback((commentId: string, show: boolean) => {
         if (show) {
-            setHiddenCommentIds((hiddenCommentIds) => hiddenCommentIds.filter(id => id != commentId));
+            setHiddenCommentIds((hiddenCommentIds: any) => ({
+                ...hiddenCommentIds,
+                [commentId]: false
+            }));
             return
         }
 
-        setHiddenCommentIds((hiddenCommentIds) => hiddenCommentIds.concat(commentId));
+        setHiddenCommentIds((hiddenCommentIds: any) => ({
+            ...hiddenCommentIds,
+            [commentId]: true
+        }));
     }, []);
 
     const changeModeToComment = React.useCallback(() => {
@@ -162,6 +168,7 @@ function Post(props: any) {
             />
             :
             <MemoComment
+                hidden={hiddenCommentIds[item.id]}
                 key={item.id}
                 comment={item}
                 backToApp={backToApp}
@@ -195,9 +202,9 @@ function Post(props: any) {
             props.scrolledOn
             &&
             <FlatList
-                initialNumToRender={1}
-                maxToRenderPerBatch={1}
-                updateCellsBatchingPeriod={100}
+                initialNumToRender={3}
+                maxToRenderPerBatch={2}
+                updateCellsBatchingPeriod={300}
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
                 ref={ref}
