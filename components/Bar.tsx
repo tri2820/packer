@@ -6,15 +6,16 @@ import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handle
 import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup } from '../utils';
+import { MemoInputSend } from './InputSend';
 import SignInSection, { MemoSignInSection } from './SignInSection';
 import UserList, { MemoUserList } from './UserList';
+
 
 
 const INSETS_OFFSET_BOTTOM = 0;
 const HANDLER_HEIGHT = 20;
 
 function Bar(props: any) {
-    const [text, setText] = useState('');
     const insets = useSafeAreaInsets();
     const keyboard = useAnimatedKeyboard();
     const MARGIN_TOP = insets.top + scaleup(170);
@@ -29,9 +30,9 @@ function Bar(props: any) {
     const [focus, setFocus] = useState(false);
     const [userListMode, setUserListMode] = useState<'normal' | 'settings'>('normal')
 
-    const ref = useRef<any>(undefined);
+    const inputref = useRef<any>(undefined);
     if (props.selectedComment) {
-        ref.current?.focus();
+        inputref.current?.focus();
     }
 
     const animatedStyles = useAnimatedStyle(() => {
@@ -51,9 +52,10 @@ function Bar(props: any) {
                 insets.bottom
                 - (Platform.OS == 'android' && props.navigationBarVisible ? constants.navigationBarHeight : 0)
                 : 0);
+
         return {
             height: k,
-            display: offset.value < -40 && !focus ? 'none' : 'flex',
+            display: offset.value < -40 && (allowShowingUserList.value || props.user == null) ? 'none' : 'flex',
             // backgroundColor: 'blue'
         };
     });
@@ -71,9 +73,9 @@ function Bar(props: any) {
         setShowUserList(true);
     }, [props.user])
 
-    useEffect(() => {
-        setText('');
-    }, [props.activePostIndex])
+    // useEffect(() => {
+    //     setText('');
+    // }, [props.activePostIndex])
 
     const changeState = (state: 'maximize' | 'minimize') => {
         if (state == 'maximize') {
@@ -99,6 +101,10 @@ function Bar(props: any) {
         setFocus(false)
         allowShowingUserList.value = true;
     }
+
+    useEffect(() => {
+        console.log("debug focus", focus)
+    }, [focus])
 
     const getSourceName = (source_url: string) => {
         const url = new URL(source_url);
@@ -188,7 +194,7 @@ function Bar(props: any) {
             changeState('minimize');
             return;
         }
-        ref.current?.blur();
+        inputref.current?.blur();
     }
 
     const setModeNormal = () => {
@@ -199,23 +205,11 @@ function Bar(props: any) {
         changeState('minimize');
     }
 
-    const send = async () => {
-        if (text.trim().length > 0) {
-            props.onSubmit(text, props.selectedComment);
-        }
-        props.setSelectedComment(null);
-        setText('');
-        ref.current?.blur();
-    }
-
     const open = () => {
         Linking.openURL(props.mode.value).catch(error =>
             console.warn('An error occurred: ', error),
         )
     }
-
-    const placeHolder = props.selectedComment ? `Replying to "${getQuote()}"` : 'Chat with Packer...'
-
     useEffect(() => {
         if (props.selectedComment == null) return;
         changeState('maximize')
@@ -248,93 +242,62 @@ function Bar(props: any) {
                         <View style={styles.handler_inside} />
                     </View>
 
-                    {!showUserList && <Animated.View
-                        style={[styles.inputbar, inputStyles]}
-                    >
-                        <View style={styles.input}>
-                            {/* Close Button */}
-                            {
-                                (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
-                                !focus &&
-                                <TouchableOpacity onPress={setModeNormal}>
-                                    <Animated.View style={animatedStyles} >
-                                        <Ionicons name="close"
-                                            size={26}
-                                            color='#C2C2C2'
-                                            style={{
-                                                marginRight: props.mode.tag == 'Comment' ? 8 : 0,
-                                            }} />
-                                    </Animated.View>
-                                </TouchableOpacity>
-                            }
-
-
-                            {
-                                props.mode.tag == 'App' ?
-                                    <>
-                                        <View style={styles.sourceNameView}>
-                                            <Text style={styles.sourceName}>{
-                                                getSourceName(props.mode.value)
-                                            }
-                                            </Text>
-                                        </View>
-                                        <TouchableOpacity onPress={open}>
-                                            {
-                                                Platform.OS == 'ios' ?
-                                                    <Ionicons name='compass-outline' size={26} color='#C2C2C2' />
-                                                    : <Ionicons name='arrow-forward-circle-outline' size={26} color='#C2C2C2' />
-                                            }
-                                        </TouchableOpacity>
-                                    </>
-
-                                    : <View style={styles.inputHeader}>
-                                        {focus ?
-                                            <TextInput
-                                                autoFocus
-                                                multiline
-                                                onBlur={onBlur}
-                                                ref={ref}
-                                                value={text}
-                                                onChangeText={setText}
-                                                placeholder={placeHolder}
-                                                placeholderTextColor='#C2C2C2'
-                                                style={styles.textinput}
-                                                keyboardAppearance='dark'
-                                                {...(Platform.OS == 'ios' ? {
-                                                    selectionColor: '#FFC542'
-                                                } : {
-                                                    cursorColor: '#FFC542'
-                                                })
-                                                }
-                                            /> : <Pressable style={styles.press}
-                                                onPress={() => {
-                                                    changeState('maximize');
-                                                }}
-                                            >
-                                                <Text style={{
-                                                    color: text == '' ? '#C2C2C2' : '#F1F1F1'
-                                                }}>{text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)}</Text>
-                                            </Pressable>
-                                        }
-
-                                        {
-                                            focus &&
-                                            <TouchableOpacity onPress={send}
+                    {
+                        !showUserList &&
+                        <Animated.View
+                            style={[styles.inputbar, inputStyles]}
+                        >
+                            <View style={styles.input}>
+                                {/* Close Button */}
+                                {
+                                    (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
+                                    !focus &&
+                                    <TouchableOpacity onPress={setModeNormal}>
+                                        <Animated.View style={animatedStyles} >
+                                            <Ionicons name="close"
+                                                size={26}
+                                                color='#C2C2C2'
                                                 style={{
-                                                    height: props.minBarHeight - HANDLER_HEIGHT,
-                                                    width: props.minBarHeight - HANDLER_HEIGHT,
-                                                    alignItems: 'flex-end',
-                                                    justifyContent: 'flex-start'
-                                                }}
-                                            >
-                                                <Ionicons name="send" size={24} color='#FFC542' />
-                                            </TouchableOpacity>
-                                        }
-                                    </View>
-                            }
-                        </View>
+                                                    marginRight: props.mode.tag == 'Comment' ? 8 : 0,
+                                                }} />
+                                        </Animated.View>
+                                    </TouchableOpacity>
+                                }
 
-                    </Animated.View>
+
+                                {
+                                    props.mode.tag == 'App' ?
+                                        <>
+                                            <View style={styles.sourceNameView}>
+                                                <Text style={styles.sourceName}>{
+                                                    getSourceName(props.mode.value)
+                                                }
+                                                </Text>
+                                            </View>
+                                            <TouchableOpacity onPress={open}>
+                                                {
+                                                    Platform.OS == 'ios' ?
+                                                        <Ionicons name='compass-outline' size={26} color='#C2C2C2' />
+                                                        : <Ionicons name='arrow-forward-circle-outline' size={26} color='#C2C2C2' />
+                                                }
+                                            </TouchableOpacity>
+                                        </>
+
+                                        : <View style={styles.inputHeader}>
+                                            <MemoInputSend
+                                                focus={focus}
+                                                onBlur={onBlur}
+                                                inputref={inputref}
+                                                setSelectedComment={props.setSelectedComment}
+                                                selectedComment={props.selectedComment}
+                                                changeState={changeState}
+                                                onSubmit={props.onSubmit}
+                                            />
+                                        </View>
+                                }
+                            </View>
+
+                        </Animated.View>
                     }
 
                     {
