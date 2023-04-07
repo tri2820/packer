@@ -203,7 +203,7 @@ function Post(props: any) {
             &&
             <FlatList
                 initialNumToRender={3}
-                maxToRenderPerBatch={2}
+                maxToRenderPerBatch={3}
                 updateCellsBatchingPeriod={300}
                 showsVerticalScrollIndicator={false}
                 listKey={props.post.id}
