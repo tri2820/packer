@@ -490,8 +490,7 @@ function Loader() {
   const onSubmit = (text: string, selectedComment: any) => {
     // if (activePostIndex == 0) return;
     console.log('submitted', activePostIndex);
-    // +1 Due to welcome screen
-    submitComment(text, selectedComment, posts[activePostIndex - 1].id);
+    submitComment(text, selectedComment, posts[activePostIndex].id);
     // setSelectedComment(null);
   }
 
