@@ -93,7 +93,7 @@ function Post(props: any) {
 
     const loadComments = async () => {
 
-        console.log('call load comments')
+        // console.log('call load comments')
         if (loadState == 'loading') return;
         setLoadState('loading');
 
