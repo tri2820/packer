@@ -1,9 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import * as React from 'react';
-import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { useEffect, useRef, useState } from 'react';
-import { Text, TouchableOpacity, Image, View } from 'react-native';
+import { useRef } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { constants, normalizedHostname } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
 
@@ -19,28 +19,20 @@ function PostHeader(props: any) {
 
 
 
-    return (<View style={{
-        marginBottom: 8
-    }}>
+    return (
         <TouchableOpacity
+            style={styles.touch}
             onPress={() => {
                 props.setMode({
                     tag: 'App',
-                    value: props.post.source_url,
-                    // insetsColor: 'rgba(0, 0, 0, 0)'
+                    value: props.post.source_url
                 })
             }}
             onLongPress={openMenu}
         >
             {
                 props.imageLoaded && <Animated.Image
-                    style={{
-                        width: constants.width - 32,
-                        height: constants.width / 4 * 2,
-                        marginHorizontal: 16,
-                        marginBottom: 16,
-                        borderRadius: 8
-                    }}
+                    style={styles.image}
                     source={{
                         uri: props.post.image
                     }}
@@ -48,74 +40,87 @@ function PostHeader(props: any) {
                 />
             }
 
-            <View style={{
-                paddingHorizontal: 16
-            }}>
-                <View style={{
-                    marginBottom: 8,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    // justifyContent: 'center'
-                }}>
-                    <Ionicons name='link' color='#A3A3A3' size={14} />
-                    <Text style={{
-                        color: '#A3A3A3',
-                        fontSize: 12,
-                        marginLeft: 4
-                        // backgroundColor: 'red'
-                    }}>
-                        {
-                            getSourceName(props.post.source_url)
-                        }
-                    </Text>
-                </View>
-                <Text style={[{
-                    color: 'white',
-                    // fontWeight: 'bold',
-                    fontSize: 18,
-                    marginBottom: 8,
-                    fontFamily: 'Rubik_500Medium'
-                },
-                    // animatedStyles
-                ]}>
-                    {props.post.title}
+            <View style={styles.textheader}>
+                <Ionicons name='link' color='#A3A3A3' size={14} />
+                <Text style={styles.source}>
+                    {
+                        getSourceName(props.post.source_url)
+                    }
                 </Text>
             </View>
-        </TouchableOpacity>
+            <Text style={styles.title}>
+                {props.post.title}
+            </Text>
 
-        <View style={{
-            paddingHorizontal: 16,
-            marginBottom: 4,
-            flexDirection: 'row',
-            // backgroundColor: 'blue',
-            alignItems: 'center'
-        }}>
-            <Text style={{
-                color: '#A3A3A3',
-                fontFamily: 'Rubik_500Medium'
-            }}>{props.post.author_name}</Text>
 
-            <Text style={{
-                color: '#A3A3A3'
-            }}> • {
+            <View style={styles.text_header_2}>
+                <Text style={styles.author_name}>{props.post.author_name}</Text>
+
+                <Text style={styles.created_at}> • {
                     moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
                 }</Text>
 
-            <View style={{
-                marginLeft: 'auto',
-                marginRight: 0,
-            }}>
-                <MemoContentMenu
-                    menuref={menuref}
-                    post={props.post}
-                    triggerOuterWrapper={{
-                        // backgroundColor: 'red',
-                        paddingLeft: 8
-                    }} />
+                <View style={styles.contentmenu}>
+                    <MemoContentMenu
+                        menuref={menuref}
+                        post={props.post}
+                        triggerOuterWrapper={styles.triggerOuterWrapper} />
+                </View>
             </View>
-        </View>
-
-    </View>);
+        </TouchableOpacity >
+    );
 }
 
 export default PostHeader;
+const styles = StyleSheet.create({
+    image: {
+        width: constants.width - 32,
+        height: constants.width / 4 * 2,
+        marginBottom: 16,
+        borderRadius: 8
+    },
+    touch: {
+        marginBottom: 8,
+        marginHorizontal: 16
+    },
+    source: {
+        color: '#A3A3A3',
+        fontSize: 12,
+        marginLeft: 4
+        // backgroundColor: 'red'
+    },
+    textheader: {
+        marginBottom: 8,
+        flexDirection: 'row',
+        alignItems: 'center',
+        // justifyContent: 'center'
+    },
+    title: {
+        color: 'white',
+        // fontWeight: 'bold',
+        fontSize: 18,
+        marginBottom: 8,
+        fontFamily: 'Rubik_500Medium'
+    },
+    triggerOuterWrapper: {
+        // backgroundColor: 'red',
+        paddingLeft: 8
+    },
+    contentmenu: {
+        marginLeft: 'auto',
+        marginRight: 0,
+    },
+    created_at: {
+        color: '#A3A3A3'
+    },
+    author_name: {
+        color: '#A3A3A3',
+        fontFamily: 'Rubik_500Medium'
+    },
+    text_header_2: {
+        marginBottom: 4,
+        flexDirection: 'row',
+        // backgroundColor: 'blue',
+        alignItems: 'center'
+    }
+})
