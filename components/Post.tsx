@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-import { Platform, Text, StyleSheet, View, ActivityIndicator } from 'react-native';
+import { Platform, Text, StyleSheet, Image, View, ActivityIndicator } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, sharedAsyncState } from '../utils';
@@ -27,8 +27,8 @@ function ListHeader(props: any) {
         paddingTop: insets.top
     }}>
         <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
+        <PostHeader post={props.post} setMode={props.setMode} imageLoaded={props.imageLoaded} />
         <View style={styles.padding}>
-            <PostHeader post={props.post} setMode={props.setMode} />
             <KeyTakeaways content={props.post.keytakeaways} />
             {props.timesLoaded > 0 && props.numTopLevelComments == 0 && <MemoNoComment />}
         </View>
@@ -90,6 +90,20 @@ function Post(props: any) {
     const numTopLevelComments = props.comments.filter((c: any) => c.parent_id == null).length;
     const timer = useRef<any>(null);
     const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
+    const [imageLoaded, setImageLoaded] = useState(false);
+
+    const loadImage = async () => {
+        if (props.post.image == '') return;
+        const imageURI = props.post.image;
+        try {
+            await Image.prefetch(imageURI);
+        } catch {
+            console.log('cannot load image')
+            return;
+        }
+
+        setImageLoaded(true)
+    };
 
     const loadComments = async () => {
 
@@ -104,9 +118,10 @@ function Post(props: any) {
         }, 1000);
     }
 
-
+    // Image piggybacks comments loading function
     if (props.shouldActive && timesLoaded == 0) {
         loadComments();
+        loadImage();
     }
 
     if (!props.shouldActive) {
@@ -189,6 +204,7 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
     const header = <ListHeader
+        imageLoaded={imageLoaded}
         scrolledOn={props.scrolledOn}
         post={props.post}
         numTopLevelComments={numTopLevelComments}

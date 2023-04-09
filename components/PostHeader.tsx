@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import * as React from 'react';
-import { useRef } from 'react';
-import { Text, TouchableOpacity, View } from 'react-native';
-import { normalizedHostname } from '../utils';
+import Animated, { FadeIn, FadeInDown, FadeInUp, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { useEffect, useRef, useState } from 'react';
+import { Text, TouchableOpacity, Image, View } from 'react-native';
+import { constants, normalizedHostname } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
 
 function PostHeader(props: any) {
@@ -15,6 +16,9 @@ function PostHeader(props: any) {
     const openMenu = () => {
         menuref.current.open();
     }
+
+
+
     return (<View style={{
         marginBottom: 8
     }}>
@@ -28,38 +32,59 @@ function PostHeader(props: any) {
             }}
             onLongPress={openMenu}
         >
+            {
+                props.imageLoaded && <Animated.Image
+                    style={{
+                        width: constants.width - 32,
+                        height: constants.width / 4 * 2,
+                        marginHorizontal: 16,
+                        marginBottom: 16,
+                        borderRadius: 8
+                    }}
+                    source={{
+                        uri: props.post.image
+                    }}
+                    entering={FadeIn}
+                />
+            }
+
             <View style={{
-                marginBottom: 8,
-                flexDirection: 'row',
-                alignItems: 'center',
-                // justifyContent: 'center'
+                paddingHorizontal: 16
             }}>
-                <Ionicons name='link' color='#A3A3A3' size={14} />
-                <Text style={{
-                    color: '#A3A3A3',
-                    fontSize: 12,
-                    marginLeft: 4
-                    // backgroundColor: 'red'
+                <View style={{
+                    marginBottom: 8,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    // justifyContent: 'center'
                 }}>
-                    {
-                        getSourceName(props.post.source_url)
-                    }
+                    <Ionicons name='link' color='#A3A3A3' size={14} />
+                    <Text style={{
+                        color: '#A3A3A3',
+                        fontSize: 12,
+                        marginLeft: 4
+                        // backgroundColor: 'red'
+                    }}>
+                        {
+                            getSourceName(props.post.source_url)
+                        }
+                    </Text>
+                </View>
+                <Text style={[{
+                    color: 'white',
+                    // fontWeight: 'bold',
+                    fontSize: 18,
+                    marginBottom: 8,
+                    fontFamily: 'Rubik_500Medium'
+                },
+                    // animatedStyles
+                ]}>
+                    {props.post.title}
                 </Text>
             </View>
-            <Text style={[{
-                color: 'white',
-                // fontWeight: 'bold',
-                fontSize: 18,
-                marginBottom: 8,
-                fontFamily: 'Rubik_500Medium'
-            },
-                // animatedStyles
-            ]}>
-                {props.post.title}
-            </Text>
         </TouchableOpacity>
 
         <View style={{
+            paddingHorizontal: 16,
             marginBottom: 4,
             flexDirection: 'row',
             // backgroundColor: 'blue',
