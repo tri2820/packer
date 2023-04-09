@@ -365,10 +365,6 @@ function Loader() {
   }, [user])
 
 
-
-
-
-
   const updateComment = (id: string, key: any, value: any) => {
     setComments((comments: any) => {
       const index = comments.findIndex((c: any) => c.id == id);
@@ -399,13 +395,25 @@ function Loader() {
       return
     }
 
+    // TODO: fix this properly
+    let _user = user;
+    if (!_user) {
+      const { data: user_data, error: user_error } = await supabaseClient.auth.getUser();
+      if (!user_data.user || user_error) {
+        console.log('debug error user when submit', user_data, user_error)
+        return;
+      }
+
+      _user = user_data.user;
+    }
+
     const placeholderId = `placeholder-${Math.random()}`;
     const placeholderComment = {
       // Could get from header
       id: placeholderId,
       created_at: new Date(),
       content: text,
-      author_name: user.user_metadata.full_name,
+      author_name: _user.user_metadata.full_name,
       parent_id: parent_id,
       post_id: post_id,
       blockRequestChildren: true,
