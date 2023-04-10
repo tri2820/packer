@@ -139,6 +139,7 @@ function Wall(props: any) {
 
     return (
         <Animated.FlatList
+            scrollsToTop={false}
             ref={props.wallref}
             windowSize={2}
             initialNumToRender={1}
