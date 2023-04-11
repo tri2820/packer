@@ -4,7 +4,7 @@ import * as React from 'react';
 import { memo, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
-import Animated, { FadeInDown } from 'react-native-reanimated';
+import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import BlinkingCursor from './BlinkingCursor';
 import { MemoContentMenu } from './ReportMenu';
 
@@ -58,9 +58,11 @@ const markdownRules = { quote, link }
 
 function Comment(props: any) {
     const [switchedOnce, setSwitchedOnce] = useState(false);
+    const longPressed = useSharedValue(false);
     const menuref = useRef<any>(null)
     const openMenu = () => {
-        menuref.current.open();
+        longPressed.value = true;
+        menuref.current?.open();
     }
     const created_at = moment
         .utc(props.comment.created_at)
@@ -82,74 +84,87 @@ function Comment(props: any) {
         props.toggle(props.comment.id, false)
     }
 
+    const longPressedStyle = useAnimatedStyle(() => {
+        return {
+            backgroundColor: longPressed.value ? withTiming('rgba(0,0,0,0.5)', { duration: 100 }) : withTiming('rgba(0,0,0,0)', { duration: 200 })
+        };
+    });
+
+    const onMenuClose = React.useCallback(() => {
+        longPressed.value = false;
+    }, [])
+
     const select = () => {
         props.setSelectedComment(props.comment);
     }
 
     // console.log('debug render comment', props.comment.id)
     return (
-        <TouchableOpacity
-            style={{
-                paddingBottom: 8,
-                marginLeft: props.comment.level <= 1 ? 0 : (16 * props.comment.level)
-            }}
-            onPress={switchMode}
-            onLongPress={openMenu}
-        >
-
-            {props.comment.level === 0 && <View style={styles.hair} />}
-
-            <View
-                style={props.comment.level == 0 ? styles.level0 : styles.levelMoreThan0}
+        <Animated.View style={longPressedStyle}>
+            <Pressable
+                style={{
+                    paddingBottom: 8,
+                    marginLeft: props.comment.level <= 1 ? 0 : (16 * props.comment.level)
+                }}
+                onPress={switchMode}
+                onLongPress={openMenu}
             >
 
-                <View style={styles.header_foot}>
-                    <Text style={styles.author_name}>
-                        {props.comment.author_name}
-                    </Text>
+                {props.comment.level === 0 && <View style={styles.hair} />}
+
+                <View
+                    style={props.comment.level == 0 ? styles.level0 : styles.levelMoreThan0}
+                >
+
+                    <View style={{
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        // backgroundColor: 'red'
+                    }}>
+                        <View style={styles.left}>
+                            <Text style={styles.author_name}>
+                                {props.comment.author_name}
+                            </Text>
+
+                            {!props.hidden
+                                ? <Text style={styles.created_at}> • {created_at}</Text>
+                                : <Animated.Text style={{
+                                    color: '#A3A3A3',
+                                    flex: 1,
+                                    paddingBottom: props.comment.level > 0 ? 0 : 4,
+                                }}
+                                    numberOfLines={1}
+                                    entering={FadeInDown}
+                                > • {props.comment.content}
+                                </Animated.Text>}
+                        </View>
+
+                        <MemoContentMenu
+                            menuref={menuref}
+                            comment={props.comment}
+                            triggerOuterWrapper={styles.triggerOuterWrapper}
+                            onClose={onMenuClose}
+                        />
+                    </View>
 
                     {
-                        !props.hidden
-                            ? <Text style={styles.created_at}> • {created_at}</Text>
-                            : <Animated.Text style={{
-                                color: '#A3A3A3',
-                                flex: 1,
-                                paddingBottom: props.comment.level > 0 ? 0 : 4,
-                            }}
-                                numberOfLines={1}
-                                entering={FadeInDown}
-                            > • {props.comment.content}
-                            </Animated.Text>
-                    }
-                </View>
-
-                {
-                    !props.hidden &&
-                    <Animated.View
-                        entering={switchedOnce ? FadeInDown : undefined}
-                    >
-                        <MarkdownView
-                            rules={markdownRules}
-                            onLinkPress={onLinkPress}
-                            styles={mdstyles}
+                        !props.hidden &&
+                        <Animated.View
+                            entering={switchedOnce ? FadeInDown : undefined}
                         >
-                            {props.comment.content}
-                        </MarkdownView>
+                            <MarkdownView
+                                rules={markdownRules}
+                                onLinkPress={onLinkPress}
+                                styles={mdstyles}
+                            >
+                                {props.comment.content}
+                            </MarkdownView>
 
-                        {
-                            props.comment.blinking
-                                ? <BlinkingCursor />
-                                :
-                                <View style={{
-                                    flexDirection: 'row',
-                                    alignItems: 'center',
-                                    alignSelf: 'flex-end',
-                                }}>
-                                    <MemoContentMenu
-                                        menuref={menuref}
-                                        comment={props.comment}
-                                        triggerOuterWrapper={styles.triggerOuterWrapper} />
-
+                            {
+                                props.comment.blinking
+                                    ? <BlinkingCursor />
+                                    :
                                     <TouchableOpacity
                                         onPress={select}
                                         style={styles.reply_button}
@@ -160,13 +175,13 @@ function Comment(props: any) {
                                             <Text style={styles.reply_text}>Reply</Text>
                                         }
                                     </TouchableOpacity>
-                                </View>
-                        }
-                    </Animated.View>
-                }
-            </View>
-        </TouchableOpacity>
 
+                            }
+                        </Animated.View>
+                    }
+                </View>
+            </Pressable>
+        </Animated.View>
     );
 }
 
@@ -289,22 +304,38 @@ const blockQuoteView = {
 }
 
 const styles = StyleSheet.create({
+    left: {
+        justifyContent: 'flex-start',
+        flexDirection: 'row',
+        // backgroundColor: 'green',
+        flex: 1
+    },
     triggerOuterWrapper: {
-        paddingHorizontal: 8,
-        paddingVertical: 4,
+        // marginLeft: 'auto',
+        // marginRight: 0,
+        // alignSelf: 'center',
+        // alignContent: 'center',
+        // margin-left: auto;
+        // order: 2,
+        // justifyContent: 'flex-end',
+        // backgroundColor: 'blue'
+        // paddingHorizontal: 8,
+        // paddingVertical: 4,
     },
     reply_text: {
         color: "#A3A3A3",
         marginLeft: 8
     },
     reply_button: {
+        alignSelf: 'flex-end',
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,
         paddingVertical: 4
     },
     created_at: {
-        color: '#A3A3A3'
+        color: '#A3A3A3',
+        // backgroundColor: 'purple'
     },
     hair: {
         borderBottomColor: '#3C3D3F',
@@ -312,7 +343,9 @@ const styles = StyleSheet.create({
         marginHorizontal: 16
     },
     header_foot: {
-        flexDirection: 'row'
+        flexDirection: 'row',
+        backgroundColor: 'red',
+        flex: 1
     },
     author_name: {
         fontFamily: 'Rubik_500Medium',

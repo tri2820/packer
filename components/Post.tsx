@@ -219,7 +219,9 @@ function Post(props: any) {
         tintColor={'transparent'}
     />
     const footer = props.post
-        ? <>
+        ? <View style={{
+            marginTop: 20
+        }}>
             {
 
                 sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
@@ -237,7 +239,7 @@ function Post(props: any) {
                     {numTopLevelComments}/{sharedAsyncState[`count/${props.post.id}`]} comments
                 </Text>
             }
-        </> : undefined
+        </View> : undefined
 
     // console.log('debug render post', props.post?.id)
     return <View style={{

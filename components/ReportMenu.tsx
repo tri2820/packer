@@ -142,14 +142,14 @@ function ContentMenu(props: any) {
 
 
     return (
-        <Menu ref={props.menuref}>
+        <Menu ref={props.menuref} onClose={props.onClose}>
             <MenuTrigger customStyles={{
                 triggerOuterWrapper: props.triggerOuterWrapper,
                 triggerTouchable: {
                     activeOpacity: 0.2
                 }
             }}>
-                {/* <MaterialCommunityIcons name="dots-horizontal" size={16} color='#A3A3A3' /> */}
+
                 {/* <Ionicons name="ellipsis-horizontal" size={14} color="#A3A3A3" /> */}
             </MenuTrigger>
             <MenuOptions

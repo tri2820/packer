@@ -2,72 +2,87 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import * as React from 'react';
 import { useRef } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import Animated, { FadeIn } from 'react-native-reanimated';
+import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, normalizedHostname } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
 
 function PostHeader(props: any) {
+    const longPressed = useSharedValue(false);
+
+    const longPressedStyle = useAnimatedStyle(() => {
+        return {
+            backgroundColor: longPressed.value ? withTiming('rgba(0,0,0,0.5)', { duration: 100 }) : withTiming('rgba(0,0,0,0)', { duration: 200 })
+        };
+    });
+
     const getSourceName = (source_url: string) => {
         const url = new URL(source_url);
         return normalizedHostname(url.hostname).toUpperCase();
     }
     const menuref = useRef<any>(null)
     const openMenu = () => {
-        menuref.current.open();
+        longPressed.value = true;
+        menuref.current?.open();
     }
 
-
+    const onMenuClose = React.useCallback(() => {
+        longPressed.value = false;
+    }, [])
 
     return (
-        <TouchableOpacity
-            style={styles.touch}
-            onPress={() => {
-                props.setMode({
-                    tag: 'App',
-                    value: props.post.source_url
-                })
-            }}
-            onLongPress={openMenu}
-        >
-            {
-                props.imageLoaded && <Animated.Image
-                    style={styles.image}
-                    source={{
-                        uri: props.post.image
-                    }}
-                    entering={FadeIn}
-                />
-            }
+        <Animated.View style={longPressedStyle}>
+            <TouchableOpacity
+                style={styles.touch}
+                onPress={() => {
+                    props.setMode({
+                        tag: 'App',
+                        value: props.post.source_url
+                    })
+                }}
+                onLongPress={openMenu}
+            >
+                {
+                    props.imageLoaded && <Animated.Image
+                        style={styles.image}
+                        source={{
+                            uri: props.post.image
+                        }}
+                        entering={FadeIn}
+                    />
+                }
 
-            <View style={styles.textheader}>
-                <Ionicons name='link' color='#A3A3A3' size={14} />
-                <Text style={styles.source}>
-                    {
-                        getSourceName(props.post.source_url)
-                    }
-                </Text>
-            </View>
-            <Text style={styles.title}>
-                {props.post.title}
-            </Text>
-
-
-            <View style={styles.text_header_2}>
-                <Text style={styles.author_name}>{props.post.author_name}</Text>
-
-                <Text style={styles.created_at}> • {
-                    moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
-                }</Text>
-
-                <View style={styles.contentmenu}>
-                    <MemoContentMenu
-                        menuref={menuref}
-                        post={props.post}
-                        triggerOuterWrapper={styles.triggerOuterWrapper} />
+                <View style={styles.textheader}>
+                    <Ionicons name='link' color='#A3A3A3' size={14} />
+                    <Text style={styles.source}>
+                        {
+                            getSourceName(props.post.source_url)
+                        }
+                    </Text>
                 </View>
-            </View>
-        </TouchableOpacity >
+                <Text style={styles.title}>
+                    {props.post.title}
+                </Text>
+
+
+                <View style={styles.text_header_2}>
+                    <Text style={styles.author_name}>{props.post.author_name}</Text>
+
+                    <Text style={styles.created_at}> • {
+                        moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
+                    }</Text>
+
+                    <View style={styles.contentmenu}>
+                        <MemoContentMenu
+                            menuref={menuref}
+                            post={props.post}
+                            triggerOuterWrapper={styles.triggerOuterWrapper}
+                            onClose={onMenuClose}
+                        />
+                    </View>
+                </View>
+            </TouchableOpacity >
+        </Animated.View>
     );
 }
 
