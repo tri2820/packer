@@ -259,7 +259,7 @@ function Post(props: any) {
                 maxToRenderPerBatch={3}
                 updateCellsBatchingPeriod={300}
                 showsVerticalScrollIndicator={false}
-                listKey={props.post.id}
+                listKey={props.index}
                 ref={ref}
                 scrollEnabled={props.mode.tag == 'Comment'}
                 refreshControl={refresh}

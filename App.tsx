@@ -289,13 +289,30 @@ const grc = async (sharedAsyncState: any, insertData: any, post_id: string, pare
   sharedAsyncState[key] = 'done';
 }
 
-function Loader() {
+export default function App() {
+  let [fontsLoaded] = useFonts({
+    Rubik_300Light,
+    Rubik_400Regular,
+    Rubik_500Medium,
+    Rubik_600SemiBold,
+    Rubik_700Bold,
+    Rubik_800ExtraBold,
+    Rubik_900Black,
+    Rubik_300Light_Italic,
+    Rubik_400Regular_Italic,
+    Rubik_500Medium_Italic,
+    Rubik_600SemiBold_Italic,
+    Rubik_700Bold_Italic,
+    Rubik_800ExtraBold_Italic,
+    Rubik_900Black_Italic,
+  });
   const [posts, setPosts] = useState<any[]>([{ type: 'welcomePost', id: 'welcome' }]);
   const [comments, setComments] = useState<any[]>([]);
   const [selectedComment, setSelectedComment] = useState<any>(null);
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
+
 
   useEffect(() => {
     // console.log('props.user changed', props.user)
@@ -522,55 +539,33 @@ function Loader() {
   const memoRequestComments = React.useCallback(requestComments, [])
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
 
-  return (
-    // <MenuProvider >
-    <SafeAreaProvider>
-      <MenuProvider>
-        <GestureHandlerRootView>
-          <MemoMain
-            onSubmit={memoOnSubmit}
-            setSelectedComment={setSelectedComment}
-            selectedComment={selectedComment}
-            activePostIndex={activePostIndex}
-            setActivePostIndex={setActivePostIndex}
-            user={user}
-            setUser={setUser}
-            posts={posts}
-            requestPost={memoRequestPost}
-            comments={comments}
-            setMode={setMode}
-            requestComments={memoRequestComments}
-            mode={mode}
-          />
-        </GestureHandlerRootView>
-      </MenuProvider>
-    </SafeAreaProvider>
-    // </MenuProvider>
-  );
-}
-
-export default function App() {
-  let [fontsLoaded] = useFonts({
-    Rubik_300Light,
-    Rubik_400Regular,
-    Rubik_500Medium,
-    Rubik_600SemiBold,
-    Rubik_700Bold,
-    Rubik_800ExtraBold,
-    Rubik_900Black,
-    Rubik_300Light_Italic,
-    Rubik_400Regular_Italic,
-    Rubik_500Medium_Italic,
-    Rubik_600SemiBold_Italic,
-    Rubik_700Bold_Italic,
-    Rubik_800ExtraBold_Italic,
-    Rubik_900Black_Italic,
-  });
-  if (!fontsLoaded) {
+  if (!fontsLoaded || posts.length <= 1) {
     return <AppLoading />;
   } else {
-    return <Loader />
+    return (
+      // <MenuProvider >
+      <SafeAreaProvider>
+        <MenuProvider>
+          <GestureHandlerRootView>
+            <MemoMain
+              onSubmit={memoOnSubmit}
+              setSelectedComment={setSelectedComment}
+              selectedComment={selectedComment}
+              activePostIndex={activePostIndex}
+              setActivePostIndex={setActivePostIndex}
+              user={user}
+              setUser={setUser}
+              posts={posts}
+              requestPost={memoRequestPost}
+              comments={comments}
+              setMode={setMode}
+              requestComments={memoRequestComments}
+              mode={mode}
+            />
+          </GestureHandlerRootView>
+        </MenuProvider>
+      </SafeAreaProvider>
+      // </MenuProvider>
+    );
   }
 }
-
-
