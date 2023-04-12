@@ -1,7 +1,7 @@
 import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Platform, View, Text } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
@@ -18,10 +18,11 @@ import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/
 // @ts-ignore
 import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
 import * as NavigationBar from 'expo-navigation-bar';
-
+import * as SplashScreen from 'expo-splash-screen';
 import { MenuProvider } from 'react-native-popup-menu';
+SplashScreen.preventAutoHideAsync();
 
-import AppLoading from 'expo-app-loading';
+// import AppLoading from 'expo-app-loading';
 const INJECTED_JAVASCRIPT = `(function() {
   window.ReactNativeWebView.postMessage(JSON.stringify(
     window.getComputedStyle( document.documentElement ,null).getPropertyValue('background-color')
@@ -149,12 +150,22 @@ function Main(props: any) {
     })()
   }, [])
 
+
+  const onLayoutRootView = useCallback(async () => {
+    if (!props.fontsLoaded || props.posts.length <= 1) return;
+    await SplashScreen.hideAsync();
+  }, [props.fontsLoaded, props.posts])
+
+  if (!props.fontsLoaded || props.posts.length <= 1) return null;
+
   return (
-    <View style={{
-      height: constants.height,
-      width: constants.width,
-      backgroundColor: 'black'
-    }}>
+    <View
+      onLayout={onLayoutRootView}
+      style={{
+        height: constants.height,
+        width: constants.width,
+        backgroundColor: 'black'
+      }}>
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
@@ -539,33 +550,32 @@ export default function App() {
   const memoRequestComments = React.useCallback(requestComments, [])
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
 
-  if (!fontsLoaded || posts.length <= 1) {
-    return <AppLoading />;
-  } else {
-    return (
-      // <MenuProvider >
-      <SafeAreaProvider>
-        <MenuProvider>
-          <GestureHandlerRootView>
-            <MemoMain
-              onSubmit={memoOnSubmit}
-              setSelectedComment={setSelectedComment}
-              selectedComment={selectedComment}
-              activePostIndex={activePostIndex}
-              setActivePostIndex={setActivePostIndex}
-              user={user}
-              setUser={setUser}
-              posts={posts}
-              requestPost={memoRequestPost}
-              comments={comments}
-              setMode={setMode}
-              requestComments={memoRequestComments}
-              mode={mode}
-            />
-          </GestureHandlerRootView>
-        </MenuProvider>
-      </SafeAreaProvider>
-      // </MenuProvider>
-    );
-  }
+
+  return (
+    // <MenuProvider >
+    <SafeAreaProvider>
+      <MenuProvider>
+        <GestureHandlerRootView>
+          <MemoMain
+            fontsLoaded={fontsLoaded}
+            onSubmit={memoOnSubmit}
+            setSelectedComment={setSelectedComment}
+            selectedComment={selectedComment}
+            activePostIndex={activePostIndex}
+            setActivePostIndex={setActivePostIndex}
+            user={user}
+            setUser={setUser}
+            posts={posts}
+            requestPost={memoRequestPost}
+            comments={comments}
+            setMode={setMode}
+            requestComments={memoRequestComments}
+            mode={mode}
+          />
+        </GestureHandlerRootView>
+      </MenuProvider>
+    </SafeAreaProvider>
+    // </MenuProvider>
+  );
+
 }
