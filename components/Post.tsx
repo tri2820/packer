@@ -93,12 +93,12 @@ function Post(props: any) {
     const [imageLoaded, setImageLoaded] = useState(false);
 
     const loadImage = async () => {
-        if (props.post.image == '') return;
+        if (!props.post || !props.post.image || props.post.image == '') return;
         const imageURI = props.post.image;
         try {
             await Image.prefetch(imageURI);
-        } catch {
-            console.log('cannot load image')
+        } catch (e) {
+            console.log('cannot load image', e, props.post, imageURI)
             return;
         }
 

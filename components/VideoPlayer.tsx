@@ -24,6 +24,8 @@ function VideoPlayer(props: any) {
 
     if (youtubeVideoId == '') return <></>
 
+    // 560x315
+    console.log(constants.width, Math.floor(constants.width / 16 * 9))
     return <View style={{
         paddingBottom: 16,
     }}>
@@ -34,12 +36,18 @@ function VideoPlayer(props: any) {
             playList={[youtubeVideoId]}
             initialPlayerParams={{
                 modestbranding: true,
-                loop: true
+                loop: true,
+                showClosedCaptions: true
+            }}
+
+            onError={(e) => {
+                console.log('error yt', e)
             }}
             webViewProps={{
                 startInLoadingState: true,
                 renderLoading: loadingView
             }}
+            baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}
         />
     </View>
 
