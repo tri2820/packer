@@ -104,7 +104,10 @@ function Wall(props: any) {
         const scrolledOn = props.activePostIndex == index;
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
         const cs = scrolledOn ? props.comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
+        const selfCommentIndex = cs.findLastIndex((c: any) => c.author_id == 'self');
+
         return <MemoPost
+            selfCommentIndex={selfCommentIndex}
             index={index}
             mode={scrolledOn ? props.mode : theEmptyMode}
             height={props.height}

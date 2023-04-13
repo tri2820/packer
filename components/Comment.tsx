@@ -170,10 +170,9 @@ function Comment(props: any) {
                                         style={styles.reply_button}
                                     >
                                         <Octicons name="reply" size={12} color="#A3A3A3" />
-                                        {
-                                            props.comment.level == 0 &&
-                                            <Text style={styles.reply_text}>Reply</Text>
-                                        }
+
+                                        <Text style={styles.reply_text}>Reply</Text>
+
                                     </TouchableOpacity>
 
                             }

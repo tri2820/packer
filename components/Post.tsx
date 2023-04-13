@@ -129,6 +129,16 @@ function Post(props: any) {
         if (loadState == 'loading') setLoadState('not_loading')
     }
 
+    useEffect(() => {
+        if (!props.scrolledOn) return;
+        if (props.selfCommentIndex == -1) return;
+        console.log("debug scroll to comment", props.selfCommentIndex);
+        props.comments.length > props.selfCommentIndex && ref.current?.scrollToIndex({
+            index: props.selfCommentIndex,
+            // viewOffset: insets.top,
+            viewPosition: 0
+        });
+    }, [props.selfCommentIndex])
 
     useEffect(() => {
         if (!props.scrolledOn) return;
@@ -138,6 +148,7 @@ function Post(props: any) {
         }
 
         if (props.mode.tag == 'Comment') {
+            // if (props.selfCommentIndex > -1) return;
             props.comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
             return;
         }
