@@ -1,17 +1,14 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet } from 'react-native';
-import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import Animated, { FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, loadingView, normalizedHostname } from '../utils';
-import { LinearGradient } from 'expo-linear-gradient';
-import Comment from './Comment';
-import * as Haptics from 'expo-haptics';
+import { useEffect, useState } from 'react';
+import { View } from 'react-native';
+import Animated, { FadeOut } from 'react-native-reanimated';
 import YoutubePlayer from "react-native-youtube-iframe";
+import { constants, loadingView, normalizedHostname } from '../utils';
 
 function VideoPlayer(props: any) {
     const [youtubeVideoId, setYoutubeVideoId] = useState('');
+    const [reloadN, setReloadN] = useState(0);
+    const [ready, setReady] = useState(false);
     useEffect(() => {
         const url = new URL(props.source_url);
         if (!(normalizedHostname(url.hostname) == 'youtube.com')) {
@@ -24,12 +21,24 @@ function VideoPlayer(props: any) {
 
     if (youtubeVideoId == '') return <></>
 
+    const onError = (e: string) => {
+        console.log('error yt', e, youtubeVideoId)
+        if (e != 'embed_not_allowed' && reloadN == 0) return;
+        setReloadN((reloadN) => reloadN + 1);
+    }
+
+    const onReady = () => {
+        setReady(true);
+    }
+
+
     // 560x315
     // console.log(constants.width, Math.floor(constants.width / 16 * 9))
     return <View style={{
         paddingBottom: 16,
     }}>
         <YoutubePlayer
+            key={reloadN}
             height={Math.floor(constants.width / 16 * 9)}
             play={props.videoPlaying}
             videoId={youtubeVideoId}
@@ -39,15 +48,23 @@ function VideoPlayer(props: any) {
                 loop: true,
                 showClosedCaptions: true
             }}
-            onError={(e) => {
-                console.log('error yt', e)
+            onError={onError}
+            onReady={onReady}
+            webViewProps={{
+                startInLoadingState: true,
+                renderLoading: loadingView
             }}
-        // webViewProps={{
-        //     startInLoadingState: true,
-        //     renderLoading: loadingView
-        // }}
         // baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}
         />
+
+        {!ready && <Animated.View style={{
+            backgroundColor: 'black',
+            position: 'absolute',
+            height: Math.floor(constants.width / 16 * 9),
+            width: constants.width,
+        }}
+            exiting={FadeOut}
+        />}
     </View>
 
 }

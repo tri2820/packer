@@ -105,7 +105,7 @@ function Wall(props: any) {
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
         const cs = scrolledOn ? props.comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
         const topLevelSelfComment = scrolledOn && cs.length > 0 && cs[0].author_id == 'self';
-        console.log('debug topLevelSelfComment', topLevelSelfComment, index);
+        // console.log('debug topLevelSelfComment', topLevelSelfComment, index);
 
         return <MemoPost
             topLevelSelfComment={topLevelSelfComment}
