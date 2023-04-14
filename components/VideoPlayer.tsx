@@ -42,10 +42,10 @@ function VideoPlayer(props: any) {
             onError={(e) => {
                 console.log('error yt', e)
             }}
-            webViewProps={{
-                startInLoadingState: true,
-                renderLoading: loadingView
-            }}
+        // webViewProps={{
+        //     startInLoadingState: true,
+        //     renderLoading: loadingView
+        // }}
         // baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}
         />
     </View>
