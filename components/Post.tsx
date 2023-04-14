@@ -131,21 +131,15 @@ function Post(props: any) {
 
     useEffect(() => {
         if (!props.scrolledOn) return;
-        if (props.selfCommentIndex == -1) return;
-        console.log("debug scroll to comment", props.selfCommentIndex);
-        try {
-            props.comments.length > props.selfCommentIndex && ref.current?.scrollToIndex({
-                index: props.selfCommentIndex,
-                // viewOffset: insets.top,
-                viewPosition: 0
-            });
-        } catch (e) {
-            console.log('debug cannot scroll', e)
-        }
-    }, [props.selfCommentIndex])
+        if (!props.topLevelSelfComment) return;
+        props.comments.length > 0 &&
+            ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+        return;
+    }, [props.topLevelSelfComment])
 
     useEffect(() => {
         if (!props.scrolledOn) return;
+
         if (props.mode.tag == 'Normal') {
             ref.current?.scrollToOffset({ offset: -insets.top });
             return;
