@@ -133,11 +133,15 @@ function Post(props: any) {
         if (!props.scrolledOn) return;
         if (props.selfCommentIndex == -1) return;
         console.log("debug scroll to comment", props.selfCommentIndex);
-        props.comments.length > props.selfCommentIndex && ref.current?.scrollToIndex({
-            index: props.selfCommentIndex,
-            // viewOffset: insets.top,
-            viewPosition: 0
-        });
+        try {
+            props.comments.length > props.selfCommentIndex && ref.current?.scrollToIndex({
+                index: props.selfCommentIndex,
+                // viewOffset: insets.top,
+                viewPosition: 0
+            });
+        } catch (e) {
+            console.log('debug cannot scroll', e)
+        }
     }, [props.selfCommentIndex])
 
     useEffect(() => {

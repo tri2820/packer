@@ -193,6 +193,8 @@ function Main(props: any) {
               exiting={FadeOut.duration(100)}
             >
               <WebView
+                domStorageEnabled={true}
+                sharedCookiesEnabled={true}
                 containerStyle={{
                   paddingTop: insets.top,
                   backgroundColor: webviewBackgroundColor

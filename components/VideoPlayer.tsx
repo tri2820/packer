@@ -39,7 +39,6 @@ function VideoPlayer(props: any) {
                 loop: true,
                 showClosedCaptions: true
             }}
-
             onError={(e) => {
                 console.log('error yt', e)
             }}
@@ -47,7 +46,7 @@ function VideoPlayer(props: any) {
                 startInLoadingState: true,
                 renderLoading: loadingView
             }}
-            baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}
+        // baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}
         />
     </View>
 
