@@ -68,9 +68,7 @@ function UserList(props: any) {
                         <View>
                             <View style={styles.header}>
                                 <Text style={styles.heading}>
-                                    {
-                                        props.user.user_metadata.full_name
-                                    }
+                                    Profile
                                 </Text>
 
                                 <TouchableOpacity onPress={openSettings} style={styles.icon} >
@@ -78,12 +76,15 @@ function UserList(props: any) {
                                 </TouchableOpacity>
                             </View>
 
+                            <Text style={styles.full_name}>
+                                @{props.user.user_metadata.full_name}
+                            </Text>
                             <Text style={styles.introduction}>
                                 Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
                             </Text>
 
                             <Text style={styles.h1}>
-                                My Chats
+                                Bookmarks
                             </Text>
                         </View>
                         {/* <View style={{
@@ -155,7 +156,15 @@ function UserList(props: any) {
 
 export default UserList;
 const styles = StyleSheet.create({
+    full_name: {
+        color: '#F1F1F1',
+        fontWeight: '700',
+        marginBottom: 4,
+        fontSize: 16,
+        // marginHorizontal: 16
+    },
     introduction: {
+        // marginHorizontal: ,
         color: '#F1F1F1',
         // backgroundColor: 'red'
     }, h1: {
@@ -185,7 +194,7 @@ const styles = StyleSheet.create({
     },
     icon: {
         paddingTop: 8,
-        paddingBottom: 20,
+        paddingBottom: 16,
         alignItems: 'flex-end',
         justifyContent: 'flex-start',
         // backgroundColor: 'red'
