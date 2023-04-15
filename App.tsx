@@ -56,14 +56,14 @@ function Main(props: any) {
   const wallref = useRef<any>(undefined);
 
   useEffect(() => {
-    if (props.app) return;
+    if (props.app !== null) return;
     setWebviewBackgroundColor('rgb(0,0,0)');
     setStatusBarStyle('light')
     if (Platform.OS == 'ios') return;
     const color = props.mode.tag == 'Comment' ? '#272727' : '#151316';
     NavigationBar.setBackgroundColorAsync(color);
     setStatusBarBackgroundColor(color, false);
-  }, [props.mode])
+  }, [props.app])
 
 
   const onMessage = (event: WebViewMessageEvent) => {
