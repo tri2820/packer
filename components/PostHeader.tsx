@@ -35,10 +35,7 @@ function PostHeader(props: any) {
             <TouchableOpacity
                 style={styles.touch}
                 onPress={() => {
-                    props.setMode({
-                        tag: 'App',
-                        value: props.post.source_url
-                    })
+                    props.setApp({ url: props.post.source_url })
                 }}
                 onLongPress={openMenu}
             >

@@ -56,7 +56,7 @@ function Main(props: any) {
   const wallref = useRef<any>(undefined);
 
   useEffect(() => {
-    if (props.mode.tag == 'App') return;
+    if (props.app) return;
     setWebviewBackgroundColor('rgb(0,0,0)');
     setStatusBarStyle('light')
     if (Platform.OS == 'ios') return;
@@ -66,14 +66,8 @@ function Main(props: any) {
   }, [props.mode])
 
 
-  useEffect(() => {
-    if (props.mode.tag == 'Normal') return;
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-  }, [props.mode.tag])
-
-
   const onMessage = (event: WebViewMessageEvent) => {
-    if (props.mode.tag != 'App') return;
+    if (props.app === null) return;
     const backgroundColor = JSON.parse(event.nativeEvent.data);
     console.log('backgroundColor', backgroundColor)
     setWebviewBackgroundColor(backgroundColor)
@@ -95,7 +89,7 @@ function Main(props: any) {
   });
   const gesture = Gesture
     .Pan()
-    .enabled(props.mode.tag === 'Comment' || props.mode.tag === 'App')
+    .enabled(props.mode.tag === 'Comment' || props.app !== null)
     .activeOffsetX([-50, 50])
     .onChange((e) => {
 
@@ -112,6 +106,11 @@ function Main(props: any) {
     .onEnd((event, success) => {
       offset.value = withSpring(0, { velocity: event.velocityX, damping: 5, mass: 0.1 });
       if (offset.value < 30) return;
+      if (props.app) {
+        runOnJS(props.setApp)(null)
+        return;
+      }
+
       runOnJS(props.setMode)({ tag: 'Normal' })
     });
 
@@ -169,6 +168,8 @@ function Main(props: any) {
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
+            app={props.app}
+            setApp={props.setApp}
             preloadImage={props.preloadImage}
             wallref={wallref}
             requestComments={props.requestComments}
@@ -183,7 +184,7 @@ function Main(props: any) {
             height={wallHeight}
           />
           {
-            props.mode.tag === 'App' && <View style={{
+            props.app && <View style={{
               position: 'absolute',
               // Catch transparency
               backgroundColor: 'black',
@@ -201,12 +202,9 @@ function Main(props: any) {
                   backgroundColor: webviewBackgroundColor
                 }}
                 decelerationRate='normal'
-                source={{ uri: props.mode.value }}
+                source={{ uri: props.app.url }}
                 onNavigationStateChange={(navState) => {
-                  props.setMode({
-                    tag: 'App',
-                    value: navState.url
-                  });
+                  props.setApp({ url: navState.url })
                 }}
                 mediaPlaybackRequiresUserAction={true}
                 allowsInlineMediaPlayback={true}
@@ -219,6 +217,8 @@ function Main(props: any) {
 
 
           <MemoBar
+            setApp={props.setApp}
+            app={props.app}
             activePostIndex={props.activePostIndex}
             onSubmit={props.onSubmit}
             wallref={wallref}
@@ -343,6 +343,7 @@ export default function App() {
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
+  const [app, setApp] = useState<null | { url: string }>(null);
 
 
   useEffect(() => {
@@ -353,6 +354,17 @@ export default function App() {
       const { error } = await supabaseClient.from('deletions').delete().eq('user_id', user.id)
     })()
   }, [user])
+
+
+  useEffect(() => {
+    if (mode.tag == 'Normal') return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+  }, [mode.tag])
+
+  // useEffect(() => {
+  //   if (app == null) return;
+  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+  // }, [app])
 
   // TODO: set only once
   const insertComments = (cs: any[], atHead = false) => {
@@ -575,6 +587,7 @@ export default function App() {
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
 
 
+
   return (
     // <MenuProvider >
     <SafeAreaProvider>
@@ -596,6 +609,8 @@ export default function App() {
             setMode={setMode}
             requestComments={memoRequestComments}
             mode={mode}
+            app={app}
+            setApp={setApp}
           />
         </GestureHandlerRootView>
       </MenuProvider>

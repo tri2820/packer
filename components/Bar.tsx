@@ -189,7 +189,12 @@ function Bar(props: any) {
         inputref.current?.blur();
     }
 
-    const setModeNormal = () => {
+    const closeIt = () => {
+        if (props.app) {
+            props.setApp(null);
+            return;
+        }
+
         props.setMode({ tag: 'Normal' });
     }
 
@@ -241,9 +246,9 @@ function Bar(props: any) {
                             <View style={styles.input}>
                                 {/* Close Button */}
                                 {
-                                    (props.mode.tag == 'Comment' || props.mode.tag == 'App') &&
+                                    (props.mode.tag == 'Comment' || props.app) &&
                                     !focus &&
-                                    <TouchableOpacity onPress={setModeNormal}>
+                                    <TouchableOpacity onPress={closeIt}>
                                         <Animated.View style={animatedStyles} >
                                             <Ionicons name="close"
                                                 size={26}
@@ -257,11 +262,11 @@ function Bar(props: any) {
 
 
                                 {
-                                    props.mode.tag == 'App' ?
+                                    props.app ?
                                         <>
                                             <View style={styles.sourceNameView}>
                                                 <Text style={styles.sourceName}>{
-                                                    getSourceName(props.mode.value)
+                                                    getSourceName(props.app.url)
                                                 }
                                                 </Text>
                                             </View>

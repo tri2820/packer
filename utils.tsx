@@ -27,11 +27,11 @@ interface Normal {
 interface Comment {
     readonly tag: 'Comment';
 }
-interface App {
-    readonly tag: 'App';
-    readonly value: string;
-    // readonly insetsColor: string;
-}
+// interface App {
+//     readonly tag: 'App';
+//     readonly value: string;
+//     // readonly insetsColor: string;
+// }
 
 export const calcStatusBarColor = (backgroundColor: any) => {
     let [r, g, b, a] = backgroundColor.slice(backgroundColor.startsWith('rgba') ? 5 : 4, -1).split(',').map((s: any) => parseInt(s))
@@ -56,7 +56,7 @@ export const randomColor = () => {
 
 export const normalizedHostname = (hostname: string) => hostname.startsWith('www.') ? hostname.slice(4) : hostname;
 
-export type Mode = Normal | Comment | App;
+export type Mode = Normal | Comment;
 
 
 export const loadingView = () => <View style={{

@@ -89,12 +89,12 @@ function WelcomePost(props: any) {
 const MemoWelcomePost = memo(WelcomePost);
 
 function Wall(props: any) {
+    const _setApp = React.useCallback(props.setApp, []);
     const _setMode = React.useCallback(props.setMode, []);
     const _setSelectedComment = React.useCallback(props.setSelectedComment, []);
     const _requestComments = React.useCallback(props.requestComments, []);
     // const welcomeData = 
     // const data = [welcomeData, ...props.posts]
-
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
         if (item.type == 'welcomePost') {
@@ -108,6 +108,8 @@ function Wall(props: any) {
         // console.log('debug topLevelSelfComment', topLevelSelfComment, index);
 
         return <MemoPost
+            setApp={_setApp}
+            app={props.app}
             preloadImage={props.preloadImage}
             topLevelSelfComment={topLevelSelfComment}
             index={index}

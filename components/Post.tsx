@@ -27,7 +27,7 @@ function ListHeader(props: any) {
         paddingTop: insets.top
     }}>
         <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
-        <PostHeader post={props.post} setMode={props.setMode} imageLoaded={props.imageLoaded} />
+        <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
         <View style={styles.padding}>
             <KeyTakeaways content={props.post.keytakeaways} />
             {props.timesLoaded > 0 && props.numTopLevelComments == 0 && <MemoNoComment />}
@@ -154,10 +154,8 @@ function Post(props: any) {
         props.setMode({ tag: 'Normal' });
     }, []);
 
-    const backToApp = React.useCallback((target: string) => props.setMode({
-        tag: 'App',
-        value: target,
-        // insetsColor: 'rgba(0, 0, 0, 0)'
+    const backToApp = React.useCallback((target: string) => props.setApp({
+        url: target
     }), [])
 
     const toggle = React.useCallback((commentId: string, show: boolean) => {
@@ -211,6 +209,7 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
     const header = <ListHeader
+        setApp={props.setApp}
         imageLoaded={imageLoaded}
         scrolledOn={props.scrolledOn}
         post={props.post}
