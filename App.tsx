@@ -183,15 +183,15 @@ function Main(props: any) {
             height={wallHeight}
           />
           {
-            props.mode.tag === 'App' && <Animated.View style={{
+            props.mode.tag === 'App' && <View style={{
               position: 'absolute',
               // Catch transparency
               backgroundColor: 'black',
               height: constants.height - insets.bottom - minBarHeight,
               width: constants.width,
             }}
-              entering={FadeIn.duration(100)}
-              exiting={FadeOut.duration(100)}
+            // entering={FadeIn.duration(300)}
+            // exiting={FadeOut.duration(300)}
             >
               <WebView
                 domStorageEnabled={true}
@@ -214,7 +214,7 @@ function Main(props: any) {
                 injectedJavaScript={INJECTED_JAVASCRIPT}
                 autoManageStatusBarEnabled={false}
               />
-            </Animated.View>
+            </View>
           }
 
 
