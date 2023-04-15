@@ -289,7 +289,7 @@ function Post(props: any) {
                     pointerEvents='none'
                 />
                 {
-                    props.comments.length > 0 && props.shouldActive &&
+                    (props.comments.length > 0 || props.post?.keytakeaways) && props.shouldActive &&
                     <View style={styles.more_discussion_view}>
                         <MemoMoreDiscussionsButton onPress={changeModeToComment} />
                     </View>

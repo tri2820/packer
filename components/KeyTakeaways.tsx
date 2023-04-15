@@ -12,7 +12,7 @@ import * as Haptics from 'expo-haptics';
 
 
 function KeyTakeaways(props: any) {
-    const [showKeyTakeaways, setShowKeyTakeaways] = useState(false);
+    const [showKeyTakeaways, setShowKeyTakeaways] = useState(true);
     const [inited, setInited] = useState(false);
 
     useEffect(() => {
@@ -64,7 +64,7 @@ function KeyTakeaways(props: any) {
                     color: '#E6E6E6',
                     marginTop: 8
                 }}
-                    entering={FadeInUp}
+                    entering={inited ? FadeInUp : undefined}
                 >
                     {props.content}
                 </Animated.Text>
