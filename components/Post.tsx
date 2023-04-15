@@ -225,26 +225,20 @@ function Post(props: any) {
         tintColor={'transparent'}
     />
     const footer = props.post
+        && sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
         ? <View style={{
             marginTop: 20
         }}>
-            {
-
-                sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
-                && <ActivityIndicator
-                    style={styles.loading_indicator}
-                    size="small"
-                />
-            }
-            {
-                sharedAsyncState[`count/${props.post.id}`] > 0 &&
-                <Text style={{
-                    color: '#A3A3A3',
-                    alignSelf: 'center'
-                }}>
-                    {numTopLevelComments}/{sharedAsyncState[`count/${props.post.id}`]} comments
-                </Text>
-            }
+            <ActivityIndicator
+                style={styles.loading_indicator}
+                size="small"
+            />
+            <Text style={{
+                color: '#A3A3A3',
+                alignSelf: 'center'
+            }}>
+                Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
+            </Text>
         </View> : undefined
 
     // console.log('debug render post', props.post?.id)
