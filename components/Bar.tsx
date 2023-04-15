@@ -203,7 +203,7 @@ function Bar(props: any) {
     }
 
     const open = () => {
-        Linking.openURL(props.mode.value).catch(error =>
+        Linking.openURL(props.app.url).catch(error =>
             console.warn('An error occurred: ', error),
         )
     }

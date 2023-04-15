@@ -105,7 +105,7 @@ function Main(props: any) {
     })
     .onEnd((event, success) => {
       offset.value = withSpring(0, { velocity: event.velocityX, damping: 5, mass: 0.1 });
-      if (offset.value < 30) return;
+      if (offset.value < 20) return;
       if (props.app) {
         runOnJS(props.setApp)(null)
         return;
