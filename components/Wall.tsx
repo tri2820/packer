@@ -108,6 +108,7 @@ function Wall(props: any) {
         // console.log('debug topLevelSelfComment', topLevelSelfComment, index);
 
         return <MemoPost
+            preloadImage={props.preloadImage}
             topLevelSelfComment={topLevelSelfComment}
             index={index}
             mode={scrolledOn ? props.mode : theEmptyMode}

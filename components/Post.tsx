@@ -91,18 +91,14 @@ function Post(props: any) {
     const timer = useRef<any>(null);
     const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
     const [imageLoaded, setImageLoaded] = useState(false);
+    const [imageError, setImageError] = useState(false);
 
     const loadImage = async () => {
         if (!props.post || !props.post.image || props.post.image == '') return;
         const imageURI = props.post.image;
-        try {
-            await Image.prefetch(imageURI);
-        } catch (e) {
-            console.log('cannot load image', e, props.post, imageURI)
-            return;
-        }
-
-        setImageLoaded(true)
+        const result = await props.preloadImage(imageURI)
+        console.log('debug loading image result', result)
+        if (result) setImageLoaded(true);
     };
 
     const loadComments = async () => {
@@ -121,7 +117,9 @@ function Post(props: any) {
     // Image piggybacks comments loading function
     if (props.shouldActive && timesLoaded == 0) {
         loadComments();
-        loadImage();
+        if (!imageError) {
+            loadImage();
+        }
     }
 
     if (!props.shouldActive) {

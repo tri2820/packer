@@ -2,7 +2,7 @@ import Constants from 'expo-constants';
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, View, Text } from 'react-native';
+import { Platform, View, Text, Image } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -169,6 +169,7 @@ function Main(props: any) {
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
+            preloadImage={props.preloadImage}
             wallref={wallref}
             requestComments={props.requestComments}
             setSelectedComment={props.setSelectedComment}
@@ -240,6 +241,23 @@ function Main(props: any) {
   )
 }
 const MemoMain = memo(Main);
+
+const pi = async (sharedAsyncState: any, imageURI: string) => {
+  if (sharedAsyncState[`preload/${imageURI}`] == 'error') return false;
+  if (sharedAsyncState[`preload/${imageURI}`] == 'ok') return true;
+
+  try {
+    await Image.prefetch(imageURI);
+  } catch (e) {
+    sharedAsyncState[`preload/${imageURI}`] = 'error';
+    console.log('cannot load image', e, imageURI)
+    return false;
+  }
+
+  sharedAsyncState[`preload/${imageURI}`] = 'ok';
+  return true;
+};
+
 
 const rp = async (sharedAsyncState: any, setData: any) => {
   console.log('debug post get requested');
@@ -364,7 +382,6 @@ export default function App() {
         i -= 1;
       }
     }
-
 
     setComments((comments) => {
       const newComments = [...comments];
@@ -541,6 +558,10 @@ export default function App() {
     await rp(sharedAsyncState, setPosts)
   }
 
+  const preloadImage = async (imageURI: string) => {
+    return await pi(sharedAsyncState, imageURI)
+  }
+
   const [inited, setInited] = useState(false);
   useEffect(() => {
     if (inited) return;
@@ -549,6 +570,7 @@ export default function App() {
   }, [])
 
   const memoRequestPost = React.useCallback(requestPost, [])
+  const memoPreloadImage = React.useCallback(preloadImage, [])
   const memoRequestComments = React.useCallback(requestComments, [])
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
 
@@ -559,6 +581,7 @@ export default function App() {
       <MenuProvider>
         <GestureHandlerRootView>
           <MemoMain
+            preloadImage={memoPreloadImage}
             fontsLoaded={fontsLoaded}
             onSubmit={memoOnSubmit}
             setSelectedComment={setSelectedComment}
