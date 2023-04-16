@@ -24,7 +24,7 @@ function ListHeader(props: any) {
     return <View style={{
         paddingTop: insets.top
     }}>
-        <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text>
+        {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
         <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
         <View style={styles.padding}>
