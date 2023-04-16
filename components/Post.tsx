@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, noComment, requestComments, sharedAsyncState, splitAt, toUIList } from '../utils';
+import { constants, noComment, requestComments, sharedAsyncState, splitToListsWithHeadIs, toUIList } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -24,7 +24,7 @@ function ListHeader(props: any) {
     return <View style={{
         paddingTop: insets.top
     }}>
-        {/* <Text style={{ color: 'white' }}>{props.post.id}</Text> */}
+        <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text>
         <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
         <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
         <View style={styles.padding}>
@@ -44,14 +44,13 @@ function Post(props: any) {
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
 
-    // const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
-    const [timesLoaded, setTimesLoaded] = useState(0);
-    const [comments, setComments] = useState(props.post ? (sharedAsyncState[`comments/${props.post.id}`] ?? []) : []);
-
-    const topLevelSelfComment = props.scrolledOn && comments.length > 0 && comments[0].author_id == 'self';
-    const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
+    const [comments, setComments] = useState<any[]>(sharedAsyncState[`comments/${props.post.id}`] ?? []);
+    const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self';
+    const numTopLevelComments = props.scrolledOn ? comments.filter((c: any) => c.parent_id == null).length : 0;
     const timer = useRef<any>(null);
-    const uiList = splitAt(comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
+    const uiList = props.scrolledOn ? splitToListsWithHeadIs(comments, (c) => c.level == 0)
+        .map(ch => toUIList(ch, hiddenCommentIds))
+        .flat(Infinity) : []
 
     const [imageLoaded, setImageLoaded] = useState(
         (!props.post.image || props.post.image == '') ? false :
@@ -202,6 +201,7 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
     const header = <ListHeader
+        index={props.index}
         imageLoaded={imageLoaded}
         setApp={props.setApp}
         scrolledOn={props.scrolledOn}
@@ -218,22 +218,24 @@ function Post(props: any) {
         progressBackgroundColor='transparent'
         tintColor={'transparent'}
     />
-    const footer = props.post
-        && sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments
-        ? <View style={{
-            marginTop: 20
-        }}>
-            <ActivityIndicator
-                style={styles.loading_indicator}
-                size="small"
-            />
-            <Text style={{
-                color: '#A3A3A3',
-                alignSelf: 'center'
+    const footer =
+        sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
+            !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
+                props.numTopLevelComments == 0)
+            ? <View style={{
+                marginTop: 20
             }}>
-                Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
-            </Text>
-        </View> : undefined
+                <ActivityIndicator
+                    style={styles.loading_indicator}
+                    size="small"
+                />
+                <Text style={{
+                    color: '#A3A3A3',
+                    alignSelf: 'center'
+                }}>
+                    Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
+                </Text>
+            </View> : undefined
 
     console.log('debug render post', props.post.id, props.index)
     return <View style={{

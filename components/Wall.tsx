@@ -94,6 +94,7 @@ function Wall(props: any) {
         }
 
         const scrolledOn = props.activePostIndex == index;
+        console.log('debug props.activePostIndex', props.activePostIndex)
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
 
         return <MemoPost

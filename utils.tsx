@@ -1,8 +1,8 @@
-import { Dimensions, PixelRatio, Platform, View } from "react-native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { supabaseClient } from "./supabaseClient";
+import { Dimensions, PixelRatio, View } from "react-native";
 import { MemoNoComment } from "./components/NoComment";
+import { supabaseClient } from "./supabaseClient";
 
 export const constants = {
     width: Dimensions.get('screen').width,
@@ -170,7 +170,7 @@ const insert = (cs: any[], where: any[], atHead: boolean) => {
         while (i >= 0) {
             if (!atHead) {
                 if (comments[i].parent_id == c.parent_id) {
-                    c.level = comments[i].level + 1;
+                    c.level = comments[i].level;
                     comments.splice(i + 1, 0, c)
                     return;
                 }
@@ -190,32 +190,32 @@ const insert = (cs: any[], where: any[], atHead: boolean) => {
 
 export const noComment = <MemoNoComment />
 
-
-// [ba ca da]
-export const splitAt = (comments: any[]) => {
-    if (comments.length == 0) return [];
-    let start = 0;
-    let parent_id = comments[start].parent_id;
-    let i = 1;
-    let result = []
-    while (i < comments.length) {
-        if (comments[i].parent_id == parent_id) {
-            result.push(
-                comments.slice(start, i)
-            )
-            start = i;
+export function splitToListsWithHeadIs(arr: any[], predicate: (x: any) => boolean) {
+    const result: any[] = [];
+    for (let i = 0; i < arr.length; i++) {
+        if (predicate(arr[i])) {
+            result.push([arr[i]]);
+            continue;
         }
-        i += 1;
+        result.at(-1)?.push(arr[i]);
     }
-    result.push(comments.slice(start))
-    return result
+    return result;
 }
 
-// (a null [ba ca da])
-export const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any): any => {
+export const toUIList = (comments: any[], hiddenCommentIds: any[]): any => {
+    // console.log('debug comments', comments);
     if (comments.length == 0) return [];
     const parent = comments[0];
-    const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`num/${parent.id}`];
+    const num = sharedAsyncState[`count/${parent.id}`] - sharedAsyncState[`num/${parent.id}`];
+
+    const hidden = hiddenCommentIds[parent.id] == true;
+    const tail = comments.slice(1);
+    if (hidden) return [parent]
+
+    const childrenUILists =
+        splitToListsWithHeadIs(tail, (c) => c.level == parent.level + 1)
+            .map(chunks => toUIList(chunks, hiddenCommentIds))
+
     const button = {
         type: 'load-comment-button',
         num: num,
@@ -223,14 +223,5 @@ export const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates
         ofId: parent.id,
         id: `button/${parent.id}`
     }
-
-    const hidden = hiddenCommentIds[parent.id] == true;
-    if (hidden) {
-        console.log('debug hidden')
-        return [parent]
-    }
-
-    const tail = comments.slice(1);
-    const childrenUILists = splitAt(tail).map(chunks => toUIList(chunks, hiddenCommentIds, commentStates))
     return [parent, childrenUILists, num > 0 ? button : []]
 }
