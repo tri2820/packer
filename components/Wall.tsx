@@ -8,10 +8,8 @@ import { constants } from '../utils';
 import { MemoPost } from './Post';
 
 const theEmptyList: any[] = [];
-const theEmptyMode = {
-    tag: 'Normal'
-};
-
+const theEmptyMode = 'normal';
+const theEmptyFunction = () => { };
 
 
 function WelcomePost(props: any) {
@@ -89,12 +87,6 @@ function WelcomePost(props: any) {
 const MemoWelcomePost = memo(WelcomePost);
 
 function Wall(props: any) {
-    const _setApp = React.useCallback(props.setApp, []);
-    const _setMode = React.useCallback(props.setMode, []);
-    const _setSelectedComment = React.useCallback(props.setSelectedComment, []);
-    const _requestComments = React.useCallback(props.requestComments, []);
-    // const welcomeData = 
-    // const data = [welcomeData, ...props.posts]
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
         if (item.type == 'welcomePost') {
@@ -103,33 +95,22 @@ function Wall(props: any) {
 
         const scrolledOn = props.activePostIndex == index;
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
-        const cs = scrolledOn ? props.comments.filter((c: any) => c.post_id == item.id) : theEmptyList;
-        const topLevelSelfComment = scrolledOn && cs.length > 0 && cs[0].author_id == 'self';
-        // console.log('debug topLevelSelfComment', topLevelSelfComment, index);
 
         return <MemoPost
-            setApp={_setApp}
+            setApp={props.setApp}
             app={props.app}
-            preloadImage={props.preloadImage}
-            topLevelSelfComment={topLevelSelfComment}
             index={index}
-            mode={scrolledOn ? props.mode : theEmptyMode}
+            mode={scrolledOn ? props.mode : 'normal'}
             height={props.height}
-            post={shouldActive ? item : null}
+            post={item}
             shouldActive={shouldActive}
             scrolledOn={scrolledOn}
-            comments={cs}
-            setSelectedComment={_setSelectedComment}
-            requestComments={_requestComments}
-            setMode={_setMode}
+            setSelectedComment={props.setSelectedComment}
+            setMode={props.setMode}
         />
     }
 
     const keyExtractor = (item: any) => item.id
-    const onEndReached = () => {
-        console.log('wall on end reached')
-        props.requestPost()
-    }
     const onScroll = (event: any) => {
         let offset = event.nativeEvent.contentOffset.y;
         if (offset < props.height / 2) {
@@ -140,11 +121,7 @@ function Wall(props: any) {
         props.setActivePostIndex(Math.floor(offset / props.height) + 1);
     }
 
-    const liststyle = {
-        width: constants.width,
-        height: props.height
-    }
-
+    // console.log('debug render flatlist');
     return (
         <Animated.FlatList
             scrollsToTop={false}
@@ -152,17 +129,20 @@ function Wall(props: any) {
             windowSize={2}
             initialNumToRender={1}
             maxToRenderPerBatch={2}
-            updateCellsBatchingPeriod={100}
+            updateCellsBatchingPeriod={500}
             showsVerticalScrollIndicator={false}
-            style={liststyle}
-            scrollEnabled={props.mode.tag == 'Normal'}
+            style={{
+                width: constants.width,
+                height: props.height
+            }}
+            scrollEnabled={props.mode == 'normal'}
             // Only works on IOS
             pagingEnabled={true}
             data={props.posts}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             onEndReachedThreshold={2}
-            onEndReached={onEndReached}
+            onEndReached={props.requestPost}
             getItemLayout={getItemLayout}
             onScroll={onScroll}
             scrollEventThrottle={6}

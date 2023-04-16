@@ -71,7 +71,7 @@ function Comment(props: any) {
         .fromNow()
 
     const onLinkPress = (target: string) => {
-        props.backToApp(target)
+        props.setApp({ url: target });
     }
 
     const switchMode = () => {
@@ -369,4 +369,8 @@ const styles = StyleSheet.create({
 })
 
 export default Comment;
-export const MemoComment = memo(Comment);
+const shouldRerenderTheSame = (p: any, c: any) => {
+    return p.hidden == c.hidden
+        && p.comment == c.comment
+}
+export const MemoComment = memo(Comment, shouldRerenderTheSame);

@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import moment from 'moment';
 import * as React from 'react';
 import { useRef } from 'react';
-import { Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, normalizedHostname } from '../utils';
 import { MemoContentMenu } from './ReportMenu';

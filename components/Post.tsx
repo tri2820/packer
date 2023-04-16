@@ -1,15 +1,14 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-import { Platform, Text, StyleSheet, Image, View, ActivityIndicator } from 'react-native';
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, sharedAsyncState } from '../utils';
+import { constants, noComment, requestComments, sharedAsyncState, splitAt, toUIList } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
-import { MemoNoComment } from './NoComment';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
 
@@ -22,61 +21,21 @@ function ListHeader(props: any) {
         setVideoPlaying(props.scrolledOn);
     }, [props.scrolledOn])
 
-
     return <View style={{
         paddingTop: insets.top
     }}>
+        {/* <Text style={{ color: 'white' }}>{props.post.id}</Text> */}
         <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
         <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
         <View style={styles.padding}>
             <KeyTakeaways content={props.post.keytakeaways} />
-            {props.timesLoaded > 0 && props.numTopLevelComments == 0 && <MemoNoComment />}
+            {
+                sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
+                props.numTopLevelComments == 0 &&
+                noComment
+            }
         </View>
     </View>
-}
-
-// [ba ca da]
-const splitAt = (comments: any[]) => {
-    if (comments.length == 0) return [];
-    let start = 0;
-    let parent_id = comments[start].parent_id;
-    let i = 1;
-    let result = []
-    while (i < comments.length) {
-        if (comments[i].parent_id == parent_id) {
-            result.push(
-                comments.slice(start, i)
-            )
-            start = i;
-        }
-        i += 1;
-    }
-    result.push(comments.slice(start))
-    return result
-}
-
-// (a null [ba ca da])
-const toUIList = (comments: any[], hiddenCommentIds: any[], commentStates: any): any => {
-    if (comments.length == 0) return [];
-    const parent = comments[0];
-    const num = sharedAsyncState[`count/${parent.id}`] - commentStates[`num/${parent.id}`];
-    const button = {
-        type: 'load-comment-button',
-        num: num,
-        level: parent.level,
-        ofId: parent.id,
-        id: `button/${parent.id}`
-    }
-
-    const hidden = hiddenCommentIds[parent.id] == true;
-    if (hidden) {
-        console.log('debug hidden')
-        return [parent]
-    }
-
-    const tail = comments.slice(1);
-    const childrenUILists = splitAt(tail).map(chunks => toUIList(chunks, hiddenCommentIds, commentStates))
-    return [parent, childrenUILists, num > 0 ? button : []]
 }
 
 function Post(props: any) {
@@ -85,78 +44,112 @@ function Post(props: any) {
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
 
-    const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
+    // const [loadState, setLoadState] = useState<'loading' | 'not_loading'>('not_loading');
     const [timesLoaded, setTimesLoaded] = useState(0);
-    const numTopLevelComments = props.comments.filter((c: any) => c.parent_id == null).length;
-    const timer = useRef<any>(null);
-    const uiList = splitAt(props.comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
-    const [imageLoaded, setImageLoaded] = useState(false);
-    const [imageError, setImageError] = useState(false);
+    const [comments, setComments] = useState(props.post ? (sharedAsyncState[`comments/${props.post.id}`] ?? []) : []);
 
-    const loadImage = async () => {
-        if (!props.post || !props.post.image || props.post.image == '') return;
+    const topLevelSelfComment = props.scrolledOn && comments.length > 0 && comments[0].author_id == 'self';
+    const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
+    const timer = useRef<any>(null);
+    const uiList = splitAt(comments).map(ch => toUIList(ch, hiddenCommentIds, sharedAsyncState)).flat(Infinity)
+
+    const [imageLoaded, setImageLoaded] = useState(
+        (!props.post.image || props.post.image == '') ? false :
+            (
+                sharedAsyncState[`imageLoaded/${props.post.image}`] == 'ok' ? true : false
+            )
+    );
+    const imageTimer = useRef<any>(null);
+
+    useEffect(() => {
+        if (imageLoaded) return;
+        if (!props.post.image || props.post.image == '') return;
+        if (sharedAsyncState[`imageLoaded/${props.post.image}`] == 'error') return;
         const imageURI = props.post.image;
-        const result = await props.preloadImage(imageURI)
-        console.log('debug loading image result', result)
-        if (result) setImageLoaded(true);
-    };
+        const key = `preloadImage/${imageURI}`;
+        if (props.shouldActive) {
+            if (sharedAsyncState[key] == 'running') return;
+            sharedAsyncState[key] = 'running';
+            imageTimer.current = setTimeout(async () => {
+                try {
+                    console.log('loading image');
+                    await Image.prefetch(imageURI);
+                } catch (e) {
+                    console.log('ERROR loading image');
+                    sharedAsyncState[`imageLoaded/${imageURI}`] = 'error';
+                    console.log('cannot load image', e, imageURI)
+                }
+                console.log('OK loading image');
+                setImageLoaded(true);
+                sharedAsyncState[`imageLoaded/${imageURI}`] = 'ok';
+                sharedAsyncState[key] = 'done';
+            }, 1000);
+            return;
+        }
+
+        clearTimeout(imageTimer.current)
+        sharedAsyncState[key] = 'done';
+    }, [props.shouldActive])
+
+
+    sharedAsyncState[`commentsChangeListener/${props.post.id}`] = () => {
+        const cs = sharedAsyncState[`comments/${props.post.id}`] ?? [];
+        setComments([...cs]);
+    }
+
+    const commentAsksForComments = React.useCallback(async (parent_id: string) => {
+        await requestComments(sharedAsyncState, props.post.id, parent_id);
+    }, [])
 
     const loadComments = async () => {
-
-        // console.log('call load comments')
-        if (loadState == 'loading') return;
-        setLoadState('loading');
-
+        const key = `preloadStatus/${props.post.id}`;
+        if (sharedAsyncState[key] == 'running') return;
+        sharedAsyncState[key] = 'running';
         timer.current = setTimeout(async () => {
-            await props.requestComments(props.post.id, null);
-            setLoadState('not_loading')
-            setTimesLoaded(t => t + 1);
+            await requestComments(sharedAsyncState, props.post.id, null);
+            sharedAsyncState[key] = 'done';
         }, 1000);
     }
 
-    // Image piggybacks comments loading function
-    if (props.shouldActive && timesLoaded == 0) {
-        loadComments();
-        if (!imageError) {
-            loadImage();
+    useEffect(() => {
+        if (props.shouldActive) {
+            if (sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 && props.mode == 'normal') return;
+            loadComments();
+            return;
         }
-    }
 
-    if (!props.shouldActive) {
         clearTimeout(timer.current);
-        if (loadState == 'loading') setLoadState('not_loading')
-    }
+        const key = `preloadStatus/${props.post.id}`;
+        sharedAsyncState[key] = 'done';
+    }, [props.shouldActive])
 
     useEffect(() => {
         if (!props.scrolledOn) return;
-        if (!props.topLevelSelfComment) return;
-        props.comments.length > 0 &&
+        if (!topLevelSelfComment) return;
+        comments.length > 0 &&
             ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
         return;
-    }, [props.topLevelSelfComment])
+    }, [topLevelSelfComment])
 
     useEffect(() => {
         if (!props.scrolledOn) return;
 
-        if (props.mode.tag == 'Normal') {
+        if (props.mode == 'normal') {
             ref.current?.scrollToOffset({ offset: -insets.top });
             return;
         }
 
-        if (props.mode.tag == 'Comment') {
+        if (props.mode == 'comment') {
             // if (props.selfCommentIndex > -1) return;
-            props.comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+            comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
             return;
         }
     }, [props.mode])
 
     const onRefresh = React.useCallback(() => {
-        props.setMode({ tag: 'Normal' });
+        props.setMode('normal');
     }, []);
 
-    const backToApp = React.useCallback((target: string) => props.setApp({
-        url: target
-    }), [])
 
     const toggle = React.useCallback((commentId: string, show: boolean) => {
         if (show) {
@@ -174,7 +167,7 @@ function Post(props: any) {
     }, []);
 
     const changeModeToComment = React.useCallback(() => {
-        props.setMode({ tag: 'Comment' })
+        props.setMode('comment')
     }, [])
 
     const renderItem = ({ item, index }: any) => {
@@ -185,7 +178,7 @@ function Post(props: any) {
                 post_id={props.post.id}
                 ofId={item.ofId}
                 num={item.num}
-                requestComments={props.requestComments}
+                requestComments={commentAsksForComments}
                 mode={props.mode}
             />
             :
@@ -193,7 +186,7 @@ function Post(props: any) {
                 hidden={hiddenCommentIds[item.id]}
                 key={item.id}
                 comment={item}
-                backToApp={backToApp}
+                setApp={props.setApp}
                 setSelectedComment={props.setSelectedComment}
                 toggle={toggle}
             />
@@ -209,13 +202,14 @@ function Post(props: any) {
 
     const keyExtractor = (item: any) => item.id
     const header = <ListHeader
-        setApp={props.setApp}
         imageLoaded={imageLoaded}
+        setApp={props.setApp}
         scrolledOn={props.scrolledOn}
+        shouldActive={props.shouldActive}
         post={props.post}
         numTopLevelComments={numTopLevelComments}
         setMode={props.setMode}
-        timesLoaded={timesLoaded}
+    // timesLoaded={timesLoaded}
     />
     const refresh = Platform.OS == 'android' ? undefined : <RefreshControl
         refreshing={refreshing}
@@ -241,9 +235,9 @@ function Post(props: any) {
             </Text>
         </View> : undefined
 
-    // console.log('debug render post', props.post?.id)
+    console.log('debug render post', props.post.id, props.index)
     return <View style={{
-        backgroundColor: props.mode.tag == 'Comment' ? '#272727' : '#151316',
+        backgroundColor: props.mode == 'comment' ? '#272727' : '#151316',
         height: props.height
     }}>
         {
@@ -261,7 +255,7 @@ function Post(props: any) {
                 showsVerticalScrollIndicator={false}
                 listKey={props.index}
                 ref={ref}
-                scrollEnabled={props.mode.tag == 'Comment'}
+                scrollEnabled={props.mode == 'comment'}
                 refreshControl={refresh}
                 scrollEventThrottle={6}
                 data={uiList}
@@ -275,7 +269,7 @@ function Post(props: any) {
         }
 
         {
-            props.mode.tag == 'Normal' &&
+            props.mode == 'normal' &&
             <>
                 <LinearGradient
                     colors={gradient}
@@ -283,7 +277,7 @@ function Post(props: any) {
                     pointerEvents='none'
                 />
                 {
-                    (props.comments.length > 0 || props.post?.keytakeaways) && props.shouldActive &&
+                    (comments.length > 0 || props.post.keytakeaways) && props.shouldActive &&
                     <View style={styles.more_discussion_view}>
                         <MemoMoreDiscussionsButton onPress={changeModeToComment} />
                     </View>
@@ -294,7 +288,16 @@ function Post(props: any) {
 }
 
 export default Post;
-export const MemoPost = memo(Post);
+const shouldRerenderTheSame = (p: any, c: any) => {
+    return p.app == c.app
+        && p.mode == c.mode
+        && p.height == c.height
+        && p.shouldActive == c.shouldActive
+        && p.scrolledOn == c.scrolledOn
+}
+export const MemoPost = memo(Post
+    , shouldRerenderTheSame
+);
 const styles = StyleSheet.create({
     loading_indicator: {
         marginBottom: 5,

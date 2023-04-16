@@ -133,6 +133,7 @@ function Bar(props: any) {
 
     const gesture = Gesture
         .Pan()
+        .enabled(props.app == null)
         .activeOffsetY([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
@@ -195,7 +196,7 @@ function Bar(props: any) {
             return;
         }
 
-        props.setMode({ tag: 'Normal' });
+        props.setMode('normal');
     }
 
     const onBlur = () => {
@@ -212,7 +213,7 @@ function Bar(props: any) {
         changeState('maximize')
     }, [props.selectedComment])
 
-    // console.log('debug bar')
+    console.log('debug bar')
     return (
         <>
             <Animated.View style={[styles.overlay, overlayStyles]}>
@@ -226,7 +227,7 @@ function Bar(props: any) {
                     top: props.wallHeight,
                     backgroundColor:
                         // 'blue',
-                        props.mode.tag == 'Comment' ? '#272727' : '#151316',
+                        props.mode == 'comment' ? '#272727' : '#151316',
                     height: HEIGHT
                 }, styles.sheet,
                     barStyles]}
@@ -236,7 +237,9 @@ function Bar(props: any) {
                     }
 
                     <View style={styles.handler}>
-                        <View style={styles.handler_inside} />
+                        {
+                            props.app == null && <View style={styles.handler_inside} />
+                        }
                     </View>
 
                     {
@@ -246,7 +249,7 @@ function Bar(props: any) {
                             <View style={styles.input}>
                                 {/* Close Button */}
                                 {
-                                    (props.mode.tag == 'Comment' || props.app) &&
+                                    (props.mode == 'comment' || props.app) &&
                                     !focus &&
                                     <TouchableOpacity onPress={closeIt}>
                                         <Animated.View style={animatedStyles} >
@@ -254,7 +257,7 @@ function Bar(props: any) {
                                                 size={26}
                                                 color='#C2C2C2'
                                                 style={{
-                                                    marginRight: props.mode.tag == 'Comment' ? 8 : 0,
+                                                    marginRight: props.mode == 'comment' ? 8 : 0,
                                                 }} />
                                         </Animated.View>
                                     </TouchableOpacity>

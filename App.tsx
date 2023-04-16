@@ -10,7 +10,7 @@ import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import Bar, { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { calcStatusBarColor, constants, Mode, sharedAsyncState } from './utils';
+import { addCommentsToPost, calcStatusBarColor, constants, Mode, requestComments, sharedAsyncState, updateCommentsOfPost } from './utils';
 // @ts-ignore
 import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
 // @ts-ignore
@@ -60,7 +60,7 @@ function Main(props: any) {
     setWebviewBackgroundColor('rgb(0,0,0)');
     setStatusBarStyle('light')
     if (Platform.OS == 'ios') return;
-    const color = props.mode.tag == 'Comment' ? '#272727' : '#151316';
+    const color = props.mode == 'comment' ? '#272727' : '#151316';
     NavigationBar.setBackgroundColorAsync(color);
     setStatusBarBackgroundColor(color, false);
   }, [props.app])
@@ -89,7 +89,7 @@ function Main(props: any) {
   });
   const gesture = Gesture
     .Pan()
-    .enabled(props.mode.tag === 'Comment' || props.app !== null)
+    .enabled(props.mode === 'comment' || props.app !== null)
     .activeOffsetX([-50, 50])
     .onChange((e) => {
 
@@ -111,7 +111,7 @@ function Main(props: any) {
         return;
       }
 
-      runOnJS(props.setMode)({ tag: 'Normal' })
+      runOnJS(props.setMode)('normal')
     });
 
   // Cannot make status bar translucent on android :(
@@ -170,14 +170,11 @@ function Main(props: any) {
           <Wall
             app={props.app}
             setApp={props.setApp}
-            preloadImage={props.preloadImage}
             wallref={wallref}
-            requestComments={props.requestComments}
             setSelectedComment={props.setSelectedComment}
             setMode={props.setMode}
             requestPost={props.requestPost}
             posts={props.posts}
-            comments={props.comments}
             mode={props.mode}
             activePostIndex={props.activePostIndex}
             setActivePostIndex={props.setActivePostIndex}
@@ -215,11 +212,10 @@ function Main(props: any) {
             </View>
           }
 
-
           <MemoBar
-            setApp={props.setApp}
             app={props.app}
             activePostIndex={props.activePostIndex}
+            setApp={props.setApp}
             onSubmit={props.onSubmit}
             wallref={wallref}
             navigationBarVisible={navigationBarVisible}
@@ -242,23 +238,6 @@ function Main(props: any) {
 }
 const MemoMain = memo(Main);
 
-const pi = async (sharedAsyncState: any, imageURI: string) => {
-  if (sharedAsyncState[`preload/${imageURI}`] == 'error') return false;
-  if (sharedAsyncState[`preload/${imageURI}`] == 'ok') return true;
-
-  try {
-    await Image.prefetch(imageURI);
-  } catch (e) {
-    sharedAsyncState[`preload/${imageURI}`] = 'error';
-    console.log('cannot load image', e, imageURI)
-    return false;
-  }
-
-  sharedAsyncState[`preload/${imageURI}`] = 'ok';
-  return true;
-};
-
-
 const rp = async (sharedAsyncState: any, setData: any) => {
   console.log('debug post get requested');
   const offset = sharedAsyncState['offset/main'] ?? 0;
@@ -273,51 +252,6 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   data.forEach((p: any) => {
     sharedAsyncState[`count/${p.id}`] = p.comment_count;
   })
-}
-
-const rc = async (sharedAsyncState: any, insertData: any, post_id: string, parent_id: string | null) => {
-  const key = parent_id ?? post_id;
-
-  const offset = sharedAsyncState[`offset/${key}`] ?? 0;
-  const count = sharedAsyncState[`count/${key}`];
-  if (offset >= count) {
-    console.log(`had enough of ${post_id}.${parent_id}`, offset, count);
-    return [];
-  }
-
-  sharedAsyncState[`offset/${key}`] = offset + 3;
-
-  const { data, error } = await supabaseClient.rpc('get_comments_batch', { o: offset, n: 3, postid: post_id, parentid: parent_id, nchildren: 3 })
-  if (error) {
-    console.log('debug error query comments from post', error)
-    return [];
-  }
-
-  const newIds = data.map((c: any) => c.id);
-  data.forEach((c: any) => {
-    if (newIds.includes(c.parent_id)) sharedAsyncState[`offset/${c.parent_id}`] = 3
-    sharedAsyncState[`count/${c.id}`] = c.comment_count;
-    sharedAsyncState[`num/${c.id}`] = 0;
-    if (c.parent_id) sharedAsyncState[`num/${c.parent_id}`] += 1;
-    // insertData(c);
-  })
-  insertData(data);
-  // console.log('data.length', data.length)
-  // return data
-}
-
-const grc = async (sharedAsyncState: any, insertData: any, post_id: string, parent_id: string | null) => {
-  const key = `status-${parent_id ?? post_id}`;
-  if (sharedAsyncState[key] == 'running') return;
-  sharedAsyncState[key] = 'running';
-  // const comments = 
-  await rc(sharedAsyncState, insertData, post_id, parent_id);
-  // if (parent_id == null) {
-  //   comments.forEach((c: any) => {
-  //     grc(sharedAsyncState, insertData, post_id, c.id);
-  //   })
-  // }
-  sharedAsyncState[key] = 'done';
 }
 
 export default function App() {
@@ -338,13 +272,11 @@ export default function App() {
     Rubik_900Black_Italic,
   });
   const [posts, setPosts] = useState<any[]>([{ type: 'welcomePost', id: 'welcome' }]);
-  const [comments, setComments] = useState<any[]>([]);
   const [selectedComment, setSelectedComment] = useState<any>(null);
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
-  const [mode, setMode] = useState<Mode>({ tag: 'Normal' });
+  const [mode, setMode] = useState<Mode>('normal');
   const [app, setApp] = useState<null | { url: string }>(null);
-
 
   useEffect(() => {
     // console.log('props.user changed', props.user)
@@ -357,50 +289,9 @@ export default function App() {
 
 
   useEffect(() => {
-    if (mode.tag == 'Normal') return;
+    if (mode == 'normal') return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-  }, [mode.tag])
-
-  // useEffect(() => {
-  //   if (app == null) return;
-  //   Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-  // }, [app])
-
-  // TODO: set only once
-  const insertComments = (cs: any[], atHead = false) => {
-    const _insert = (c: any, comments: any[]) => {
-      if (c.parent_id == null) {
-        if (atHead) {
-          comments.unshift({ ...c, level: 0 });
-          return;
-        }
-
-        comments.push({ ...c, level: 0 });
-        return;
-      }
-
-      let i = comments.length - 1;
-      while (i >= 0) {
-        if (!atHead) {
-          if (comments[i].parent_id == c.parent_id) {
-            comments.splice(i + 1, 0, { ...c, level: comments[i].level })
-            return;
-          }
-        }
-        if (comments[i].id == c.parent_id) {
-          comments.splice(i + 1, 0, { ...c, level: comments[i].level + 1 })
-          return;
-        }
-        i -= 1;
-      }
-    }
-
-    setComments((comments) => {
-      const newComments = [...comments];
-      cs.forEach(c => _insert(c, newComments))
-      return newComments;
-    })
-  }
+  }, [mode])
 
   useEffect(() => {
     (async () => {
@@ -423,19 +314,9 @@ export default function App() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
   }, [user])
 
-
-  const updateComment = (id: string, key: any, value: any) => {
-    setComments((comments: any) => {
-      const index = comments.findIndex((c: any) => c.id == id);
-      comments[index][key] = typeof value === 'function' ? value(comments[index][key]) : value;
-      comments[index] = { ...comments[index] }
-      return [...comments];
-    })
-  }
-
   const submitComment = async (text: string, selectedComment: any, post_id: string) => {
     const parent_id = selectedComment?.id ?? null;
-    console.log('submit content', parent_id, post_id)
+    console.log('submit content', text, parent_id, post_id)
     const body = {
       content: text,
       post_id: post_id,
@@ -492,8 +373,8 @@ export default function App() {
       author_id: null
     }
 
-    insertComments([placeholderComment], true);
-    insertComments([childComment]);
+    addCommentsToPost(post_id, [placeholderComment], true)
+    addCommentsToPost(post_id, [childComment]);
 
     const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
       // @ts-ignore
@@ -515,9 +396,9 @@ export default function App() {
       return
     }
 
-    updateComment(childPlaceholderId, 'id', childId)
-    updateComment(childId, 'parent_id', newId)
-    updateComment(placeholderId, 'id', newId)
+    updateCommentsOfPost(post_id, childPlaceholderId, 'id', childId)
+    updateCommentsOfPost(post_id, childId, 'parent_id', newId)
+    updateCommentsOfPost(post_id, placeholderId, 'id', newId)
 
     const utf8Decoder = new TextDecoder('utf-8')
 
@@ -547,31 +428,20 @@ export default function App() {
 
     const reader = response.body.getReader()
     await read(reader, async (update) => {
-      // console.log('update', update);
-      updateComment(childId, 'content', (old: string) => old + update);
+      updateCommentsOfPost(post_id, childId, 'content', (old: string) => old + update);
     });
 
-    updateComment(childId, 'blinking', false)
+    updateCommentsOfPost(post_id, childId, 'blinking', false)
   }
 
   const onSubmit = (text: string, selectedComment: any) => {
-    // if (activePostIndex == 0) return;
     console.log('submitted', activePostIndex);
     submitComment(text, selectedComment, posts[activePostIndex].id);
-    // setSelectedComment(null);
   }
 
-  const requestComments = async (post_id: string, parent_id: string | null) => {
-    console.log('request comments', post_id, parent_id)
-    await grc(sharedAsyncState, insertComments, post_id, parent_id)
-  }
 
   const requestPost = async () => {
     await rp(sharedAsyncState, setPosts)
-  }
-
-  const preloadImage = async (imageURI: string) => {
-    return await pi(sharedAsyncState, imageURI)
   }
 
   const [inited, setInited] = useState(false);
@@ -582,34 +452,29 @@ export default function App() {
   }, [])
 
   const memoRequestPost = React.useCallback(requestPost, [])
-  const memoPreloadImage = React.useCallback(preloadImage, [])
-  const memoRequestComments = React.useCallback(requestComments, [])
   const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
 
-
-
+  console.log('debug big re-render');
   return (
     // <MenuProvider >
     <SafeAreaProvider>
       <MenuProvider>
         <GestureHandlerRootView>
           <MemoMain
-            preloadImage={memoPreloadImage}
             fontsLoaded={fontsLoaded}
-            onSubmit={memoOnSubmit}
-            setSelectedComment={setSelectedComment}
             selectedComment={selectedComment}
             activePostIndex={activePostIndex}
-            setActivePostIndex={setActivePostIndex}
             user={user}
-            setUser={setUser}
-            posts={posts}
-            requestPost={memoRequestPost}
-            comments={comments}
-            setMode={setMode}
-            requestComments={memoRequestComments}
             mode={mode}
             app={app}
+            posts={posts}
+
+            onSubmit={memoOnSubmit}
+            setSelectedComment={setSelectedComment}
+            setUser={setUser}
+            setActivePostIndex={setActivePostIndex}
+            requestPost={memoRequestPost}
+            setMode={setMode}
             setApp={setApp}
           />
         </GestureHandlerRootView>

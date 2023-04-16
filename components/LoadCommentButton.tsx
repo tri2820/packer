@@ -8,14 +8,14 @@ function LoadCommentButton(props: any) {
 
     const load = () => {
         setVisible(false);
-        props.requestComments(props.post_id, props.ofId);
+        props.requestComments(props.ofId);
     }
 
     return visible
         ? <TouchableOpacity style={
             {
                 marginLeft: props.level <= 1 ? 0 : (16 * props.level) + props.level == 0 ? 0 : (props.level == 1 ? 2 : 18),
-                backgroundColor: props.mode.tag == 'Comment' ? '#2e2e2e' : '#1e1d21',
+                backgroundColor: props.mode == 'comment' ? '#2e2e2e' : '#1e1d21',
                 marginBottom: 8,
                 alignSelf: 'center',
                 paddingVertical: 8,
