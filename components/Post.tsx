@@ -76,6 +76,7 @@ function Post(props: any) {
                     console.log('ERROR loading image');
                     sharedAsyncState[`imageLoaded/${imageURI}`] = 'error';
                     console.log('cannot load image', e, imageURI)
+                    return;
                 }
                 console.log('OK loading image');
                 setImageLoaded(true);

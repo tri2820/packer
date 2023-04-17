@@ -9,6 +9,7 @@ function VideoPlayer(props: any) {
     const [youtubeVideoId, setYoutubeVideoId] = useState('');
     const [reloadN, setReloadN] = useState(0);
     const [ready, setReady] = useState(false);
+    const [error, setError] = useState(false);
     useEffect(() => {
         const url = new URL(props.source_url);
         if (!(normalizedHostname(url.hostname) == 'youtube.com')) {
@@ -23,7 +24,10 @@ function VideoPlayer(props: any) {
 
     const onError = (e: string) => {
         console.log('error yt', e, youtubeVideoId)
-        if (e != 'embed_not_allowed' && reloadN == 0) return;
+        if (e != 'embed_not_allowed' || reloadN > 0) {
+            setError(true);
+            return;
+        }
         setReloadN((reloadN) => reloadN + 1);
     }
 
@@ -57,7 +61,7 @@ function VideoPlayer(props: any) {
         // baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}
         />
 
-        {!ready && <Animated.View style={{
+        {!(ready || error) && <Animated.View style={{
             backgroundColor: 'black',
             position: 'absolute',
             height: Math.floor(constants.width / 16 * 9),
