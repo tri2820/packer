@@ -190,38 +190,41 @@ const insert = (cs: any[], where: any[], atHead: boolean) => {
 
 export const noComment = <MemoNoComment />
 
-export function splitToListsWithHeadIs(arr: any[], predicate: (x: any) => boolean) {
-    const result: any[] = [];
-    for (let i = 0; i < arr.length; i++) {
-        if (predicate(arr[i])) {
-            result.push([arr[i]]);
-            continue;
-        }
-        result.at(-1)?.push(arr[i]);
-    }
-    return result;
-}
-
 export const toUIList = (comments: any[], hiddenCommentIds: any[]): any => {
-    // console.log('debug comments', comments);
-    if (comments.length == 0) return [];
-    const parent = comments[0];
-    const num = sharedAsyncState[`count/${parent.id}`] - sharedAsyncState[`num/${parent.id}`];
+    const button_stack: any[] = [];
+    let hiding_for_level = -1;
+    let to_add_flag = true;
+    let result: any[] = [];
+    for (let i = 0; i < comments.length; i++) {
+        if (comments[i].level <= button_stack.at(-1)?.level) {
+            const button = button_stack.pop();
+            if (button) result.push(button);
+        }
 
-    const hidden = hiddenCommentIds[parent.id] == true;
-    const tail = comments.slice(1);
-    if (hidden) return [parent]
+        if (comments[i].level <= hiding_for_level) {
+            hiding_for_level = -1;
+            to_add_flag = true;
+        }
 
-    const childrenUILists =
-        splitToListsWithHeadIs(tail, (c) => c.level == parent.level + 1)
-            .map(chunks => toUIList(chunks, hiddenCommentIds))
+        if (to_add_flag) {
+            result.push(comments[i]);
+            const num_children = sharedAsyncState[`count/${comments[i].id}`] - sharedAsyncState[`num/${comments[i].id}`];
+            if (num_children > 0) {
+                button_stack.push({
+                    type: 'load-comment-button',
+                    num: num_children,
+                    level: comments[i].level,
+                    ofId: comments[i].id,
+                    id: `button/${comments[i].id}`
+                })
+            }
+        }
 
-    const button = {
-        type: 'load-comment-button',
-        num: num,
-        level: parent.level,
-        ofId: parent.id,
-        id: `button/${parent.id}`
+        if (hiddenCommentIds[comments[i].id]) {
+            hiding_for_level = comments[i].level;
+            to_add_flag = false;
+        }
     }
-    return [parent, childrenUILists, num > 0 ? button : []]
+
+    return result;
 }

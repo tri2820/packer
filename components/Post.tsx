@@ -4,7 +4,7 @@ import { memo, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, noComment, requestComments, sharedAsyncState, splitToListsWithHeadIs, toUIList } from '../utils';
+import { constants, noComment, requestComments, sharedAsyncState, toUIList } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -38,6 +38,7 @@ function ListHeader(props: any) {
     </View>
 }
 
+
 function Post(props: any) {
     const [refreshing, _] = useState(false);
     const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
@@ -48,9 +49,7 @@ function Post(props: any) {
     const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self';
     const numTopLevelComments = props.scrolledOn ? comments.filter((c: any) => c.parent_id == null).length : 0;
     const timer = useRef<any>(null);
-    const uiList = props.scrolledOn ? splitToListsWithHeadIs(comments, (c) => c.level == 0)
-        .map(ch => toUIList(ch, hiddenCommentIds))
-        .flat(Infinity) : []
+    const uiList = props.scrolledOn ? toUIList(comments, hiddenCommentIds) : []
 
     const [imageLoaded, setImageLoaded] = useState(
         (!props.post.image || props.post.image == '') ? false :
