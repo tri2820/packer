@@ -6,6 +6,8 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, normalizedHostname } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
+import * as Sentry from 'sentry-expo';
+
 
 function PostHeader(props: any) {
     const longPressed = useSharedValue(false);
@@ -36,6 +38,7 @@ function PostHeader(props: any) {
                 style={styles.touch}
                 onPress={() => {
                     props.setApp({ url: props.post.source_url })
+                    // Sentry.Native.nativeCrash()
                 }}
                 onLongPress={openMenu}
             >

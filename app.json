@@ -44,6 +44,20 @@
     },
     "updates": {
       "url": "https://u.expo.dev/99a4fb77-5ba1-404f-8f20-f9680db3e4dc"
+    },
+    "plugins": [
+      "sentry-expo"
+    ],
+    "hooks": {
+      "postPublish": [
+        {
+          "file": "sentry-expo/upload-sourcemaps",
+          "config": {
+            "organization": "packer-ia",
+            "project": "packer"
+          }
+        }
+      ]
     }
   }
 }

@@ -97,6 +97,7 @@ function Wall(props: any) {
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
 
         return <MemoPost
+            key={item.id}
             setApp={props.setApp}
             app={props.app}
             index={index}
@@ -127,9 +128,9 @@ function Wall(props: any) {
             scrollsToTop={false}
             ref={props.wallref}
             windowSize={2}
-            initialNumToRender={3}
+            initialNumToRender={1}
             maxToRenderPerBatch={2}
-            updateCellsBatchingPeriod={1000}
+            updateCellsBatchingPeriod={500}
             showsVerticalScrollIndicator={false}
             style={{
                 width: constants.width,

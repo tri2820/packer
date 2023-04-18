@@ -233,7 +233,7 @@ function Post(props: any) {
                 </Text>
             </View> : undefined
 
-    // console.log('debug render post', props.index)
+    console.log('debug render post', props.index)
     return <View style={{
         backgroundColor: props.mode == 'comment' ? '#272727' : '#151316',
         height: props.height
@@ -249,7 +249,7 @@ function Post(props: any) {
                 // windowSize={1}
                 initialNumToRender={3}
                 maxToRenderPerBatch={3}
-                updateCellsBatchingPeriod={300}
+                updateCellsBatchingPeriod={200}
                 showsVerticalScrollIndicator={props.mode == 'comment'}
                 ref={ref}
                 scrollEnabled={props.mode == 'comment'}

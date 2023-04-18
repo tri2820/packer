@@ -1,25 +1,38 @@
-import Constants from 'expo-constants';
+import * as Sentry from 'sentry-expo';
+
+Sentry.init({
+  dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
+  tracesSampleRate: 1.0,
+  enableInExpoDevelopment: true,
+  // debug: true
+});
+
 import * as Haptics from 'expo-haptics';
-import { setStatusBarBackgroundColor, setStatusBarHidden, setStatusBarStyle, setStatusBarTranslucent, StatusBar } from 'expo-status-bar';
+import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, View, Text, Image } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeOut, runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import Bar, { MemoBar } from './components/Bar';
+import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { addCommentsToPost, calcStatusBarColor, constants, Mode, requestComments, sharedAsyncState, updateCommentsOfPost } from './utils';
+import { addCommentsToPost, calcStatusBarColor, constants, Mode, sharedAsyncState, updateCommentsOfPost } from './utils';
 // @ts-ignore
 import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
 // @ts-ignore
 import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
-// @ts-ignore
-import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
+import {
+  Rubik_300Light, Rubik_300Light_Italic, Rubik_400Regular, Rubik_400Regular_Italic, Rubik_500Medium, Rubik_500Medium_Italic, Rubik_600SemiBold, Rubik_600SemiBold_Italic, Rubik_700Bold, Rubik_700Bold_Italic, Rubik_800ExtraBold, Rubik_800ExtraBold_Italic, Rubik_900Black, Rubik_900Black_Italic, useFonts
+} from '@expo-google-fonts/rubik';
 import * as NavigationBar from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
+// @ts-ignore
+import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
 import { MenuProvider } from 'react-native-popup-menu';
+
+
 SplashScreen.preventAutoHideAsync();
 
 // import AppLoading from 'expo-app-loading';
@@ -28,23 +41,6 @@ const INJECTED_JAVASCRIPT = `(function() {
     window.getComputedStyle( document.documentElement ,null).getPropertyValue('background-color')
     ));
 })();`;
-import {
-  useFonts,
-  Rubik_300Light,
-  Rubik_400Regular,
-  Rubik_500Medium,
-  Rubik_600SemiBold,
-  Rubik_700Bold,
-  Rubik_800ExtraBold,
-  Rubik_900Black,
-  Rubik_300Light_Italic,
-  Rubik_400Regular_Italic,
-  Rubik_500Medium_Italic,
-  Rubik_600SemiBold_Italic,
-  Rubik_700Bold_Italic,
-  Rubik_800ExtraBold_Italic,
-  Rubik_900Black_Italic,
-} from '@expo-google-fonts/rubik';
 // import { MenuView } from '@react-native-menu/menu';
 
 
@@ -254,7 +250,7 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   })
 }
 
-export default function App() {
+function App() {
   let [fontsLoaded] = useFonts({
     Rubik_300Light,
     Rubik_400Regular,
@@ -492,3 +488,7 @@ export default function App() {
   );
 
 }
+
+
+export default Sentry.Native.wrap(App);
+
