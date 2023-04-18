@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, noComment, requestComments, sharedAsyncState, toUIList } from '../utils';
@@ -11,6 +11,7 @@ import { MemoLoadCommentButton } from './LoadCommentButton';
 import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
+import { Image } from 'expo-image';
 
 
 function ListHeader(props: any) {
@@ -44,12 +45,12 @@ function Post(props: any) {
     const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
     const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
-
-    const [comments, setComments] = useState<any[]>(sharedAsyncState[`comments/${props.post.id}`] ?? []);
+    const comments = sharedAsyncState[`comments/${props.post.id}`] ?? [];
+    const [__, update] = useState(false);
     const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self';
-    const numTopLevelComments = props.scrolledOn ? comments.filter((c: any) => c.parent_id == null).length : 0;
+    const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
     const timer = useRef<any>(null);
-    const uiList = props.scrolledOn ? toUIList(comments, hiddenCommentIds) : []
+    const uiList = toUIList(comments, hiddenCommentIds)
 
     const [imageLoaded, setImageLoaded] = useState(
         (!props.post.image || props.post.image == '') ? false :
@@ -92,8 +93,7 @@ function Post(props: any) {
 
 
     sharedAsyncState[`commentsChangeListener/${props.post.id}`] = () => {
-        const cs = sharedAsyncState[`comments/${props.post.id}`] ?? [];
-        setComments([...cs]);
+        update((d) => !d);
     }
 
     const commentAsksForComments = React.useCallback(async (parent_id: string) => {
@@ -138,11 +138,7 @@ function Post(props: any) {
             return;
         }
 
-        if (props.mode == 'comment') {
-            // if (props.selfCommentIndex > -1) return;
-            comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
-            return;
-        }
+        comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
     }, [props.mode])
 
     const onRefresh = React.useCallback(() => {
@@ -182,8 +178,8 @@ function Post(props: any) {
             />
             :
             <MemoComment
-                hidden={hiddenCommentIds[item.id]}
                 key={item.id}
+                hidden={hiddenCommentIds[item.id]}
                 comment={item}
                 setApp={props.setApp}
                 setSelectedComment={props.setSelectedComment}
@@ -237,7 +233,7 @@ function Post(props: any) {
                 </Text>
             </View> : undefined
 
-    console.log('debug render post', props.post.id, props.index)
+    // console.log('debug render post', props.index)
     return <View style={{
         backgroundColor: props.mode == 'comment' ? '#272727' : '#151316',
         height: props.height
@@ -251,17 +247,18 @@ function Post(props: any) {
                 // Here it's set to 21 by default, is there a performance impact?
                 // Nevertheless there is now a limit (21) that comments will not get rendered, but it's really long so meh for now
                 // windowSize={1}
-                initialNumToRender={1}
+                initialNumToRender={3}
                 maxToRenderPerBatch={3}
                 updateCellsBatchingPeriod={300}
-                showsVerticalScrollIndicator={false}
-                listKey={props.index}
+                showsVerticalScrollIndicator={props.mode == 'comment'}
                 ref={ref}
                 scrollEnabled={props.mode == 'comment'}
                 refreshControl={refresh}
                 scrollEventThrottle={6}
                 data={uiList}
                 onScroll={onScroll}
+                // @ts-ignore
+                listKey={props.post.id}
                 // onEndReached={loadComments}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}

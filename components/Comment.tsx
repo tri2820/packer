@@ -18,11 +18,10 @@ const quote: MarkdownRule = {
     },
     parse: (capture: any, parse: any, state: any) => {
         // console.log('debug parse', capture, parse, state)
-        var stateNested = Object.assign({}, state, { inline: true })  //important to clone!
+        var stateNested = { ...state, inline: true }
         return { children: parse(capture[1].trim(), stateNested), key: capture[0] }
     },
     render: (node: any, output: any, state: any, styles: any) => {
-        // console.log('debug render', node, output, styles)
         const tag = <View
             key={state.key}
             style={blockQuoteView}>
@@ -170,9 +169,7 @@ function Comment(props: any) {
                                         style={styles.reply_button}
                                     >
                                         <Octicons name="reply" size={12} color="#A3A3A3" />
-
                                         <Text style={styles.reply_text}>Reply</Text>
-
                                     </TouchableOpacity>
 
                             }

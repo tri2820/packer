@@ -276,7 +276,16 @@ export default function App() {
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>('normal');
-  const [app, setApp] = useState<null | { url: string }>(null);
+  const [app, _setApp] = useState<null | { url: string }>(null);
+
+  const setApp = useCallback((a: null | { url: string }) => {
+    _setApp((app) => {
+      if (app == null) {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
+      }
+      return a
+    })
+  }, [])
 
   useEffect(() => {
     // console.log('props.user changed', props.user)
@@ -468,7 +477,6 @@ export default function App() {
             mode={mode}
             app={app}
             posts={posts}
-
             onSubmit={memoOnSubmit}
             setSelectedComment={setSelectedComment}
             setUser={setUser}

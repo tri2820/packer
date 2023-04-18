@@ -94,7 +94,6 @@ function Wall(props: any) {
         }
 
         const scrolledOn = props.activePostIndex == index;
-        console.log('debug props.activePostIndex', props.activePostIndex)
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
 
         return <MemoPost
@@ -128,9 +127,9 @@ function Wall(props: any) {
             scrollsToTop={false}
             ref={props.wallref}
             windowSize={2}
-            initialNumToRender={1}
+            initialNumToRender={3}
             maxToRenderPerBatch={2}
-            updateCellsBatchingPeriod={500}
+            updateCellsBatchingPeriod={1000}
             showsVerticalScrollIndicator={false}
             style={{
                 width: constants.width,
