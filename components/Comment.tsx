@@ -103,7 +103,7 @@ function Comment(props: any) {
             <Pressable
                 style={{
                     paddingBottom: 8,
-                    marginLeft: props.comment.level <= 1 ? 0 : (16 * props.comment.level)
+                    marginLeft: props.comment.level <= 1 ? 0 : (20 * (props.comment.level - 1))
                 }}
                 onPress={switchMode}
                 onLongPress={openMenu}
@@ -132,6 +132,7 @@ function Comment(props: any) {
                                     color: '#A3A3A3',
                                     flex: 1,
                                     paddingBottom: props.comment.level > 0 ? 0 : 4,
+                                    // backgroundColor: 'blue'
                                 }}
                                     numberOfLines={1}
                                     entering={FadeInDown}

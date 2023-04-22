@@ -12,7 +12,7 @@ import { supabaseClient } from '../supabaseClient';
 
 function ContentMenu(props: any) {
     const copyToClipboard = () => {
-        const text = props.post?.title ?? props.comment?.content;
+        const text = props.post?.title ?? props.comment?.content ?? props._content;
         if (text && text.length > 0) {
             Clipboard.setStringAsync(text);
             Alert.alert('Copied Text')
@@ -186,16 +186,19 @@ function ContentMenu(props: any) {
                         marginLeft: 8
                     }}>Copy Text</Text>
                 </MenuOption>
-                <MenuOption onSelect={showReportMenu} >
-                    <Ionicons name="flag" size={24} color="#B7B9BE" />
-                    <Text style={{
-                        fontSize: 16,
-                        color: '#B7B9BE',
-                        fontWeight: '600',
-                        marginLeft: 8
-                    }}>Report</Text>
-                </MenuOption>
-                <MenuOption onSelect={showBlockMenu} >
+                {
+                    !props.noReport &&
+                    <MenuOption onSelect={showReportMenu} >
+                        <Ionicons name="flag" size={24} color="#B7B9BE" />
+                        <Text style={{
+                            fontSize: 16,
+                            color: '#B7B9BE',
+                            fontWeight: '600',
+                            marginLeft: 8
+                        }}>Report</Text>
+                    </MenuOption>
+                }
+                {!props.noUser && <MenuOption onSelect={showBlockMenu} >
                     <Ionicons name="md-eye-off" size={24} color="#B7B9BE" />
                     {/* <Ionicons name="flag" size={24} color="#B7B9BE" /> */}
                     <Text style={{
@@ -205,6 +208,7 @@ function ContentMenu(props: any) {
                         marginLeft: 8
                     }}>Block User</Text>
                 </MenuOption>
+                }
             </MenuOptions>
         </Menu >
     );

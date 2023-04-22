@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Octicons from '@expo/vector-icons/Octicons';
 import * as React from 'react';
 import { memo, useEffect, useState } from 'react';
-import { Platform, Text, Pressable, StyleSheet, TouchableOpacity } from 'react-native';
+import { Platform, Text, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
 import { TextInput } from 'react-native-gesture-handler';
 import { constants } from '../utils';
 
@@ -35,7 +35,7 @@ function InputSend(props: any) {
         //     'Down the rabbit hole we go!' :
         (props.selectedComment ?
             `Replying to "${getQuote()}"` :
-            'Chat with Packer - say "Hello"')
+            'Chat with Packer...')
 
     const press = () => {
         // if (props.activePostIndex == 0) {
@@ -95,12 +95,20 @@ function InputSend(props: any) {
                 <Pressable style={styles.press}
                     onPress={press}
                 >
-                    <Text style={{
-                        color: text == '' ? '#C2C2C2' : '#F1F1F1'
-                    }}>{
-                            text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)
-                        }
-                    </Text>
+                    {
+                        props.user ?
+                            <Text style={{
+                                color: text == '' ? '#C2C2C2' : '#F1F1F1'
+                            }}>{
+                                    text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)
+                                }
+                            </Text> : <View>
+                                <Text style={{
+                                    color: '#C2C2C2'
+                                }}>Sign in to chat with Packer</Text>
+                            </View>
+                    }
+
                 </Pressable>
             }
         </>

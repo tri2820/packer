@@ -1,14 +1,9 @@
+import * as Haptics from 'expo-haptics';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Dimensions, Pressable, SafeAreaView, Text, View, StyleSheet } from 'react-native';
-import { FlatList, Gesture, GestureDetector, RefreshControl, ScrollView } from 'react-native-gesture-handler';
-import Animated, { FadeInUp, useAnimatedReaction, useAnimatedStyle, useDerivedValue, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants } from '../utils';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import { LinearGradient } from 'expo-linear-gradient';
-import Comment from './Comment';
-import * as Haptics from 'expo-haptics';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { MemoContentMenu } from './ReportMenu';
 
 
 function KeyTakeaways(props: any) {
@@ -27,35 +22,82 @@ function KeyTakeaways(props: any) {
 
     if (props.content == '') return <></>;
 
-    return <Pressable onPress={() => {
-        setShowKeyTakeaways(!showKeyTakeaways);
-    }}>
-        <View style={{
-            backgroundColor: '#323032',
-            paddingVertical: showKeyTakeaways ? 8 : 8,
-            paddingHorizontal: showKeyTakeaways ? 8 : 8,
-            borderRadius: 8,
-            marginTop: 4,
-            marginBottom: 16,
-        }}>
+    const longPressed = useSharedValue(false);
+    const menuref = useRef<any>(null)
+    const openMenu = () => {
+        longPressed.value = true;
+        menuref.current?.open();
+    }
+    const onMenuClose = React.useCallback(() => {
+        longPressed.value = false;
+    }, [])
+    const longPressedStyle = useAnimatedStyle(() => {
+        return {
+            backgroundColor: longPressed.value ? withTiming('rgba(0,0,0,0.5)', { duration: 100 }) : withTiming('rgba(0,0,0,0)', { duration: 200 })
+        };
+    });
+
+    return <Animated.View style={longPressedStyle}>
+        <Pressable
+            onPress={() => {
+                setShowKeyTakeaways(!showKeyTakeaways);
+            }}
+            onLongPress={openMenu}
+            style={{
+                paddingHorizontal: 16,
+                marginBottom: 12,
+            }}
+        >
             <View style={{
+                borderBottomColor: '#3C3D3F',
+                borderBottomWidth: StyleSheet.hairlineWidth,
+                // marginHorizontal: 16
+            }} />
+
+            <View style={{
+                marginTop: 12,
                 flex: 1,
                 flexDirection: 'row',
                 alignItems: 'center'
             }}>
-                <View style={{
-                    // backgroundColor: '#F2C740',
-                    borderRadius: 4,
-                    padding: 2,
-                    marginRight: 8,
-                }}>
-                    <FontAwesome5 name='pen' size={16} color="#FFC542" />
-                </View>
+                <Image
+                    style={{
+                        width: 20,
+                        height: 20,
+                    }}
+                    source={require('../assets/smallicon.png')}
+                />
 
                 <Text style={{
                     color: '#E6E6E6',
                     fontWeight: 'bold',
-                }}>In short</Text>
+                    marginLeft: 8
+                }}>Packer's Report</Text>
+
+
+
+                {
+                    !showKeyTakeaways &&
+
+                    <Animated.Text style={{
+                        color: '#A3A3A3',
+                        flex: 1,
+                        // backgroundColor: 'red'
+                    }}
+                        numberOfLines={1}
+                        entering={FadeInDown}
+                    > • {props.content}
+                    </Animated.Text>
+
+                }
+
+                <MemoContentMenu
+                    menuref={menuref}
+                    _content={props.content}
+                    onClose={onMenuClose}
+                    noUser
+                    noReport
+                />
             </View>
 
             {
@@ -69,9 +111,9 @@ function KeyTakeaways(props: any) {
                     {props.content}
                 </Animated.Text>
             }
+        </Pressable>
 
-        </View>
-    </Pressable>
+    </Animated.View>
 
 }
 

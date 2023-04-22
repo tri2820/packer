@@ -2,13 +2,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup } from '../utils';
 import { MemoInputSend } from './InputSend';
-import SignInSection, { MemoSignInSection } from './SignInSection';
-import UserList, { MemoUserList } from './UserList';
+import { MemoSignInSection } from './SignInSection';
+import { MemoUserList } from './UserList';
 
 
 
@@ -233,7 +233,16 @@ function Bar(props: any) {
                     barStyles]}
                 >
                     {
-                        props.user === null && <MemoSignInSection INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM} minOffset={minOffset} offset={offset} mode={props.mode} user={props.user} setUser={props.setUser} setUserListMode={setUserListMode} />
+                        props.user === null && <MemoSignInSection
+                            INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM}
+                            minOffset={minOffset}
+                            offset={offset}
+                            mode={props.mode}
+                            user={props.user}
+                            setUser={props.setUser}
+                            // setUserListMode={setUserListMode}
+                            changeState={changeState}
+                        />
                     }
 
                     <View style={styles.handler}>
@@ -293,6 +302,7 @@ function Bar(props: any) {
                                                 changeState={changeState}
                                                 onSubmit={props.onSubmit}
                                                 activePostIndex={props.activePostIndex}
+                                                user={props.user}
                                             />
                                         </View>
                                 }

@@ -1,36 +1,55 @@
 import { AuthChangeEvent, Session, User } from '@supabase/supabase-js';
 import { makeRedirectUri, startAsync } from 'expo-auth-session';
 import { supabaseClient, supabaseClientUrl } from './supabaseClient';
+import * as WebBrowser from 'expo-web-browser';
+import url from 'url';
+import { parseUrlParams } from './utils';
 
 export const signIn = async (provider: 'google' | 'apple') => {
     const returnUrl = makeRedirectUri({
         useProxy: false,
         path: '/auth/callback',
     });
-    const authUrl = `${supabaseClientUrl}/auth/v1/authorize?provider=${provider}&redirect_to=${returnUrl}&prompt=select_account+consent`;
 
-    const authSessionResult = await startAsync({
-        returnUrl,
-        authUrl,
-        projectNameForProxy: '@tri2820/packer'
-    });
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+        provider,
+        options: {
+            redirectTo: returnUrl
+        }
+    })
+
+    if (!data || error) {
+        console.log('error auth', error, data);
+        return;
+    }
+
+    // console.log('data', data)
+    const authSessionResult = await WebBrowser.openAuthSessionAsync(data.url);
 
     if (authSessionResult.type !== 'success') {
         console.log('debug authSessionResult.type is NOT a success', authSessionResult)
         return null;
     }
 
-    const { data, error } = await supabaseClient.auth.setSession({
-        access_token: authSessionResult.params.access_token,
-        refresh_token: authSessionResult.params.refresh_token,
+    console.log('> authSessionResult', authSessionResult)
+    const params = parseUrlParams(authSessionResult.url);
+    if (!params || !params.access_token || !params.refresh_token) {
+        console.log('debug cannot parse', params, authSessionResult.url)
+        return;
+    }
+
+    const { data: sessionData, error: sessionError } = await supabaseClient.auth.setSession({
+        access_token: params.access_token,
+        refresh_token: params.refresh_token,
     })
 
-    if (error) {
-        console.log('setSession error', error);
+    if (sessionError) {
+        console.log('setSession error', sessionError);
         return null;
     }
 
-    return data.user;
+    console.log('sessionData', sessionData)
+    return sessionData.user;
 };
 
 export const signOut = async () => {

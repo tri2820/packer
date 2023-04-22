@@ -3,7 +3,7 @@ import * as React from 'react';
 import { memo, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
-
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { constants } from '../utils';
 import { MemoPost } from './Post';
 
@@ -39,7 +39,7 @@ function WelcomePost(props: any) {
             alignItems: 'center'
         }}>
             <View style={{
-                marginTop: 200,
+                marginTop: 100,
                 marginBottom: 40,
                 alignItems: 'center'
             }}>
@@ -50,23 +50,52 @@ function WelcomePost(props: any) {
                     fontFamily: 'Rubik_900Black',
                 }}>PACKER</Text>
                 <View style={{
-                    marginTop: 8
+                    marginTop: 12,
+                    marginHorizontal: 16
                 }}>
+                    <View style={{
+                        alignSelf: 'center',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        marginVertical: 8,
+                    }}>
+                        <Ionicons name="bulb"
+                            size={26}
+                            color='#C2C2C2'
+                            style={{
+                                marginRight: props.mode == 'comment' ? 8 : 0,
+                            }} />
+                        <Text style={{
+                            color: '#c2c2c2',
+                            fontSize: 26,
+                            marginLeft: 4,
+                            marginRight: 20
+                        }}>
+                            Examples
+                        </Text>
+                    </View>
                     <Text style={{
-                        marginVertical: 4,
-                        color: 'white',
+                        marginVertical: 8,
+                        color: '#c2c2c2',
                         fontSize: 20,
-                    }}>1. Chat with Packer</Text>
+                        // textAlign: 'center'
+                    }}>
+                        Who will be affected by the new tax reform?
+                    </Text>
                     <Text style={{
-                        marginVertical: 4,
-                        color: 'white',
+                        marginVertical: 8,
+                        color: '#c2c2c2',
                         fontSize: 20,
-                    }}>2. Dive deep into topics</Text>
+                        // textAlign: 'center'
+                    }}>What factors contributed to the record profits?
+                    </Text>
                     <Text style={{
-                        marginVertical: 4,
-                        color: 'white',
+                        marginVertical: 8,
+                        color: '#c2c2c2',
                         fontSize: 20,
-                    }}>3. Swipe this way</Text>
+                        // textAlign: 'center'
+                    }}>How can individuals contribute to supporting homeless shelters in their area?
+                    </Text>
                 </View>
             </View>
             <Animated.Image

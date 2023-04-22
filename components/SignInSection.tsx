@@ -16,7 +16,8 @@ function SignInSection(props: any) {
         const user = await signIn(provider);
         if (!user) return;
 
-        props.setUserListMode('normal');
+        // props.setUserListMode('normal');
+        props.changeState('minimize')
         console.log('debug user', JSON.stringify(user));
         props.setUser(user);
 

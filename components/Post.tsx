@@ -1,9 +1,10 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { Image, ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+// import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, noComment, requestComments, sharedAsyncState, toUIList } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
@@ -11,8 +12,8 @@ import { MemoLoadCommentButton } from './LoadCommentButton';
 import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
-import { Image } from 'expo-image';
-
+// import { Image } from 'expo-image';
+import * as Haptics from 'expo-haptics';
 
 function ListHeader(props: any) {
     const insets = useSafeAreaInsets();
@@ -28,14 +29,13 @@ function ListHeader(props: any) {
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
         <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
-        <View style={styles.padding}>
-            <KeyTakeaways content={props.post.keytakeaways} />
-            {
-                sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
-                props.numTopLevelComments == 0 &&
-                noComment
-            }
-        </View>
+        <KeyTakeaways content={props.post.keytakeaways} />
+        {
+            sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
+            props.numTopLevelComments == 0 &&
+            props.post.keytakeaways == '' &&
+            noComment
+        }
     </View>
 }
 
@@ -47,7 +47,7 @@ function Post(props: any) {
     const ref = useRef<any>(null);
     const comments = sharedAsyncState[`comments/${props.post.id}`] ?? [];
     const [__, update] = useState(false);
-    const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self';
+    const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self' ? comments[0] : null;
     const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
     const timer = useRef<any>(null);
     const uiList = toUIList(comments, hiddenCommentIds)
@@ -125,8 +125,10 @@ function Post(props: any) {
     useEffect(() => {
         if (!props.scrolledOn) return;
         if (!topLevelSelfComment) return;
-        comments.length > 0 &&
-            ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+        console.log('debug CHECK scroll to topLevelSelfComment')
+        if (comments.length <= 0) return;
+        console.log('debug scroll to topLevelSelfComment')
+        ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
         return;
     }, [topLevelSelfComment])
 
@@ -147,6 +149,7 @@ function Post(props: any) {
 
 
     const toggle = React.useCallback((commentId: string, show: boolean) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
         if (show) {
             setHiddenCommentIds((hiddenCommentIds: any) => ({
                 ...hiddenCommentIds,

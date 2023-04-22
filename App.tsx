@@ -188,8 +188,8 @@ function Main(props: any) {
             // exiting={FadeOut.duration(300)}
             >
               <WebView
-                domStorageEnabled={true}
-                sharedCookiesEnabled={true}
+                domStorageEnabled={!__DEV__}
+                sharedCookiesEnabled={!__DEV__}
                 containerStyle={{
                   paddingTop: insets.top,
                   backgroundColor: webviewBackgroundColor
@@ -313,11 +313,6 @@ function App() {
       }
     );
   }, [])
-
-
-  useEffect(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-  }, [user])
 
   const submitComment = async (text: string, selectedComment: any, post_id: string) => {
     const parent_id = selectedComment?.id ?? null;

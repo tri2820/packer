@@ -42,43 +42,53 @@ function PostHeader(props: any) {
                 }}
                 onLongPress={openMenu}
             >
-                {
-                    props.imageLoaded && <Animated.Image
+
+                <View style={{
+                    // width: constants.width - 32,
+                    // height: constants.width / 4 * 2,
+                    // marginBottom: 16,
+                    // borderRadius: 8
+                    // backgroundColor: 'red'
+                }}>
+                    {props.imageLoaded && <Animated.Image
                         style={styles.image}
                         source={{
                             uri: props.post.image
                         }}
                         entering={FadeIn}
                     />
-                }
+                    }
 
-                <View style={styles.textheader}>
-                    <Ionicons name='link' color='#A3A3A3' size={14} />
-                    <Text style={styles.source}>
-                        {
-                            getSourceName(props.post.source_url)
-                        }
-                    </Text>
-                </View>
-                <Text style={styles.title}>
-                    {props.post.title}
-                </Text>
+                    <View style={{
+                        paddingVertical: 8
+                    }}>
+                        <Text style={styles.title}>
+                            {props.post.title}
+                        </Text>
 
+                        <View style={styles.textheader}>
+                            {/* <Ionicons name='link' color='#A3A3A3' size={14} /> */}
+                            <Text style={styles.source}>
+                                {
+                                    getSourceName(props.post.source_url)
+                                }
+                            </Text>
+                            <Text style={styles.created_at}> • {
+                                moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
+                            }</Text>
 
-                <View style={styles.text_header_2}>
-                    <Text style={styles.author_name}>{props.post.author_name}</Text>
+                            <View style={styles.contentmenu}>
+                                <MemoContentMenu
+                                    menuref={menuref}
+                                    post={props.post}
+                                    triggerOuterWrapper={styles.triggerOuterWrapper}
+                                    onClose={onMenuClose}
+                                    noUser
+                                />
+                            </View>
 
-                    <Text style={styles.created_at}> • {
-                        moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
-                    }</Text>
+                        </View>
 
-                    <View style={styles.contentmenu}>
-                        <MemoContentMenu
-                            menuref={menuref}
-                            post={props.post}
-                            triggerOuterWrapper={styles.triggerOuterWrapper}
-                            onClose={onMenuClose}
-                        />
                     </View>
                 </View>
             </TouchableOpacity >
@@ -90,22 +100,22 @@ export default PostHeader;
 const styles = StyleSheet.create({
     image: {
         width: constants.width - 32,
-        height: constants.width / 4 * 2,
-        marginBottom: 16,
+        height: constants.width / 4 * 1.8,
+        // marginBottom: 16,
         borderRadius: 8
     },
     touch: {
-        marginBottom: 8,
+        // marginBottom: 0,
         marginHorizontal: 16
     },
     source: {
         color: '#A3A3A3',
         fontSize: 12,
-        marginLeft: 4
+        // marginLeft: 4
         // backgroundColor: 'red'
     },
     textheader: {
-        marginBottom: 8,
+        // marginBottom: 8,
         flexDirection: 'row',
         alignItems: 'center',
         // justifyContent: 'center'
@@ -114,7 +124,7 @@ const styles = StyleSheet.create({
         color: 'white',
         // fontWeight: 'bold',
         fontSize: 18,
-        marginBottom: 8,
+        marginBottom: 4,
         fontFamily: 'Rubik_500Medium'
     },
     triggerOuterWrapper: {
@@ -124,6 +134,9 @@ const styles = StyleSheet.create({
     contentmenu: {
         marginLeft: 'auto',
         marginRight: 0,
+        // backgroundColor: 'blue',
+        // width: 20,
+        // height: 20
     },
     created_at: {
         color: '#A3A3A3'

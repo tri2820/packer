@@ -1,22 +1,23 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
-import { memo } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { FlatList } from 'react-native-gesture-handler';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle } from 'react-native-reanimated';
+import { memo, useState } from 'react';
+import { FlatList, Alert, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
 import { supabaseClient } from '../supabaseClient';
-
+import { randomNickName } from '../utils';
+import * as Haptics from 'expo-haptics';
 
 function UserList(props: any) {
+    const [showDeleteAccount, setShowDeleteAccount] = useState(false)
     const insets = useSafeAreaInsets();
     const signOutAndUpdateProfile = async () => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
         const signedOut = await signOut();
         if (!signedOut) return;
         props.setUser(null);
     }
-
 
     const createDeleteConfirmationAlert = () =>
         Alert.alert(
@@ -39,14 +40,6 @@ function UserList(props: any) {
             },
         ]);
 
-    const openSettings = () => {
-        props.setMode('settings')
-    }
-
-    const setModeNormal = () => {
-        props.setMode('normal')
-    }
-
     // console.log('debug userlist')
     return (
         <View style={{
@@ -55,6 +48,67 @@ function UserList(props: any) {
             flex: 1
         }}
         >
+            <View style={{
+                flexDirection: 'row',
+                marginTop: 8,
+                marginBottom: 16
+            }}>
+                <TouchableOpacity style={{
+                    backgroundColor: props.mode == 'normal' ? '#f1f1f1' : '#323233',
+                    paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderRadius: 10,
+                    marginRight: 10,
+                    flexDirection: 'row',
+                    alignItems: 'center'
+                }}
+                    onPress={() => {
+                        props.setMode('normal')
+                    }}
+                >
+                    <Ionicons name="person" size={20} color={
+                        props.mode == 'normal' ? 'black' : '#f1f1f1'
+                    } />
+                    <Text style={{
+                        marginLeft: 6,
+                        color: props.mode == 'normal' ? 'black' : '#f1f1f1',
+                        fontWeight: 'bold'
+                    }}>Profile</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={{
+                    backgroundColor: props.mode == 'settings' ? '#f1f1f1' : '#323233',
+                    paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderRadius: 10,
+                    marginRight: 4,
+                    flexDirection: 'row',
+                    alignItems: 'center'
+                }}
+                    onPress={() => {
+                        props.setMode('settings')
+                    }}
+                >
+                    <Ionicons name="settings-sharp" size={20} color={
+                        props.mode == 'settings' ? 'black' : '#f1f1f1'
+                    } />
+                    <Text style={{
+                        marginLeft: 6,
+                        color: props.mode == 'settings' ? 'black' : '#f1f1f1',
+                        fontWeight: 'bold'
+                    }}>Settings</Text>
+                </TouchableOpacity>
+            </View>
+
+
+            <View
+                style={{
+                    marginBottom: 20,
+                    borderBottomColor: '#3C3D3F',
+                    borderBottomWidth: StyleSheet.hairlineWidth,
+                }}
+            />
+
             {
                 props.mode == 'normal'
                     ? <Animated.View
@@ -62,40 +116,37 @@ function UserList(props: any) {
                         exiting={FadeOut.duration(200)}
                         style={{
                             // backgroundColor: 'blue',
-                            height: '100%'
+                            flex: 1
                         }}
                     >
-                        <View>
-                            <View style={styles.header}>
-                                <Text style={styles.heading}>
-                                    Profile
-                                </Text>
+                        <Text style={{
+                            fontFamily: 'Rubik_800ExtraBold',
+                            fontSize: 28,
+                            color: '#FFC542'
+                        }}>{props.user.user_metadata.full_name}
+                        </Text>
 
-                                <TouchableOpacity onPress={openSettings} style={styles.icon} >
-                                    <Ionicons name="settings-sharp" size={28} color='#C2C2C2' />
-                                </TouchableOpacity>
-                            </View>
-
-                            <Text style={styles.full_name}>
-                                @{props.user.user_metadata.full_name}
-                            </Text>
-                            <Text style={styles.introduction}>
-                                Just joined Packer to connect with interesting people from all over the world. Looking forward to discovering new perspectives and making new friends!
-                            </Text>
-
-                            <Text style={styles.h1}>
-                                Bookmarks
-                            </Text>
+                        <View style={{
+                            flexDirection: 'row',
+                            alignItems: 'center'
+                        }}>
+                            <Ionicons name="bookmark" size={14} color='#F1F1F1' />
+                            <Text style={{
+                                marginLeft: 4,
+                                fontWeight: '500',
+                                fontSize: 16,
+                                color: '#F1F1F1',
+                                fontFamily: 'Rubik_600SemiBold'
+                            }}>{
+                                    'Bookmarks'
+                                    // randomNickName()
+                                }</Text>
                         </View>
-                        {/* <View style={{
-                            backgroundColor: 'blue',
-                            alignSelf: 'stretch',
-                            flex: 1
-                        }}> */}
+
                         <FlatList
                             horizontal={false}
                             showsVerticalScrollIndicator={false}
-                            listKey='userList'
+                            // listKey='userList'
                             style={{
                                 marginTop: 8,
                                 marginBottom: insets.bottom,
@@ -108,48 +159,88 @@ function UserList(props: any) {
                                 <View style={styles.discussion} />
                             }
                         />
-                        {/* </View> */}
+
                     </Animated.View> :
                     <Animated.View
                         entering={FadeIn}
                         exiting={FadeOut}
                     >
                         <View>
-                            <View style={styles.header}>
+                            {/* <View style={styles.header}>
                                 <Text style={styles.heading}>
                                     Settings
                                 </Text>
 
                                 <TouchableOpacity onPress={setModeNormal} style={styles.icon} >
-                                    <Ionicons name="close" size={28} color='#C2C2C2' />
+                                    <Ionicons name="person-circle" size={30} color='#A3A3A3' />
                                 </TouchableOpacity>
-                            </View>
+                            </View> */}
 
                             <View style={styles.buttons}>
-                                <TouchableOpacity onPress={signOutAndUpdateProfile} style={styles.button} >
+                                <TouchableOpacity onPress={signOutAndUpdateProfile} style={[styles.button, {
+                                    marginBottom: 32
+                                }]} >
                                     {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
                                     <Text style={styles.button_text}>Sign Out</Text>
                                 </TouchableOpacity>
+                                {/* <View
+                                    style={{
+                                        // marginVertical: 20,
+                                        borderBottomColor: '#3C3D3F',
+                                        borderBottomWidth: StyleSheet.hairlineWidth,
+                                    }}
+                                /> */}
 
-                                <View
-                                    style={styles.hair}
-                                />
+                                {
+                                    showDeleteAccount
+                                        ?
+                                        <>
+                                            <Pressable style={{
+                                                flexDirection: 'row',
+                                                alignItems: 'center',
+                                                marginBottom: 12
+                                            }}
+                                                onPress={() => {
+                                                    setShowDeleteAccount(false)
+                                                }}
+                                            >
+                                                <Ionicons name="chevron-down" size={20} color='#c2c2c2' />
+                                                <Text style={{
+                                                    color: '#c2c2c2'
+                                                }}>Advanced Settings</Text>
+                                            </Pressable>
+                                            <TouchableOpacity
+                                                onPress={createDeleteConfirmationAlert}
+                                                style={styles.button} >
+                                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                                <Text style={styles.deletion_text}>Request account deletion</Text>
+                                            </TouchableOpacity>
 
-                                <TouchableOpacity
-                                    onPress={createDeleteConfirmationAlert}
-                                    style={styles.button} >
-                                    {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                                    <Text style={styles.deletion_text}>Request account deletion</Text>
-                                </TouchableOpacity>
+                                            <Text style={styles.deletion_info}>
+                                                Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
+                                            </Text>
+                                        </>
+                                        :
+                                        <Pressable style={{
+                                            flexDirection: 'row',
+                                            alignItems: 'center'
+                                        }}
+                                            onPress={() => {
+                                                setShowDeleteAccount(true)
+                                            }}
+                                        >
+                                            <Ionicons name="chevron-forward" size={20} color='#c2c2c2' />
+                                            <Text style={{
+                                                color: '#c2c2c2'
+                                            }}>Advanced Settings</Text>
+                                        </Pressable>
+                                }
 
-                                <Text style={styles.deletion_info}>
-                                    Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
-                                </Text>
                             </View>
                         </View>
                     </Animated.View>
             }
-        </View>
+        </View >
 
     );
 }
@@ -187,24 +278,28 @@ const styles = StyleSheet.create({
     heading: {
         paddingTop: 8,
         // backgroundColor: 'blue',
-        color: '#F1F1F1',
+        fontFamily: 'Rubik_700Bold',
+        color: '#A3A3A3',
         fontSize: 24,
-        fontWeight: '800',
+        // fontWeight: '800',
         flexGrow: 1
     },
     icon: {
         paddingTop: 8,
         paddingBottom: 16,
         alignItems: 'flex-end',
-        justifyContent: 'flex-start',
+        justifyContent: 'flex-end',
+        marginLeft: 'auto',
+        marginRight: 0,
         // backgroundColor: 'red'
     },
     header: {
+        // backgroundColor: 'blue',
         flexDirection: 'row',
         alignItems: 'flex-start',
     },
     button: {
-        paddingVertical: 10,
+        paddingVertical: 14,
         borderRadius: 8,
         backgroundColor: '#323233',
         alignItems: 'center'
@@ -213,18 +308,13 @@ const styles = StyleSheet.create({
         color: '#ed4339',
         fontSize: 18
     },
-    hair: {
-        marginVertical: 20,
-        borderBottomColor: '#3C3D3F',
-        borderBottomWidth: StyleSheet.hairlineWidth,
-    },
     deletion_info: {
         color: '#929196',
-        marginTop: 20,
+        marginTop: 4,
         textAlign: 'center'
     },
     buttons: {
-        marginTop: 16
+        marginTop: 0
     },
     deletion_text: {
         color: '#ed4339',

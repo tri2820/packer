@@ -27,6 +27,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         marginLeft: 'auto',
         marginRight: 'auto',
+        paddingHorizontal: 16
     },
     bubble: {
         marginRight: 4
