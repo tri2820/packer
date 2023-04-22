@@ -237,6 +237,7 @@ function Post(props: any) {
             </View> : undefined
 
     console.log('debug render post', props.index)
+
     return <View style={{
         backgroundColor: props.mode == 'comment' ? '#272727' : '#151316',
         height: props.height
@@ -262,11 +263,16 @@ function Post(props: any) {
                 onScroll={onScroll}
                 // @ts-ignore
                 listKey={props.post.id}
-                // onEndReached={loadComments}
+                onEndReached={(distanceFromEnd) => {
+                    if (!props.scrolledOn) return;
+                    console.log('*****************end reached', props.post.id, distanceFromEnd, props.mode)
+                    loadComments();
+                }}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
                 ListHeaderComponent={header}
                 ListFooterComponent={footer}
+            // style={{ backgroundColor: 'blue' }}
             />
         }
 

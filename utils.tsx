@@ -109,14 +109,16 @@ const _requestComments = async (sharedAsyncState: any, post_id: string, parent_i
     }
 
     const offset = sharedAsyncState[`offset/${key}`] ?? 0;
+    const num_request = offset == 0 ? 5 : 3;
+    const num_children_request = 3;
     if (offset >= count) {
         // console.log(`had enough of ${post_id}.${parent_id}`, offset, count);
         return 'had enough';
     }
 
-    sharedAsyncState[`offset/${key}`] = offset + 3;
+    sharedAsyncState[`offset/${key}`] = offset + num_request;
 
-    const { data, error } = await supabaseClient.rpc('get_comments_batch', { o: offset, n: 3, postid: post_id, parentid: parent_id, nchildren: 3 })
+    const { data, error } = await supabaseClient.rpc('get_comments_batch', { o: offset, n: num_request, postid: post_id, parentid: parent_id, nchildren: num_children_request })
     if (error) {
         console.log('debug error query comments from post', error)
         return 'error';
@@ -124,7 +126,7 @@ const _requestComments = async (sharedAsyncState: any, post_id: string, parent_i
 
     const newIds = data.map((c: any) => c.id);
     data.forEach((c: any) => {
-        if (newIds.includes(c.parent_id)) sharedAsyncState[`offset/${c.parent_id}`] = 3
+        if (newIds.includes(c.parent_id)) sharedAsyncState[`offset/${c.parent_id}`] = num_children_request
         sharedAsyncState[`count/${c.id}`] = c.comment_count;
         sharedAsyncState[`num/${c.id}`] = 0;
         if (c.parent_id) sharedAsyncState[`num/${c.parent_id}`] += 1;
