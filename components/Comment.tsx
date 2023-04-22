@@ -7,6 +7,7 @@ import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdow
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import BlinkingCursor from './BlinkingCursor';
 import { MemoContentMenu } from './ReportMenu';
+import { fixText } from '../utils';
 
 
 const quote: MarkdownRule = {
@@ -136,7 +137,7 @@ function Comment(props: any) {
                                 }}
                                     numberOfLines={1}
                                     entering={FadeInDown}
-                                > • {props.comment.content}
+                                > • {fixText(props.comment.content, props.comment.author_name)}
                                 </Animated.Text>}
                         </View>
 
@@ -158,7 +159,7 @@ function Comment(props: any) {
                                 onLinkPress={onLinkPress}
                                 styles={mdstyles}
                             >
-                                {props.comment.content}
+                                {fixText(props.comment.content, props.comment.author_name) as any}
                             </MarkdownView>
 
                             {

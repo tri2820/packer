@@ -747,3 +747,10 @@ export function parseUrlParams(inputUrl: string) {
     });
     return paramObj;
 }
+
+export const fixText = (text: string, author_name: string) => {
+    console.log('debug text', text, author_name)
+    if (author_name != 'Packer') return text;
+    if (!text.startsWith('Packer:')) return text;
+    return text.startsWith('Packer: ') ? text.slice(8) : text.slice(7)
+}

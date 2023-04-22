@@ -35,7 +35,7 @@ function InputSend(props: any) {
         //     'Down the rabbit hole we go!' :
         (props.selectedComment ?
             `Replying to "${getQuote()}"` :
-            'Chat with Packer...')
+            'Chat with Packer: How do you feel about this news?')
 
     const press = () => {
         // if (props.activePostIndex == 0) {
