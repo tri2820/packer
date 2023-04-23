@@ -120,7 +120,7 @@ function Main(props: any) {
 
   // Note: Some Android treats the bottom handle as navigationBar, so navigationBarVisible is true
   // In thoses cases, this still works as intended
-  const minBarHeight = 60 + (Platform.OS == 'android' && !navigationBarVisible ? 32 : 0);
+  const minBarHeight = 60 + (Platform.OS == 'android' && !navigationBarVisible ? 16 : 0);
   const wallHeight = constants.height
     - (
       Platform.OS == 'android'
