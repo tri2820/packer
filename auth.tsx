@@ -24,7 +24,7 @@ export const signIn = async (provider: 'google' | 'apple') => {
     }
 
     // console.log('data', data)
-    const authSessionResult = await WebBrowser.openAuthSessionAsync(data.url);
+    const authSessionResult = await WebBrowser.openAuthSessionAsync(data.url, returnUrl);
 
     if (authSessionResult.type !== 'success') {
         console.log('debug authSessionResult.type is NOT a success', authSessionResult)

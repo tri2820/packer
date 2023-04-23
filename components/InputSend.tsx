@@ -2,9 +2,10 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Octicons from '@expo/vector-icons/Octicons';
 import * as React from 'react';
 import { memo, useEffect, useState } from 'react';
-import { Platform, Text, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import Animated, { Platform, Text, Pressable, StyleSheet, TouchableOpacity, View } from 'react-native';
+// import { TextInput } from 'react-native-gesture-handler';
 import { constants } from '../utils';
+import { FadeIn } from 'react-native-reanimated';
 
 const HANDLER_HEIGHT = 20;
 
@@ -35,7 +36,8 @@ function InputSend(props: any) {
         //     'Down the rabbit hole we go!' :
         (props.selectedComment ?
             `Replying to "${getQuote()}"` :
-            'Chat with Packer: How do you feel about this news?')
+            (props.focus ? 'How do you feel about this news?' : 'Chat with Packer...')
+        )
 
     const press = () => {
         // if (props.activePostIndex == 0) {
@@ -70,7 +72,7 @@ function InputSend(props: any) {
 
             {props.focus ?
                 <>
-                    <TextInput
+                    <Animated.TextInput
                         autoFocus
                         multiline
                         onBlur={blur}

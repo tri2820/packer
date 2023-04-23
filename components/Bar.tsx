@@ -50,7 +50,7 @@ function Bar(props: any) {
             - keyboard.height.value +
             (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ?
                 insets.bottom
-                - (Platform.OS == 'android' && props.navigationBarVisible ? constants.navigationBarHeight : 0)
+                - (Platform.OS == 'android' && props.navigationBarVisible ? 0 : 0)
                 : 0);
 
         return {
@@ -134,16 +134,23 @@ function Bar(props: any) {
     const gesture = Gesture
         .Pan()
         .enabled(props.app == null)
-        .activeOffsetY([-10, 10])
+        .activeOffsetY(showUserList ? [-100, 100] : [-10, 10])
+        .onBegin((e) => {
+            console.log('begin e', e)
+        })
+        .onStart((e) => {
+            console.log('start e', e)
+        })
+        // .activeOffsetX([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
             // TWO
-            const keyboardOffset = -(keyboard.height.value - insets.bottom);
-            if (keyboardOffset < newValue) {
-                _offset.value = keyboardOffset;
-                offset.value = keyboardOffset;
-                return;
-            }
+            // const keyboardOffset = -(keyboard.height.value - insets.bottom);
+            // if (keyboardOffset < newValue) {
+            //     _offset.value = keyboardOffset;
+            //     offset.value = keyboardOffset;
+            //     return;
+            // }
 
             if (minOffset <= newValue) {
                 _offset.value = newValue;
@@ -160,19 +167,22 @@ function Bar(props: any) {
 
             if (newOffset > minOffset / 2) {
                 // THREE
-                const value =
-                    keyboard.state.value == KeyboardState.OPEN
-                        || keyboard.state.value == KeyboardState.OPENING ?
-                        -(keyboard.height.value - insets.bottom +
-                            (Platform.OS == 'android' ? (props.navigationBarVisible ? constants.navigationBarHeight : -32) : 0)
-                        )
-                        : 0;
+                const value = 0;
+                // keyboard.state.value == 
+                // KeyboardState.OPEN
+                //     || keyboard.state.value == KeyboardState.OPENING ?
+                //     -(keyboard.height.value - insets.bottom +
+                //         (Platform.OS == 'android' ? (props.navigationBarVisible ? constants.navigationBarHeight : -32) : 0)
+                //     )
+                //     : 0;
                 _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
-                if (value == 0) {
-                    runOnJS(setUserListMode)('normal')
-                    if (props.user === null) runOnJS(props.setSelectedComment)(null)
-                }
+                // if (value == 0) {
+                // changeState();
+                runOnJS(changeState)('minimize')
+                runOnJS(setUserListMode)('normal')
+                if (props.user === null) runOnJS(props.setSelectedComment)(null)
+                // }
                 return;
             }
 
@@ -230,7 +240,9 @@ function Bar(props: any) {
                         props.mode == 'comment' ? '#272727' : '#151316',
                     height: HEIGHT
                 }, styles.sheet,
-                    barStyles]}
+                    barStyles,
+                    // { backgroundColor: 'red' }
+                ]}
                 >
                     {
                         props.user === null && <MemoSignInSection
@@ -253,7 +265,9 @@ function Bar(props: any) {
 
                     {
                         <Animated.View
-                            style={[styles.inputbar, inputStyles]}
+                            style={[styles.inputbar, inputStyles,
+                                // { backgroundColor: 'yellow' }
+                            ]}
                         >
                             <View style={styles.input}>
                                 {/* Close Button */}
@@ -376,6 +390,7 @@ const styles = StyleSheet.create({
         alignItems: 'flex-start'
     },
     inputHeader: {
+        // backgroundColor: 'blue',
         height: '100%',
         width: '100%',
         flexDirection: 'row',

@@ -18,7 +18,7 @@ import WebView, { WebViewMessageEvent } from 'react-native-webview';
 import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { addCommentsToPost, calcStatusBarColor, constants, Mode, sharedAsyncState, updateCommentsOfPost } from './utils';
+import { addCommentsToPost, calcStatusBarColor, constants, Mode, scaledown, sharedAsyncState, updateCommentsOfPost } from './utils';
 // @ts-ignore
 import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
 // @ts-ignore
@@ -31,6 +31,7 @@ import * as SplashScreen from 'expo-splash-screen';
 // @ts-ignore
 import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
 import { MenuProvider } from 'react-native-popup-menu';
+import { scaleup } from './utils';
 
 
 SplashScreen.preventAutoHideAsync();
@@ -51,15 +52,23 @@ function Main(props: any) {
   const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
   const wallref = useRef<any>(undefined);
 
-  useEffect(() => {
-    if (props.app !== null) return;
-    setWebviewBackgroundColor('rgb(0,0,0)');
-    setStatusBarStyle('light')
+  const updateAndroidBarsColor = () => {
     if (Platform.OS == 'ios') return;
     const color = props.mode == 'comment' ? '#272727' : '#151316';
     NavigationBar.setBackgroundColorAsync(color);
     setStatusBarBackgroundColor(color, false);
+  }
+
+  useEffect(() => {
+    if (props.app !== null) return;
+    setWebviewBackgroundColor('rgb(0,0,0)');
+    setStatusBarStyle('light')
+    updateAndroidBarsColor();
   }, [props.app])
+
+  useEffect(() => {
+    updateAndroidBarsColor();
+  }, [])
 
 
   const onMessage = (event: WebViewMessageEvent) => {

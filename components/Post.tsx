@@ -243,7 +243,7 @@ function Post(props: any) {
         height: props.height
     }}>
         {
-            props.scrolledOn
+            props.shouldActive
             &&
             <FlatList
                 // See, for windowSize, if I set this to a number, 2 for example, there are comments at the end not rendered.

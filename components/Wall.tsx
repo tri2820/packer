@@ -4,7 +4,7 @@ import { memo, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { constants } from '../utils';
+import { constants, scaledown } from '../utils';
 import { MemoPost } from './Post';
 
 const theEmptyList: any[] = [];
@@ -46,7 +46,7 @@ function WelcomePost(props: any) {
 
                 <Text style={{
                     color: 'white',
-                    fontSize: 48,
+                    fontSize: scaledown(48),
                     fontFamily: 'Rubik_900Black',
                 }}>PACKER</Text>
                 <View style={{
@@ -67,7 +67,7 @@ function WelcomePost(props: any) {
                             }} />
                         <Text style={{
                             color: '#c2c2c2',
-                            fontSize: 26,
+                            fontSize: scaledown(26),
                             marginLeft: 4,
                             marginRight: 20
                         }}>
@@ -77,7 +77,7 @@ function WelcomePost(props: any) {
                     <Text style={{
                         marginVertical: 8,
                         color: '#c2c2c2',
-                        fontSize: 20,
+                        fontSize: scaledown(20),
                         // textAlign: 'center'
                     }}>
                         Who will be affected by the new tax reform?
@@ -85,14 +85,14 @@ function WelcomePost(props: any) {
                     <Text style={{
                         marginVertical: 8,
                         color: '#c2c2c2',
-                        fontSize: 20,
+                        fontSize: scaledown(20),
                         // textAlign: 'center'
                     }}>What factors contributed to the record profits?
                     </Text>
                     <Text style={{
                         marginVertical: 8,
                         color: '#c2c2c2',
-                        fontSize: 20,
+                        fontSize: scaledown(20),
                         // textAlign: 'center'
                     }}>How can individuals contribute to supporting homeless shelters in their area?
                     </Text>

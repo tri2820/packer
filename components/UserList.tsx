@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { memo, useState } from 'react';
-import { FlatList, Alert, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
@@ -143,7 +143,8 @@ function UserList(props: any) {
                                 }</Text>
                         </View>
 
-                        <FlatList
+                        <Animated.FlatList
+                            overScrollMode={'always'}
                             horizontal={false}
                             showsVerticalScrollIndicator={false}
                             // listKey='userList'
@@ -153,7 +154,7 @@ function UserList(props: any) {
                                 // backgroundColor: 'red'
                                 // overflow: 'hidden'
                             }}
-                            data={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]}
+                            data={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
                             // keyExtractor={keyExtractor}
                             renderItem={() =>
                                 <View style={styles.discussion} />
