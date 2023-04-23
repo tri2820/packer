@@ -140,7 +140,7 @@ function Post(props: any) {
             return;
         }
 
-        comments.length > 0 && ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+        comments.length > 0 && ref.current?.scrollToOffset({ offset: constants.height / 3 });
     }, [props.mode])
 
     const onRefresh = React.useCallback(() => {

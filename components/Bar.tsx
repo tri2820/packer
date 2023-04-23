@@ -135,12 +135,6 @@ function Bar(props: any) {
         .Pan()
         .enabled(props.app == null)
         .activeOffsetY(showUserList ? [-100, 100] : [-10, 10])
-        .onBegin((e) => {
-            console.log('begin e', e)
-        })
-        .onStart((e) => {
-            console.log('start e', e)
-        })
         // .activeOffsetX([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;

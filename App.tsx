@@ -48,7 +48,6 @@ const INJECTED_JAVASCRIPT = `(function() {
 function Main(props: any) {
   const insets = useSafeAreaInsets();
   const [navigationBarVisible, setNavigationBarVisible] = useState(false);
-  const minBarHeight = 60 + (Platform.OS == 'android' ? (navigationBarVisible ? 0 : 32) : 0);
   const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
   const wallref = useRef<any>(undefined);
 
@@ -119,32 +118,22 @@ function Main(props: any) {
       runOnJS(props.setMode)('normal')
     });
 
-  // Cannot make status bar translucent on android :(
-  // Maybe check if status bar is translucent?
-
-
-  const [wallHeight, setWallHeight] = useState(constants.height
+  // Note: Some Android treats the bottom handle as navigationBar, so navigationBarVisible is true
+  // In thoses cases, this still works as intended
+  const minBarHeight = 60 + (Platform.OS == 'android' && !navigationBarVisible ? 32 : 0);
+  const wallHeight = constants.height
     - (
       Platform.OS == 'android'
-        ? constants.statusBarHeight +
-        (navigationBarVisible ? constants.navigationBarHeight : 0)
+        ? constants.statusBarHeight + Math.max((navigationBarVisible ? constants.navigationBarHeight : 0), insets.bottom)
         : 0
     )
-    - insets.bottom
-    - minBarHeight)
-
-  useEffect(() => {
-    const wallHeight = constants.height
-      - (
-        Platform.OS == 'android'
-          ? constants.statusBarHeight +
-          (navigationBarVisible ? constants.navigationBarHeight : 0)
-          : 0
-      )
-      - insets.bottom
-      - minBarHeight;
-    setWallHeight(wallHeight)
-  }, [navigationBarVisible, insets.bottom])
+    - (
+      Platform.OS == 'ios'
+        ? insets.bottom
+        : 0
+    )
+    - minBarHeight;
+  console.log('debug wallheight', wallHeight, insets.bottom, navigationBarVisible)
 
   useEffect(() => {
     (async () => {
@@ -190,7 +179,7 @@ function Main(props: any) {
               position: 'absolute',
               // Catch transparency
               backgroundColor: 'black',
-              height: constants.height - insets.bottom - minBarHeight,
+              height: wallHeight,
               width: constants.width,
             }}
             // entering={FadeIn.duration(300)}

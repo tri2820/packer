@@ -17,6 +17,7 @@ function UserList(props: any) {
         const signedOut = await signOut();
         if (!signedOut) return;
         props.setUser(null);
+        props.setMode('normal');
     }
 
     const createDeleteConfirmationAlert = () =>
