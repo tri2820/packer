@@ -95,7 +95,7 @@ function Comment(props: any) {
     }, [])
 
     const select = () => {
-        props.setSelectedComment(props.comment);
+        props.setSelectedComment({ ...props.comment });
     }
 
     // console.log('debug render comment', props.comment.id)
