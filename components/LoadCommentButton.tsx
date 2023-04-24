@@ -6,27 +6,32 @@ import { Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-nat
 function LoadCommentButton(props: any) {
     const [visible, setVisible] = useState(true);
 
-    const load = () => {
+    const load = async () => {
+        console.log('debug load false');
         setVisible(false);
-        props.requestComments(props.ofId);
+        await props.requestComments(props.ofId);
+        setVisible(true);
     }
 
     return visible
         ? <TouchableOpacity style={
             {
-                marginLeft: props.level <= 1 ? 0 : (16 * props.level) + props.level == 0 ? 0 : (props.level == 1 ? 2 : 18),
-                backgroundColor: props.mode == 'comment' ? '#2e2e2e' : '#1e1d21',
+                marginLeft: props.level == 16 ? 0 : 36 + (20 * (props.level - 1)),
+                // backgroundColor: props.mode == 'comment' ? '#2e2e2e' : '#1e1d21',
                 marginBottom: 8,
-                alignSelf: 'center',
+                flex: 1,
+                marginRight: 'auto',
+                // alignSelf: 'center',
                 paddingVertical: 8,
-                paddingHorizontal: 16,
+                paddingRight: 16,
                 borderRadius: 4
 
             }}
             onPress={load}
         >
             <Text style={styles.text}>
-                {props.num} more replies
+                {props.num} replies
+                {/* {props.ofId} */}
             </Text>
         </TouchableOpacity>
         :

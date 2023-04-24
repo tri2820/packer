@@ -116,6 +116,7 @@ function WelcomePost(props: any) {
 }
 const MemoWelcomePost = memo(WelcomePost);
 const analytics = async (user_id: any, post_id: any) => {
+    if (__DEV__) return;
     const { data, error } = await supabaseClient.from('history').insert({
         user_id,
         post_id

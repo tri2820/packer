@@ -126,6 +126,9 @@ function Comment(props: any) {
                             <Text style={styles.author_name}>
                                 {props.comment.author_name}
                             </Text>
+                            {/* <Text style={styles.author_name}>
+                                {props.comment.id}
+                            </Text> */}
 
                             {!props.hidden
                                 ? <Text style={styles.created_at}> • {created_at}</Text>

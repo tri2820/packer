@@ -109,8 +109,8 @@ const _requestComments = async (sharedAsyncState: any, post_id: string, parent_i
     }
 
     const offset = sharedAsyncState[`offset/${key}`] ?? 0;
-    const num_request = offset == 0 ? 5 : 3;
-    const num_children_request = 3;
+    const num_request = offset == 0 ? 5 : (parent_id ? 2 : 3);
+    const num_children_request = parent_id ? 0 : 2;
     if (offset >= count) {
         // console.log(`had enough of ${post_id}.${parent_id}`, offset, count);
         return 'had enough';
@@ -199,9 +199,10 @@ export const toUIList = (comments: any[], hiddenCommentIds: any[]): any => {
     let to_add_flag = true;
     let result: any[] = [];
     for (let i = 0; i < comments.length; i++) {
-        if (comments[i].level <= button_stack.at(-1)?.level) {
+        while (comments[i].level <= button_stack.at(-1)?.level) {
             const button = button_stack.pop();
-            if (button) result.push(button);
+            console.log('@', button, hiding_for_level)
+            if (button && button.level != hiding_for_level) result.push(button);
         }
 
         if (comments[i].level <= hiding_for_level) {
