@@ -51,7 +51,7 @@ export type Mode = 'normal' | 'comment';
 
 
 export const loadingView = () => <View style={{
-    backgroundColor: 'black',
+    backgroundColor: '#212121',
     height: '100%',
     width: '100%',
 }} />

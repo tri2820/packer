@@ -17,17 +17,12 @@ import * as Haptics from 'expo-haptics';
 
 function ListHeader(props: any) {
     const insets = useSafeAreaInsets();
-    const [videoPlaying, setVideoPlaying] = useState(false);
-
-    useEffect(() => {
-        setVideoPlaying(props.scrolledOn);
-    }, [props.scrolledOn])
 
     return <View style={{
         paddingTop: insets.top
     }}>
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
-        <VideoPlayer videoPlaying={videoPlaying} source_url={props.post.source_url} />
+        <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
         <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
         <KeyTakeaways content={props.post.keytakeaways} />
         {
