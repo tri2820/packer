@@ -4,8 +4,9 @@ import { memo, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { constants, scaledown } from '../utils';
+import { constants, scaledown, sharedAsyncState } from '../utils';
 import { MemoPost } from './Post';
+import { supabaseClient } from '../supabaseClient';
 
 const theEmptyList: any[] = [];
 const theEmptyMode = 'normal';
@@ -114,6 +115,17 @@ function WelcomePost(props: any) {
     )
 }
 const MemoWelcomePost = memo(WelcomePost);
+const analytics = async (user_id: any, post_id: any) => {
+    const { data, error } = await supabaseClient.from('history').insert({
+        user_id,
+        post_id
+    });
+    console.log('debug data', data);
+    if (error) {
+        console.warn('Error Analytics', error);
+        return;
+    }
+}
 
 function Wall(props: any) {
     const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
@@ -124,6 +136,11 @@ function Wall(props: any) {
 
         const scrolledOn = props.activePostIndex == index;
         const shouldActive = props.activePostIndex == index || props.activePostIndex + 1 == index;
+        // console.log('debug wall user', props.user);
+        if (scrolledOn && props.user && !sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`]) {
+            sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`] = true
+            analytics(props.user.id, item.id);
+        }
 
         return <MemoPost
             key={item.id}

@@ -162,6 +162,7 @@ function Main(props: any) {
       <GestureDetector gesture={gesture}>
         <Animated.View style={animatedStyles}>
           <Wall
+            user={props.user}
             app={props.app}
             setApp={props.setApp}
             wallref={wallref}

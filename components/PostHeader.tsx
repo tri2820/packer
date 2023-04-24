@@ -67,15 +67,15 @@ function PostHeader(props: any) {
                         </Text>
 
                         <View style={styles.textheader}>
-                            {/* <Ionicons name='link' color='#A3A3A3' size={14} /> */}
+                            <Ionicons name='link' color='#A3A3A3' size={14} />
                             <Text style={styles.source}>
                                 {
                                     getSourceName(props.post.source_url)
                                 }
                             </Text>
-                            <Text style={styles.created_at}> • {
+                            {/* <Text style={styles.created_at}> • {
                                 moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
-                            }</Text>
+                            }</Text> */}
 
                             <View style={styles.contentmenu}>
                                 <MemoContentMenu
@@ -111,7 +111,7 @@ const styles = StyleSheet.create({
     source: {
         color: '#A3A3A3',
         fontSize: 12,
-        // marginLeft: 4
+        marginLeft: 4
         // backgroundColor: 'red'
     },
     textheader: {
