@@ -38,6 +38,12 @@ function KeyTakeaways(props: any) {
     });
 
     return <Animated.View style={longPressedStyle}>
+        <View style={{
+            borderBottomColor: '#3C3D3F',
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            marginHorizontal: 16
+        }} />
+
         <Pressable
             onPress={() => {
                 setShowKeyTakeaways(!showKeyTakeaways);
@@ -48,11 +54,6 @@ function KeyTakeaways(props: any) {
                 marginBottom: 12,
             }}
         >
-            <View style={{
-                borderBottomColor: '#3C3D3F',
-                borderBottomWidth: StyleSheet.hairlineWidth,
-                // marginHorizontal: 16
-            }} />
 
             <View style={{
                 marginTop: 12,

@@ -142,11 +142,9 @@ function Wall(props: any) {
             sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`] = true
             analytics(props.user.id, item.id);
         }
-
         return <MemoPost
+            offsetZoomStyles={props.offsetZoomStyles}
             key={item.id}
-            setApp={props.setApp}
-            app={props.app}
             index={index}
             mode={scrolledOn ? props.mode : 'normal'}
             height={props.height}

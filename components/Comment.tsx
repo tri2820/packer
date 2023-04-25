@@ -71,7 +71,7 @@ function Comment(props: any) {
         .fromNow()
 
     const onLinkPress = (target: string) => {
-        props.setApp({ url: target });
+        props.openLink(target);
     }
 
     const switchMode = () => {

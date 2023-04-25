@@ -35,13 +35,6 @@ function Bar(props: any) {
     //     inputref.current?.focus();
     // }
 
-    const animatedStyles = useAnimatedStyle(() => {
-        return {
-            transform: [
-                { scale: props.offset.value > 1 ? (2 - 1 / Math.pow(props.offset.value, 0.2)) : 1 },
-            ]
-        };
-    });
 
     const inputStyles = useAnimatedStyle(() => {
         const k = -(offset.value)
@@ -133,7 +126,7 @@ function Bar(props: any) {
 
     const gesture = Gesture
         .Pan()
-        .enabled(props.app == null)
+        .enabled(!props.isSinglePost)
         .activeOffsetY(showUserList && Platform.OS == 'android' ? [-100, 100] : [-10, 10])
         // .activeOffsetX([-10, 10])
         .onChange((e) => {
@@ -194,24 +187,10 @@ function Bar(props: any) {
         inputref.current?.blur();
     }
 
-    const closeIt = () => {
-        if (props.app) {
-            props.setApp(null);
-            return;
-        }
-
-        props.setMode('normal');
-    }
-
     const onBlur = () => {
         changeState('minimize');
     }
 
-    const open = () => {
-        Linking.openURL(props.app.url).catch(error =>
-            console.warn('An error occurred: ', error),
-        )
-    }
     useEffect(() => {
         if (props.selectedComment == null) return;
         changeState('maximize')
@@ -253,7 +232,8 @@ function Bar(props: any) {
 
                     <View style={styles.handler}>
                         {
-                            props.app == null && <View style={styles.handler_inside} />
+                            !props.isSinglePost &&
+                            <View style={styles.handler_inside} />
                         }
                     </View>
 
@@ -263,57 +243,21 @@ function Bar(props: any) {
                                 // { backgroundColor: 'yellow' }
                             ]}
                         >
-                            <View style={styles.input}>
-                                {/* Close Button */}
-                                {
-                                    (props.mode == 'comment' || props.app) &&
-                                    !focus &&
-                                    <TouchableOpacity onPress={closeIt}>
-                                        <Animated.View style={animatedStyles} >
-                                            <Ionicons name="close"
-                                                size={26}
-                                                color='#C2C2C2'
-                                                style={{
-                                                    marginRight: props.mode == 'comment' ? 8 : 0,
-                                                }} />
-                                        </Animated.View>
-                                    </TouchableOpacity>
-                                }
 
-
-                                {
-                                    props.app ?
-                                        <>
-                                            <View style={styles.sourceNameView}>
-                                                <Text style={styles.sourceName}>{
-                                                    getSourceName(props.app.url)
-                                                }
-                                                </Text>
-                                            </View>
-                                            <TouchableOpacity onPress={open}>
-                                                {
-                                                    Platform.OS == 'ios' ?
-                                                        <Ionicons name='compass-outline' size={26} color='#C2C2C2' />
-                                                        : <Ionicons name='arrow-forward-circle-outline' size={26} color='#C2C2C2' />
-                                                }
-                                            </TouchableOpacity>
-                                        </>
-
-                                        : <View style={styles.inputHeader}>
-                                            <MemoInputSend
-                                                wallref={props.wallref}
-                                                focus={focus}
-                                                onBlur={onBlur}
-                                                inputref={inputref}
-                                                selectedComment={props.selectedComment}
-                                                setSelectedComment={props.setSelectedComment}
-                                                changeState={changeState}
-                                                onSubmit={props.onSubmit}
-                                                activePostIndex={props.activePostIndex}
-                                                user={props.user}
-                                            />
-                                        </View>
-                                }
+                            <View style={styles.inputHeader}>
+                                <MemoInputSend
+                                    // wallref={props.wallref}
+                                    focus={focus}
+                                    onBlur={onBlur}
+                                    inputref={inputref}
+                                    selectedComment={props.selectedComment}
+                                    setSelectedComment={props.setSelectedComment}
+                                    changeState={changeState}
+                                    onSubmit={props.onSubmit}
+                                    activePostIndex={props.activePostIndex}
+                                    user={props.user}
+                                    setMode={props.setMode}
+                                />
                             </View>
 
                         </Animated.View>
@@ -322,7 +266,7 @@ function Bar(props: any) {
                     {
                         showUserList &&
                         props.user !== null &&
-                        <MemoUserList mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        <MemoUserList navProps={props.navProps} mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
                     }
 
                 </Animated.View>
@@ -374,9 +318,9 @@ const styles = StyleSheet.create({
         position: 'absolute',
         width: constants.width,
         borderTopWidth: StyleSheet.hairlineWidth,
-        borderTopColor: '#2A2829',
-        borderTopLeftRadius: 4,
-        borderTopRightRadius: 4,
+        borderTopColor: '#3C3D3F',
+        // borderTopLeftRadius: 4,
+        // borderTopRightRadius: 4,
     },
     input: {
         flex: 1,

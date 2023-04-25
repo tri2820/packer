@@ -1,4 +1,5 @@
 import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { memo } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
@@ -7,9 +8,17 @@ function MoreDiscussionsButton(props: any) {
     return (
         <TouchableOpacity onPress={props.onPress} style={styles.view}>
             {/* <FontAwesome5 name='expand' color='angle-double-down' size={16} /> */}
-            <FontAwesome5 name="angle-double-down" size={14} color="black" />
+
             {/* <MaterialCommunityIcons name='chevron-double-down' size={16} /> */}
             <Text style={styles.text}>See all chats</Text>
+            {/* <FontAwesome5 name="angle-double-right" size={14} color="black" /> */}
+            <Ionicons name="chevron-forward"
+                size={20}
+                color='black'
+                style={{
+                    // backgroundColor: 'red',
+                }}
+            />
         </TouchableOpacity>
     );
 }
@@ -26,13 +35,13 @@ const styles = StyleSheet.create({
         // borderColor: '#2A2829',
         // overflow: 'hidden',
         borderRadius: 24,
-        flex: 1,
+        // flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
     },
     text: {
         color: 'black',
         fontWeight: '700',
-        marginLeft: 6
+        marginLeft: 4
     }
 });

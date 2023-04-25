@@ -1,16 +1,18 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import moment from 'moment';
 import * as React from 'react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, normalizedHostname } from '../utils';
+import { constants, normalizedHostname, sharedAsyncState } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
-import * as Sentry from 'sentry-expo';
+
+
+
 
 
 function PostHeader(props: any) {
     const longPressed = useSharedValue(false);
+    const [bookmarked, setBookmarked] = useState(sharedAsyncState[`bookmark/${props.post.id}`]);
 
     const longPressedStyle = useAnimatedStyle(() => {
         return {
@@ -32,24 +34,25 @@ function PostHeader(props: any) {
         longPressed.value = false;
     }, [])
 
-    return (
-        <Animated.View style={longPressedStyle}>
-            <TouchableOpacity
-                style={styles.touch}
-                onPress={() => {
-                    props.setApp({ url: props.post.source_url })
-                    // Sentry.Native.nativeCrash()
-                }}
-                onLongPress={openMenu}
-            >
+    const toggleBookmark = () => {
+        sharedAsyncState[`bookmark/${props.post.id}`] = !sharedAsyncState[`bookmark/${props.post.id}`];
+        setBookmarked(sharedAsyncState[`bookmark/${props.post.id}`]);
+    }
 
-                <View style={{
-                    // width: constants.width - 32,
-                    // height: constants.width / 4 * 2,
-                    // marginBottom: 16,
-                    // borderRadius: 8
-                    // backgroundColor: 'red'
-                }}>
+
+    return (
+        <>
+            <Animated.View style={longPressedStyle}>
+                <TouchableOpacity
+                    style={styles.touch}
+                    onPress={() => {
+                        props.openLink(props.post.source_url)
+                    }}
+                    onLongPress={openMenu}
+                >
+
+
+
                     {props.imageLoaded && <Animated.Image
                         style={styles.image}
                         source={{
@@ -59,15 +62,13 @@ function PostHeader(props: any) {
                     />
                     }
 
-                    <View style={{
-                        paddingVertical: 8
-                    }}>
-                        <Text style={styles.title}>
-                            {props.post.title}
-                        </Text>
 
+                    <View style={{
+                        paddingTop: 8,
+                        paddingBottom: 4
+                    }}>
                         <View style={styles.textheader}>
-                            <Ionicons name='link' color='#A3A3A3' size={14} />
+                            {/* <Ionicons name='link' color='#A3A3A3' size={12} /> */}
                             <Text style={styles.source}>
                                 {
                                     getSourceName(props.post.source_url)
@@ -76,6 +77,7 @@ function PostHeader(props: any) {
                             {/* <Text style={styles.created_at}> • {
                                 moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
                             }</Text> */}
+
 
                             <View style={styles.contentmenu}>
                                 <MemoContentMenu
@@ -88,11 +90,64 @@ function PostHeader(props: any) {
                             </View>
 
                         </View>
-
+                        <Text style={styles.title}>
+                            {props.post.title}
+                        </Text>
                     </View>
-                </View>
-            </TouchableOpacity >
-        </Animated.View>
+
+                </TouchableOpacity >
+
+            </Animated.View>
+
+            {
+                !props.isSinglePost && <>
+                    <View style={{
+                        borderBottomColor: '#3C3D3F',
+                        borderBottomWidth: StyleSheet.hairlineWidth,
+                        marginHorizontal: 16
+                    }} />
+
+                    <TouchableOpacity
+                        onPress={toggleBookmark}
+                        style={{
+                            marginLeft: 0,
+                            marginRight: 'auto',
+                            // borderWidth: StyleSheet.hairlineWidth,
+                            // borderColor: 'white',
+                            // backgroundColor: '#323233',
+                            paddingVertical: 8,
+                            paddingHorizontal: 16,
+                            // paddingHorizontal: 12,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            // borderRadius: 16,
+                            // marginTop: 2
+                        }}
+                    >
+                        {bookmarked ?
+                            <Ionicons
+                                name="bookmark"
+                                size={14}
+                                color='#FFC542'
+                            />
+                            : <Ionicons
+                                name="bookmark-outline"
+                                size={14}
+                                color='#a3a3a3'
+                            />
+                        }
+
+                        <Text style={{
+                            marginLeft: 4,
+                            color: bookmarked ? '#FFC542' : '#a3a3a3',
+                            fontSize: 14
+                        }}>{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+                    </TouchableOpacity>
+                </>
+            }
+
+
+        </>
     );
 }
 
@@ -101,17 +156,20 @@ const styles = StyleSheet.create({
     image: {
         width: constants.width - 32,
         height: constants.width / 4 * 1.8,
-        // marginBottom: 16,
+        // paddingTop: 8,
         borderRadius: 8
     },
     touch: {
+        paddingTop: 8,
         // marginBottom: 0,
         marginHorizontal: 16
     },
     source: {
         color: '#A3A3A3',
-        fontSize: 12,
-        marginLeft: 4
+        fontSize: 10,
+        marginTop: 2,
+        marginBottom: 2,
+        // marginLeft: 4
         // backgroundColor: 'red'
     },
     textheader: {

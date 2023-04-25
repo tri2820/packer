@@ -46,7 +46,7 @@ export const MemoLoadCommentButton = memo(LoadCommentButton);
 
 const styles = StyleSheet.create({
     text: {
-        color: '#7E8084',
+        color: '#a3a3a3',
         fontWeight: '400'
     },
     loading_indicator: {

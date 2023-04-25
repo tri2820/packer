@@ -1,4 +1,16 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
+import * as Haptics from 'expo-haptics';
+import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
+import React, { memo, useCallback, useEffect, useState } from 'react';
+import { Platform, TouchableOpacity, View } from 'react-native';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Sentry from 'sentry-expo';
+import { MemoBar } from './components/Bar';
+import Wall from './components/Wall';
+import { supabaseClient } from './supabaseClient';
+import { Mode, addCommentsToPost, constants, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
@@ -6,84 +18,59 @@ Sentry.init({
   enableInExpoDevelopment: true,
   // debug: true
 });
-
-import * as Haptics from 'expo-haptics';
-import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Platform, View } from 'react-native';
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
-import WebView, { WebViewMessageEvent } from 'react-native-webview';
-import { MemoBar } from './components/Bar';
-import Wall from './components/Wall';
-import { supabaseClient } from './supabaseClient';
-import { addCommentsToPost, calcStatusBarColor, constants, Mode, scaledown, sharedAsyncState, updateCommentsOfPost } from './utils';
 // @ts-ignore
 import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fetch';
 // @ts-ignore
-import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
 import {
   Rubik_300Light, Rubik_300Light_Italic, Rubik_400Regular, Rubik_400Regular_Italic, Rubik_500Medium, Rubik_500Medium_Italic, Rubik_600SemiBold, Rubik_600SemiBold_Italic, Rubik_700Bold, Rubik_700Bold_Italic, Rubik_800ExtraBold, Rubik_800ExtraBold_Italic, Rubik_900Black, Rubik_900Black_Italic, useFonts
 } from '@expo-google-fonts/rubik';
 import * as NavigationBar from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
 // @ts-ignore
+import { polyfill as polyfillEncoding } from 'react-native-polyfill-globals/src/encoding';
+// @ts-ignore
 import { polyfill as polyfillReadableStream } from 'react-native-polyfill-globals/src/readable-stream';
 import { MenuProvider } from 'react-native-popup-menu';
-import { scaleup } from './utils';
+
+import { useHeaderHeight } from '@react-navigation/elements';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { MemoPost } from './components/Post';
 
 
 SplashScreen.preventAutoHideAsync();
-
-// import AppLoading from 'expo-app-loading';
-const INJECTED_JAVASCRIPT = `(function() {
-  window.ReactNativeWebView.postMessage(JSON.stringify(
-    window.getComputedStyle( document.documentElement ,null).getPropertyValue('background-color')
-    ));
-})();`;
-// import { MenuView } from '@react-native-menu/menu';
 
 
 function Main(props: any) {
   const insets = useSafeAreaInsets();
   const [navigationBarVisible, setNavigationBarVisible] = useState(false);
-  const [webviewBackgroundColor, setWebviewBackgroundColor] = useState('rgba(0, 0, 0, 0)')
-  const wallref = useRef<any>(undefined);
+
+  // const wallref = useRef<any>(undefined);
+  const isSinglePost = props.navProps.route.params?.singlePostId;
+  const mode = isSinglePost ? 'comment' : props.mode;
+  const setMode = isSinglePost ? theEmptyFunction : props.setMode;
 
   const updateAndroidBarsColor = () => {
     if (Platform.OS == 'ios') return;
-    const color = props.mode == 'comment' ? '#272727' : '#151316';
+    const color = mode == 'comment' ? '#272727' : '#151316';
     NavigationBar.setBackgroundColorAsync(color);
     setStatusBarBackgroundColor(color, false);
   }
-
-  useEffect(() => {
-    if (props.app !== null) return;
-    setWebviewBackgroundColor('rgb(0,0,0)');
-    setStatusBarStyle('light')
-    updateAndroidBarsColor();
-  }, [props.app])
 
   useEffect(() => {
     updateAndroidBarsColor();
   }, [])
 
 
-  const onMessage = (event: WebViewMessageEvent) => {
-    if (props.app === null) return;
-    const backgroundColor = JSON.parse(event.nativeEvent.data);
-    console.log('backgroundColor', backgroundColor)
-    setWebviewBackgroundColor(backgroundColor)
-
-    // TODO: Android this, android that, android with translucent status bar or not
-    if (Platform.OS == 'android') return;
-    const color = calcStatusBarColor(backgroundColor);
-    console.log('color', color)
-    setStatusBarStyle(color)
-  }
 
   const offset = useSharedValue(0);
+  const offsetZoomStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { scale: offset.value > 1 ? (2 - 1 / Math.pow(offset.value, 0.2)) : 1 },
+      ]
+    };
+  });
   const animatedStyles = useAnimatedStyle(() => {
     return {
       transform: [
@@ -93,7 +80,7 @@ function Main(props: any) {
   });
   const gesture = Gesture
     .Pan()
-    .enabled(props.mode === 'comment' || props.app !== null)
+    .enabled(!isSinglePost && (mode === 'comment'))
     .activeOffsetX([-50, 50])
     .onChange((e) => {
 
@@ -110,12 +97,7 @@ function Main(props: any) {
     .onEnd((event, success) => {
       offset.value = withSpring(0, { velocity: event.velocityX, damping: 5, mass: 0.1 });
       if (offset.value < 20) return;
-      if (props.app) {
-        runOnJS(props.setApp)(null)
-        return;
-      }
-
-      runOnJS(props.setMode)('normal')
+      runOnJS(setMode)('normal')
     });
 
   // Note: Some Android treats the bottom handle as navigationBar, so navigationBarVisible is true
@@ -132,7 +114,9 @@ function Main(props: any) {
         ? insets.bottom
         : 0
     )
-    - minBarHeight;
+    - minBarHeight
+    - useHeaderHeight()
+    ;
   console.log('debug wallheight', wallHeight, insets.bottom, navigationBarVisible)
 
   useEffect(() => {
@@ -151,84 +135,73 @@ function Main(props: any) {
 
   if (!props.fontsLoaded || props.posts.length <= 1) return null;
 
+  // console.log('navProps', props.navProps)
+
   return (
-    <View
-      onLayout={onLayoutRootView}
-      style={{
-        height: constants.height,
-        width: constants.width,
-        backgroundColor: 'black'
-      }}>
-      <GestureDetector gesture={gesture}>
-        <Animated.View style={animatedStyles}>
-          <Wall
-            user={props.user}
-            app={props.app}
-            setApp={props.setApp}
-            wallref={wallref}
-            setSelectedComment={props.setSelectedComment}
-            setMode={props.setMode}
-            requestPost={props.requestPost}
-            posts={props.posts}
-            mode={props.mode}
-            activePostIndex={props.activePostIndex}
-            setActivePostIndex={props.setActivePostIndex}
-            height={wallHeight}
-          />
-          {
-            props.app && <View style={{
-              position: 'absolute',
-              // Catch transparency
-              backgroundColor: 'black',
-              height: wallHeight,
-              width: constants.width,
-            }}
-            // entering={FadeIn.duration(300)}
-            // exiting={FadeOut.duration(300)}
-            >
-              <WebView
-                domStorageEnabled={!__DEV__}
-                sharedCookiesEnabled={!__DEV__}
-                containerStyle={{
-                  paddingTop: insets.top,
-                  backgroundColor: webviewBackgroundColor
-                }}
-                decelerationRate='normal'
-                source={{ uri: props.app.url }}
-                onNavigationStateChange={(navState) => {
-                  props.setApp({ url: navState.url })
-                }}
-                mediaPlaybackRequiresUserAction={true}
-                allowsInlineMediaPlayback={true}
-                onMessage={onMessage}
-                injectedJavaScript={INJECTED_JAVASCRIPT}
-                autoManageStatusBarEnabled={false}
-              />
-            </View>
-          }
+    <GestureHandlerRootView>
+      <View
+        onLayout={onLayoutRootView}
+        style={{
+          height: constants.height,
+          width: constants.width,
+          backgroundColor: 'black'
+        }}>
+        <GestureDetector gesture={gesture}>
+          <Animated.View style={animatedStyles}>
+            {
+              isSinglePost ?
+                <MemoPost
+                  isSinglePost
+                  mode={mode}
+                  height={wallHeight}
+                  post={{
+                    id: '3032e1df-1f25-58fa-ad64-d8b59f3d5364',
+                    source_url: 'https://cs.uwaterloo.ca/~csk/hat/',
+                    title: 'An Aperiodic Monotile',
+                    author_name: 'panic',
+                    keytakeaways: ''
+                  }}
+                  shouldActive={true}
+                  scrolledOn={true}
+                  setSelectedComment={() => { }}
+                  setMode={setMode}
+                /> :
+                <Wall
+                  offsetZoomStyles={offsetZoomStyles}
+                  user={props.user}
+                  // wallref={wallref}
+                  setSelectedComment={props.setSelectedComment}
+                  setMode={setMode}
+                  requestPost={props.requestPost}
+                  posts={props.posts}
+                  mode={mode}
+                  activePostIndex={props.activePostIndex}
+                  setActivePostIndex={props.setActivePostIndex}
+                  height={wallHeight}
+                />
+            }
+            <MemoBar
+              isSinglePost={props.navProps.route.params?.singlePostId}
+              navProps={props.navProps}
+              activePostIndex={props.activePostIndex}
+              onSubmit={props.onSubmit}
+              // wallref={wallref}
+              navigationBarVisible={navigationBarVisible}
+              mode={mode}
+              setMode={setMode}
+              setSelectedComment={props.setSelectedComment}
+              selectedComment={props.selectedComment}
+              user={props.user}
+              setUser={props.setUser}
+              minBarHeight={minBarHeight}
+              offset={offset}
+              wallHeight={wallHeight}
+            />
 
-          <MemoBar
-            app={props.app}
-            activePostIndex={props.activePostIndex}
-            setApp={props.setApp}
-            onSubmit={props.onSubmit}
-            wallref={wallref}
-            navigationBarVisible={navigationBarVisible}
-            mode={props.mode}
-            setMode={props.setMode}
-            setSelectedComment={props.setSelectedComment}
-            selectedComment={props.selectedComment}
-            user={props.user}
-            setUser={props.setUser}
-            minBarHeight={minBarHeight}
-            offset={offset}
-            wallHeight={wallHeight}
-          />
-
-        </Animated.View>
-      </GestureDetector>
-    </View>
-
+          </Animated.View>
+        </GestureDetector>
+      </View>
+    </GestureHandlerRootView>
   )
 }
 const MemoMain = memo(Main);
@@ -247,6 +220,45 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   data.forEach((p: any) => {
     sharedAsyncState[`count/${p.id}`] = p.comment_count;
   })
+}
+
+const Stack = createNativeStackNavigator();
+
+function MyStack(props: any) {
+  const TheMain = (navProps: any) => {
+    return <MemoMain {...props} navProps={navProps} />
+  };
+
+  return (
+    <Stack.Navigator>
+      <Stack.Screen
+        name="Main"
+        options={{ headerShown: false }}
+        children={TheMain}
+      />
+      <Stack.Screen
+        name="SinglePost"
+        options={{
+          title: 'Bookmark',
+          headerStyle: {
+            backgroundColor: '#272727',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontFamily: 'Rubik_600SemiBold'
+          },
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={() => alert('This is a button!')}
+            >
+              <Ionicons name="bookmark" size={24} color='#FFC542' />
+            </TouchableOpacity>
+          ),
+        }}
+        children={TheMain}
+      />
+    </Stack.Navigator>
+  );
 }
 
 function App() {
@@ -271,16 +283,8 @@ function App() {
   const [activePostIndex, setActivePostIndex] = useState(0);
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>('normal');
-  const [app, _setApp] = useState<null | { url: string }>(null);
 
-  const setApp = useCallback((a: null | { url: string }) => {
-    _setApp((app) => {
-      if (app == null) {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
-      }
-      return a
-    })
-  }, [])
+
 
   useEffect(() => {
     // console.log('props.user changed', props.user)
@@ -455,17 +459,17 @@ function App() {
 
   console.log('debug big re-render');
   return (
-    // <MenuProvider >
     <SafeAreaProvider>
       <MenuProvider>
-        <GestureHandlerRootView>
-          <MemoMain
+
+        <NavigationContainer>
+
+          <MyStack
             fontsLoaded={fontsLoaded}
             selectedComment={selectedComment}
             activePostIndex={activePostIndex}
             user={user}
             mode={mode}
-            app={app}
             posts={posts}
             onSubmit={memoOnSubmit}
             setSelectedComment={setSelectedComment}
@@ -473,12 +477,10 @@ function App() {
             setActivePostIndex={setActivePostIndex}
             requestPost={memoRequestPost}
             setMode={setMode}
-            setApp={setApp}
           />
-        </GestureHandlerRootView>
+        </NavigationContainer>
       </MenuProvider>
     </SafeAreaProvider>
-    // </MenuProvider>
   );
 
 }

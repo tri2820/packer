@@ -29,6 +29,7 @@ function InputSend(props: any) {
         setText('');
         props.setSelectedComment(null)
         props.inputref.current?.blur();
+        props.setMode('comment');
     }
 
     const placeHolder =

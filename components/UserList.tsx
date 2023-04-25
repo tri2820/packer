@@ -134,7 +134,7 @@ function UserList(props: any) {
                             <Ionicons name="bookmark" size={14} color='#F1F1F1' />
                             <Text style={{
                                 marginLeft: 4,
-                                fontWeight: '500',
+                                // fontWeight: '500',
                                 fontSize: 16,
                                 color: '#F1F1F1',
                                 fontFamily: 'Rubik_600SemiBold'
@@ -158,7 +158,13 @@ function UserList(props: any) {
                             data={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
                             // keyExtractor={keyExtractor}
                             renderItem={() =>
-                                <View style={styles.discussion} />
+                                <TouchableOpacity onPress={() => {
+                                    props.navProps.navigation.push('SinglePost', {
+                                        singlePostId: 'what'
+                                    })
+                                }}>
+                                    <View style={styles.discussion} />
+                                </TouchableOpacity>
                             }
                         />
 

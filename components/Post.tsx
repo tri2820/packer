@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { memo, useEffect, useRef, useState } from 'react';
-import { Image, ActivityIndicator, Platform, StyleSheet, Text, View } from 'react-native';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { Image, ActivityIndicator, Platform, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -14,16 +14,26 @@ import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
 // import { Image } from 'expo-image';
 import * as Haptics from 'expo-haptics';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import Animated from 'react-native-reanimated';
+import * as WebBrowser from 'expo-web-browser';
+import { WebBrowserPresentationStyle } from 'expo-web-browser';
+
 
 function ListHeader(props: any) {
     const insets = useSafeAreaInsets();
 
     return <View style={{
-        paddingTop: insets.top
+        paddingTop: props.mode == 'normal' ? insets.top : 0
     }}>
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
-        <PostHeader setApp={props.setApp} post={props.post} imageLoaded={props.imageLoaded} />
+        <PostHeader
+            isSinglePost={props.isSinglePost}
+            openLink={props.openLink}
+            post={props.post}
+            imageLoaded={props.imageLoaded}
+        />
         <KeyTakeaways content={props.post.keytakeaways} />
         {
             sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
@@ -46,6 +56,10 @@ function Post(props: any) {
     const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
     const timer = useRef<any>(null);
     const uiList = toUIList(comments, hiddenCommentIds)
+    uiList.unshift({
+        type: 'post-header',
+        id: 'post-header'
+    })
 
     const [imageLoaded, setImageLoaded] = useState(
         (!props.post.image || props.post.image == '') ? false :
@@ -123,7 +137,9 @@ function Post(props: any) {
         console.log('debug CHECK scroll to topLevelSelfComment')
         if (comments.length <= 0) return;
         console.log('debug scroll to topLevelSelfComment')
-        ref.current?.scrollToIndex({ index: 0, viewOffset: insets.top });
+        ref.current?.scrollToIndex({
+            index: 0
+        });
         return;
     }, [topLevelSelfComment])
 
@@ -135,7 +151,7 @@ function Post(props: any) {
             return;
         }
 
-        comments.length > 0 && ref.current?.scrollToOffset({ offset: constants.height / 3 });
+        comments.length > 0 && ref.current?.scrollToOffset({ offset: constants.height / 5 });
     }, [props.mode])
 
     const onRefresh = React.useCallback(() => {
@@ -159,11 +175,20 @@ function Post(props: any) {
         }));
     }, []);
 
+    const openLink = useCallback(async (url: string) => {
+        const result = await WebBrowser.openBrowserAsync(url, {
+            presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN
+        });
+        console.log('debug browser result', result);
+    }, [])
+
     const changeModeToComment = React.useCallback(() => {
         props.setMode('comment')
     }, [])
 
     const renderItem = ({ item, index }: any) => {
+
+
         return item.type == 'load-comment-button' ?
             <MemoLoadCommentButton
                 key={item.id}
@@ -175,14 +200,29 @@ function Post(props: any) {
                 mode={props.mode}
             />
             :
-            <MemoComment
-                key={item.id}
-                hidden={hiddenCommentIds[item.id]}
-                comment={item}
-                setApp={props.setApp}
-                setSelectedComment={props.setSelectedComment}
-                toggle={toggle}
-            />
+            item.type == 'post-header' ?
+                <ListHeader
+                    key={item.id}
+                    isSinglePost={props.isSinglePost}
+                    index={props.index}
+                    imageLoaded={imageLoaded}
+                    openLink={openLink}
+                    scrolledOn={props.scrolledOn}
+                    shouldActive={props.shouldActive}
+                    post={props.post}
+                    numTopLevelComments={numTopLevelComments}
+                    setMode={props.setMode}
+                    mode={props.mode}
+                // timesLoaded={timesLoaded}
+                /> :
+                <MemoComment
+                    key={item.id}
+                    hidden={hiddenCommentIds[item.id]}
+                    comment={item}
+                    openLink={openLink}
+                    setSelectedComment={props.setSelectedComment}
+                    toggle={toggle}
+                />
     }
 
     const onScroll = (event: any) => {
@@ -194,53 +234,88 @@ function Post(props: any) {
     }
 
     const keyExtractor = (item: any) => item.id
-    const header = <ListHeader
-        index={props.index}
-        imageLoaded={imageLoaded}
-        setApp={props.setApp}
-        scrolledOn={props.scrolledOn}
-        shouldActive={props.shouldActive}
-        post={props.post}
-        numTopLevelComments={numTopLevelComments}
-        setMode={props.setMode}
-    // timesLoaded={timesLoaded}
-    />
-    const refresh = Platform.OS == 'android' ? undefined : <RefreshControl
+    const refresh = props.isSinglePost || Platform.OS == 'android' ? undefined : <RefreshControl
         refreshing={refreshing}
         onRefresh={onRefresh}
         colors={['transparent']}
         progressBackgroundColor='transparent'
         tintColor={'transparent'}
     />
-    const footer =
-        sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
-            !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
-                props.numTopLevelComments == 0)
-            ? <View style={{
-                marginTop: 20
+    const footer = sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
+        !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
+            props.numTopLevelComments == 0)
+        ? <View style={{
+            marginTop: 20,
+            paddingBottom: 16
+            // alignSelf: 'stretch'
+        }}>
+            <ActivityIndicator
+                style={styles.loading_indicator}
+                size="small"
+            />
+            <Text style={{
+                color: '#A3A3A3',
+                alignSelf: 'center'
             }}>
-                <ActivityIndicator
-                    style={styles.loading_indicator}
-                    size="small"
-                />
-                <Text style={{
-                    color: '#A3A3A3',
-                    alignSelf: 'center'
-                }}>
-                    Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
-                </Text>
-            </View> : undefined
+                Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
+            </Text>
+        </View> : undefined
 
     console.log('debug render post', props.index)
 
+    const nav = () => props.mode == 'comment' && !props.isSinglePost ? <View style={{
+        paddingTop: props.isSinglePost ? 0 : insets.top,
+        paddingBottom: 8,
+        // marginBottom: 8,
+        backgroundColor: '#272727',
+        borderBottomColor: '#3C3D3F',
+        borderBottomWidth: StyleSheet.hairlineWidth,
+    }}>
+        <TouchableOpacity onPress={() => {
+            props.setMode('normal')
+        }} style={{
+            flexDirection: 'row',
+            alignItems: 'center'
+        }}>
+            <Animated.View style={props.offsetZoomStyles}>
+                <Ionicons name="chevron-back-sharp"
+                    size={26}
+                    color='white'
+                    style={{
+                        marginLeft: 8
+                    }} />
+            </Animated.View>
+            <Text style={{
+                color: 'white',
+                // fontFamily: 'Rubik_400Regular',
+                fontSize: 16
+            }}>Back</Text>
+        </TouchableOpacity>
+    </View> : null
+
     return <View style={{
-        backgroundColor: props.mode == 'comment' ? '#272727' : '#151316',
+        backgroundColor: (props.mode == 'normal' || props.isSinglePost) ? '#151316' : '#272727',
         height: props.height
     }}>
+        <View
+            style={{
+                position: 'absolute',
+                bottom: 0,
+                height: constants.height / 2,
+                width: '100%',
+                backgroundColor: '#151316'
+            }}
+        />
+
         {
             props.shouldActive
             &&
             <FlatList
+                contentContainerStyle={{
+                    backgroundColor: '#151316',
+                    minHeight: props.height,
+                }}
+                stickyHeaderIndices={[0]}
                 // See, for windowSize, if I set this to a number, 2 for example, there are comments at the end not rendered.
                 //  This might be because we have nested list (affect onEndReached also)
                 // Here it's set to 21 by default, is there a performance impact?
@@ -255,7 +330,7 @@ function Post(props: any) {
                 refreshControl={refresh}
                 scrollEventThrottle={6}
                 data={uiList}
-                onScroll={onScroll}
+                onScroll={props.isSinglePost ? undefined : onScroll}
                 // @ts-ignore
                 listKey={props.post.id}
                 onEndReached={(distanceFromEnd) => {
@@ -265,7 +340,7 @@ function Post(props: any) {
                 }}
                 keyExtractor={keyExtractor}
                 renderItem={renderItem}
-                ListHeaderComponent={header}
+                ListHeaderComponent={nav}
                 ListFooterComponent={footer}
             // style={{ backgroundColor: 'blue' }}
             />
@@ -279,12 +354,27 @@ function Post(props: any) {
                     style={styles.gradient}
                     pointerEvents='none'
                 />
-                {
-                    (comments.length > 0 || props.post.keytakeaways) && props.shouldActive &&
-                    <View style={styles.more_discussion_view}>
+                <View style={{
+                    position: 'absolute',
+                    bottom: 12,
+                    right: 16,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1
+                }}>
+                    {/* <TouchableOpacity
+                        onPress={() => alert('This is a button!')}
+                        style={{
+                            paddingRight: 12
+                        }}
+                    >
+                        <Ionicons name="bookmark" size={24} color='white' />
+                    </TouchableOpacity> */}
+                    {
+                        (comments.length > 0 || props.post.keytakeaways) && props.shouldActive &&
                         <MemoMoreDiscussionsButton onPress={changeModeToComment} />
-                    </View>
-                }
+                    }
+                </View>
             </>
         }
     </View >
@@ -292,8 +382,7 @@ function Post(props: any) {
 
 export default Post;
 const shouldRerenderTheSame = (p: any, c: any) => {
-    return p.app == c.app
-        && p.mode == c.mode
+    return p.mode == c.mode
         && p.height == c.height
         && p.shouldActive == c.shouldActive
         && p.scrolledOn == c.scrolledOn
@@ -307,12 +396,6 @@ const styles = StyleSheet.create({
         alignSelf: 'center',
         paddingVertical: 8,
         paddingHorizontal: 16
-    },
-    more_discussion_view: {
-        position: 'absolute',
-        bottom: 12,
-        right: 16
-        // alignSelf: 'center',
     },
     gradient: {
         width: '100%',

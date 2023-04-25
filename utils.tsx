@@ -10,7 +10,7 @@ export const constants = {
     height: Dimensions.get('screen').height,
     pixelratio: PixelRatio.get(),
     navigationBarHeight: Dimensions.get('screen').height - Dimensions.get('window').height - Constants.statusBarHeight,
-    statusBarHeight: Constants.statusBarHeight
+    statusBarHeight: Constants.statusBarHeight,
 }
 
 export function scaledown(size: number) {
@@ -201,7 +201,7 @@ export const toUIList = (comments: any[], hiddenCommentIds: any[]): any => {
     for (let i = 0; i < comments.length; i++) {
         while (comments[i].level <= button_stack.at(-1)?.level) {
             const button = button_stack.pop();
-            console.log('@', button, hiding_for_level)
+            // console.log('@', button, hiding_for_level)
             if (button && button.level != hiding_for_level) result.push(button);
         }
 
@@ -755,3 +755,5 @@ export const fixText = (text: string, author_name: string) => {
     if (!text.startsWith('Packer:')) return text;
     return text.startsWith('Packer: ') ? text.slice(8) : text.slice(7)
 }
+
+export const theEmptyFunction = () => { };
