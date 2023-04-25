@@ -3,6 +3,7 @@ import Constants from 'expo-constants';
 import { Dimensions, PixelRatio, View } from "react-native";
 import { MemoNoComment } from "./components/NoComment";
 import { supabaseClient } from "./supabaseClient";
+import * as Haptics from 'expo-haptics';
 
 import url from 'url';
 export const constants = {
@@ -56,7 +57,9 @@ export const loadingView = () => <View style={{
     width: '100%',
 }} />
 
-export const sharedAsyncState: any = {};
+export const sharedAsyncState: any = {
+    bookmarks: {}
+};
 // export const toUIComments = (comments: any[], index = 0) => {
 //     if (index == comments.length) return 
 //     return [comments[index], toUIComments(comments, index + 1), { type: 'button' }]
@@ -757,3 +760,29 @@ export const fixText = (text: string, author_name: string) => {
 }
 
 export const theEmptyFunction = () => { };
+export const getSourceName = (source_url: string) => {
+    const url = new URL(source_url);
+    return normalizedHostname(url.hostname).toUpperCase();
+}
+
+export const toggleBookmark = (post: any) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    const new_value = sharedAsyncState.bookmarks[post.id] ? undefined
+        : {
+            ...post,
+            bookmark_datetime: (new Date()).toISOString()
+        };
+    sharedAsyncState.bookmarks[post.id] = new_value;
+    executeListeners(`BookmarkChangelisteners/${post.id}`);
+    return new_value
+}
+
+export const hookListeners = (key: string, f: () => void) => {
+    if (!sharedAsyncState[key]) sharedAsyncState[key] = [];
+    sharedAsyncState[key].push(f)
+}
+
+export const executeListeners = (key: string) => {
+    if (!sharedAsyncState[key]) return;
+    sharedAsyncState[key].forEach((f: () => void) => f());
+}

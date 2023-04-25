@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { constants, scaledown, sharedAsyncState } from '../utils';
-import { MemoPost } from './Post';
+import Post, { MemoPost } from './Post';
 import { supabaseClient } from '../supabaseClient';
 
 const theEmptyList: any[] = [];

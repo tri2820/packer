@@ -6,12 +6,20 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
 import { supabaseClient } from '../supabaseClient';
-import { randomNickName } from '../utils';
+import { getSourceName, randomNickName, sharedAsyncState } from '../utils';
 import * as Haptics from 'expo-haptics';
+import { useIsFocused } from '@react-navigation/native';
 
 function UserList(props: any) {
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
     const insets = useSafeAreaInsets();
+    const isFocused = useIsFocused();
+    console.log('debug UserList isFocused', isFocused);
+    const bookmarked_posts = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.bookmark_datetime)).getTime() - (new Date(a.bookmark_datetime)).getTime());
+    bookmarked_posts.length = Math.max(bookmarked_posts.length, 15);
+    const data = bookmarked_posts;
+    console.log('debug data', data)
+
     const signOutAndUpdateProfile = async () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
         const signedOut = await signOut();
@@ -155,15 +163,55 @@ function UserList(props: any) {
                                 // backgroundColor: 'red'
                                 // overflow: 'hidden'
                             }}
-                            data={[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]}
+                            data={data}
                             // keyExtractor={keyExtractor}
-                            renderItem={() =>
-                                <TouchableOpacity onPress={() => {
+                            renderItem={({ item }: any) =>
+                                <TouchableOpacity onPress={item ? () => {
                                     props.navProps.navigation.push('SinglePost', {
-                                        singlePostId: 'what'
+                                        singlePost: item
                                     })
-                                }}>
-                                    <View style={styles.discussion} />
+                                } : undefined}>
+                                    {
+                                        item ?
+                                            <View style={{
+                                                height: 60,
+                                                width: '100%',
+                                                backgroundColor: '#323233',
+                                                borderRadius: 8,
+                                                marginVertical: 8,
+                                                // borderStyle: 'dashed',
+                                                // borderWidth: 2,
+                                                borderColor: '#5D5F64',
+                                                flexDirection: 'row',
+                                                alignItems: 'center'
+                                            }}>
+                                                <View style={{
+                                                    // backgroundColor: 'red',
+                                                    paddingHorizontal: 8,
+                                                    flex: 1
+                                                }}>
+                                                    <Text style={{
+                                                        color: '#f1f1f1',
+                                                        fontSize: 16,
+                                                        fontFamily: 'Rubik_500Medium'
+                                                    }}
+                                                        numberOfLines={1}
+                                                    >
+                                                        {item.title}
+                                                    </Text>
+                                                    <Text style={{
+                                                        color: '#A3A3A3',
+                                                        fontSize: 12,
+                                                    }}
+                                                        numberOfLines={1}
+                                                    >
+                                                        {getSourceName(item.source_url)}
+                                                    </Text>
+                                                </View>
+                                            </View>
+                                            :
+                                            <View style={styles.emptyBookmark} />
+                                    }
                                 </TouchableOpacity>
                             }
                         />
@@ -273,7 +321,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: '800'
     },
-    discussion: {
+    emptyBookmark: {
         height: 60,
         width: '100%',
         // backgroundColor: 'blue',

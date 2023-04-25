@@ -1,18 +1,18 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, normalizedHostname, sharedAsyncState } from '../utils';
+import { constants, getSourceName, hookListeners, normalizedHostname, sharedAsyncState, toggleBookmark } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
-
-
-
-
 
 function PostHeader(props: any) {
     const longPressed = useSharedValue(false);
-    const [bookmarked, setBookmarked] = useState(sharedAsyncState[`bookmark/${props.post.id}`]);
+    const [bookmarked, setBookmarked] = useState(sharedAsyncState.bookmarks[props.post.id] ? true : false);
+    hookListeners(`BookmarkChangelisteners/${props.post.id}`, () => {
+        console.log('update!');
+        setBookmarked(sharedAsyncState.bookmarks[props.post.id] ? true : false)
+    })
 
     const longPressedStyle = useAnimatedStyle(() => {
         return {
@@ -20,10 +20,7 @@ function PostHeader(props: any) {
         };
     });
 
-    const getSourceName = (source_url: string) => {
-        const url = new URL(source_url);
-        return normalizedHostname(url.hostname).toUpperCase();
-    }
+
     const menuref = useRef<any>(null)
     const openMenu = () => {
         longPressed.value = true;
@@ -34,121 +31,111 @@ function PostHeader(props: any) {
         longPressed.value = false;
     }, [])
 
-    const toggleBookmark = () => {
-        sharedAsyncState[`bookmark/${props.post.id}`] = !sharedAsyncState[`bookmark/${props.post.id}`];
-        setBookmarked(sharedAsyncState[`bookmark/${props.post.id}`]);
+    const _toggleBookmark = () => {
+        toggleBookmark(props.post)
     }
 
+    console.log('debug re render this with', bookmarked)
+    return <View>
+        <Animated.View style={longPressedStyle}>
+            <TouchableOpacity
+                style={styles.touch}
+                onPress={() => {
+                    props.openLink(props.post.source_url)
+                }}
+                onLongPress={openMenu}
+            >
 
-    return (
-        <>
-            <Animated.View style={longPressedStyle}>
-                <TouchableOpacity
-                    style={styles.touch}
-                    onPress={() => {
-                        props.openLink(props.post.source_url)
+                {props.imageLoaded && <Animated.Image
+                    style={styles.image}
+                    source={{
+                        uri: props.post.image
                     }}
-                    onLongPress={openMenu}
-                >
+                    entering={FadeIn}
+                />
+                }
 
 
-
-                    {props.imageLoaded && <Animated.Image
-                        style={styles.image}
-                        source={{
-                            uri: props.post.image
-                        }}
-                        entering={FadeIn}
-                    />
-                    }
-
-
-                    <View style={{
-                        paddingTop: 8,
-                        paddingBottom: 4
-                    }}>
-                        <View style={styles.textheader}>
-                            {/* <Ionicons name='link' color='#A3A3A3' size={12} /> */}
-                            <Text style={styles.source}>
-                                {
-                                    getSourceName(props.post.source_url)
-                                }
-                            </Text>
-                            {/* <Text style={styles.created_at}> • {
+                <View style={{
+                    paddingTop: 8,
+                    paddingBottom: 4
+                }}>
+                    <View style={styles.textheader}>
+                        {/* <Ionicons name='link' color='#A3A3A3' size={12} /> */}
+                        <Text style={styles.source}>
+                            {
+                                getSourceName(props.post.source_url)
+                            }
+                        </Text>
+                        {/* <Text style={styles.created_at}> • {
                                 moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
                             }</Text> */}
 
 
-                            <View style={styles.contentmenu}>
-                                <MemoContentMenu
-                                    menuref={menuref}
-                                    post={props.post}
-                                    triggerOuterWrapper={styles.triggerOuterWrapper}
-                                    onClose={onMenuClose}
-                                    noUser
-                                />
-                            </View>
-
+                        <View style={styles.contentmenu}>
+                            <MemoContentMenu
+                                menuref={menuref}
+                                post={props.post}
+                                triggerOuterWrapper={styles.triggerOuterWrapper}
+                                onClose={onMenuClose}
+                                noUser
+                            />
                         </View>
-                        <Text style={styles.title}>
-                            {props.post.title}
-                        </Text>
+
                     </View>
+                    <Text style={styles.title}>
+                        {props.post.title}
+                    </Text>
+                </View>
 
-                </TouchableOpacity >
+            </TouchableOpacity >
 
-            </Animated.View>
+        </Animated.View>
 
-            {
-                !props.isSinglePost && <>
-                    <View style={{
-                        borderBottomColor: '#3C3D3F',
-                        borderBottomWidth: StyleSheet.hairlineWidth,
-                        marginHorizontal: 16
-                    }} />
+        <View style={{
+            borderBottomColor: '#3C3D3F',
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            marginHorizontal: 16
+        }} />
 
-                    <TouchableOpacity
-                        onPress={toggleBookmark}
-                        style={{
-                            marginLeft: 0,
-                            marginRight: 'auto',
-                            // borderWidth: StyleSheet.hairlineWidth,
-                            // borderColor: 'white',
-                            // backgroundColor: '#323233',
-                            paddingVertical: 8,
-                            paddingHorizontal: 16,
-                            // paddingHorizontal: 12,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            // borderRadius: 16,
-                            // marginTop: 2
-                        }}
-                    >
-                        {bookmarked ?
-                            <Ionicons
-                                name="bookmark"
-                                size={14}
-                                color='#FFC542'
-                            />
-                            : <Ionicons
-                                name="bookmark-outline"
-                                size={14}
-                                color='#a3a3a3'
-                            />
-                        }
-
-                        <Text style={{
-                            marginLeft: 4,
-                            color: bookmarked ? '#FFC542' : '#a3a3a3',
-                            fontSize: 14
-                        }}>{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
-                    </TouchableOpacity>
-                </>
+        <TouchableOpacity
+            onPress={_toggleBookmark}
+            style={{
+                marginLeft: 0,
+                marginRight: 'auto',
+                // borderWidth: StyleSheet.hairlineWidth,
+                // borderColor: 'white',
+                // backgroundColor: '#323233',
+                paddingVertical: 8,
+                paddingHorizontal: 16,
+                // paddingHorizontal: 12,
+                flexDirection: 'row',
+                alignItems: 'center',
+                // borderRadius: 16,
+                // marginTop: 2
+            }}
+        >
+            {bookmarked ?
+                <Ionicons
+                    name="bookmark"
+                    size={14}
+                    color='#FFC542'
+                />
+                : <Ionicons
+                    name="bookmark-outline"
+                    size={14}
+                    color='#a3a3a3'
+                />
             }
 
-
-        </>
-    );
+            <Text style={{
+                marginLeft: 4,
+                color: bookmarked ? '#FFC542' : '#a3a3a3',
+                fontSize: 14
+            }}>{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+        </TouchableOpacity>
+    </View >
+        ;
 }
 
 export default PostHeader;

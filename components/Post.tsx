@@ -18,10 +18,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import Animated from 'react-native-reanimated';
 import * as WebBrowser from 'expo-web-browser';
 import { WebBrowserPresentationStyle } from 'expo-web-browser';
+import { useIsFocused } from '@react-navigation/native';
+
 
 
 function ListHeader(props: any) {
     const insets = useSafeAreaInsets();
+
 
     return <View style={{
         paddingTop: props.mode == 'normal' ? insets.top : 0
@@ -60,7 +63,8 @@ function Post(props: any) {
         type: 'post-header',
         id: 'post-header'
     })
-
+    // const isFocused = useIsFocused();
+    // console.log('debug isFocused', isFocused)
     const [imageLoaded, setImageLoaded] = useState(
         (!props.post.image || props.post.image == '') ? false :
             (
@@ -110,6 +114,7 @@ function Post(props: any) {
     }, [])
 
     const loadComments = async () => {
+        // console.log('L')
         const key = `preloadStatus/${props.post.id}`;
         if (sharedAsyncState[key] == 'running') return;
         sharedAsyncState[key] = 'running';
@@ -120,6 +125,7 @@ function Post(props: any) {
     }
 
     useEffect(() => {
+        // console.log('A')
         if (props.shouldActive) {
             if (sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 && props.mode == 'normal') return;
             loadComments();
@@ -176,6 +182,7 @@ function Post(props: any) {
     }, []);
 
     const openLink = useCallback(async (url: string) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         const result = await WebBrowser.openBrowserAsync(url, {
             presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN
         });
@@ -186,9 +193,9 @@ function Post(props: any) {
         props.setMode('comment')
     }, [])
 
+
+
     const renderItem = ({ item, index }: any) => {
-
-
         return item.type == 'load-comment-button' ?
             <MemoLoadCommentButton
                 key={item.id}
@@ -226,6 +233,7 @@ function Post(props: any) {
     }
 
     const onScroll = (event: any) => {
+        // console.log('B')
         // Hack because onEndReached doesn't work
         const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
         const y = event.nativeEvent.contentOffset.y;
@@ -260,8 +268,6 @@ function Post(props: any) {
                 Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
             </Text>
         </View> : undefined
-
-    console.log('debug render post', props.index)
 
     const nav = () => props.mode == 'comment' && !props.isSinglePost ? <View style={{
         paddingTop: props.isSinglePost ? 0 : insets.top,
@@ -334,6 +340,7 @@ function Post(props: any) {
                 // @ts-ignore
                 listKey={props.post.id}
                 onEndReached={(distanceFromEnd) => {
+                    // console.log('D')
                     if (!props.scrolledOn) return;
                     console.log('*****************end reached', props.post.id, distanceFromEnd, props.mode)
                     loadComments();

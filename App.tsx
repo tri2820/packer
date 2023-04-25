@@ -10,7 +10,7 @@ import * as Sentry from 'sentry-expo';
 import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { Mode, addCommentsToPost, constants, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
+import { Mode, addCommentsToPost, constants, sharedAsyncState, theEmptyFunction, toggleBookmark, updateCommentsOfPost } from './utils';
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
@@ -35,7 +35,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { MemoPost } from './components/Post';
+import Post, { MemoPost } from './components/Post';
 
 
 SplashScreen.preventAutoHideAsync();
@@ -46,7 +46,7 @@ function Main(props: any) {
   const [navigationBarVisible, setNavigationBarVisible] = useState(false);
 
   // const wallref = useRef<any>(undefined);
-  const isSinglePost = props.navProps.route.params?.singlePostId;
+  const isSinglePost = props.navProps.route.params?.singlePost ? true : false;
   const mode = isSinglePost ? 'comment' : props.mode;
   const setMode = isSinglePost ? theEmptyFunction : props.setMode;
 
@@ -58,6 +58,7 @@ function Main(props: any) {
   }
 
   useEffect(() => {
+    setStatusBarStyle('light')
     updateAndroidBarsColor();
   }, [])
 
@@ -135,7 +136,7 @@ function Main(props: any) {
 
   if (!props.fontsLoaded || props.posts.length <= 1) return null;
 
-  // console.log('navProps', props.navProps)
+  console.log('navProps', props.navProps)
 
   return (
     <GestureHandlerRootView>
@@ -154,13 +155,7 @@ function Main(props: any) {
                   isSinglePost
                   mode={mode}
                   height={wallHeight}
-                  post={{
-                    id: '3032e1df-1f25-58fa-ad64-d8b59f3d5364',
-                    source_url: 'https://cs.uwaterloo.ca/~csk/hat/',
-                    title: 'An Aperiodic Monotile',
-                    author_name: 'panic',
-                    keytakeaways: ''
-                  }}
+                  post={props.navProps.route.params?.singlePost}
                   shouldActive={true}
                   scrolledOn={true}
                   setSelectedComment={() => { }}
@@ -229,6 +224,7 @@ function MyStack(props: any) {
     return <MemoMain {...props} navProps={navProps} />
   };
 
+
   return (
     <Stack.Navigator>
       <Stack.Screen
@@ -247,13 +243,7 @@ function MyStack(props: any) {
           headerTitleStyle: {
             fontFamily: 'Rubik_600SemiBold'
           },
-          headerRight: () => (
-            <TouchableOpacity
-              onPress={() => alert('This is a button!')}
-            >
-              <Ionicons name="bookmark" size={24} color='#FFC542' />
-            </TouchableOpacity>
-          ),
+          // headerRight: headerRight
         }}
         children={TheMain}
       />
