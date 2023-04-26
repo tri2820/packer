@@ -22,6 +22,9 @@
         "com.apple.developer.applesignin": [
           "Default"
         ]
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
