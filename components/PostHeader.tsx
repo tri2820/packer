@@ -3,16 +3,20 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getSourceName, hookListeners, normalizedHostname, sharedAsyncState, toggleBookmark } from '../utils';
+import { constants, getSourceName, hookListener, normalizedHostname, sharedAsyncState, toggleBookmark, unhookListener } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
 
 function PostHeader(props: any) {
     const longPressed = useSharedValue(false);
     const [bookmarked, setBookmarked] = useState(sharedAsyncState.bookmarks[props.post.id] ? true : false);
-    hookListeners(`BookmarkChangelisteners/${props.post.id}`, () => {
-        console.log('update!');
-        setBookmarked(sharedAsyncState.bookmarks[props.post.id] ? true : false)
-    })
+    useEffect(() => {
+        const key = `BookmarkChangelisteners/${props.post.id}`;
+        const mySubkey = hookListener(key, () => {
+            console.log('update!', props.post.id);
+            setBookmarked(sharedAsyncState.bookmarks[props.post.id] ? true : false)
+        })
+        return () => unhookListener(key, mySubkey)
+    }, [])
 
     const longPressedStyle = useAnimatedStyle(() => {
         return {
@@ -32,10 +36,14 @@ function PostHeader(props: any) {
     }, [])
 
     const _toggleBookmark = () => {
-        toggleBookmark(props.post)
+        if (!props.user) {
+            sharedAsyncState['barstateListener']?.();
+            return;
+        }
+        toggleBookmark(props.post, props.user)
     }
 
-    console.log('debug re render this with', bookmarked)
+    console.log('debug re render this with', bookmarked, sharedAsyncState[`BookmarkChangelisteners/${props.post.id}`])
     return <View>
         <Animated.View style={longPressedStyle}>
             <TouchableOpacity
@@ -47,7 +55,9 @@ function PostHeader(props: any) {
             >
 
                 {props.imageLoaded && <Animated.Image
-                    style={styles.image}
+                    style={[styles.image, {
+                        marginTop: props.mode == 'normal' ? 0 : 16
+                    }]}
                     source={{
                         uri: props.post.image
                     }}
@@ -143,11 +153,10 @@ const styles = StyleSheet.create({
     image: {
         width: constants.width - 32,
         height: constants.width / 4 * 1.8,
-        // paddingTop: 8,
         borderRadius: 8
     },
     touch: {
-        paddingTop: 8,
+        // paddingTop: 8,
         // marginBottom: 0,
         marginHorizontal: 16
     },

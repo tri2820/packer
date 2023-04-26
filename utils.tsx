@@ -760,12 +760,44 @@ export const fixText = (text: string, author_name: string) => {
 }
 
 export const theEmptyFunction = () => { };
-export const getSourceName = (source_url: string) => {
+export const getSourceName = (source_url: string, lower?: boolean) => {
     const url = new URL(source_url);
-    return normalizedHostname(url.hostname).toUpperCase();
+    const normed = normalizedHostname(url.hostname)
+    return lower ? normed.toLowerCase() : normed.toUpperCase();
 }
 
-export const toggleBookmark = (post: any) => {
+export const toggleBookmark = async (post: any, user: any) => {
+    const db_insert = async () => {
+        // const { data, error } = await supabaseClient.auth.getUser();
+        // if (error) {
+        //     console.warn('Cannot toggle bookmark getUser', error);
+        //     return;
+        // }
+
+        const insertResult = await supabaseClient.from('bookmarks').insert({
+            user_id: user.id,
+            post_id: post.id
+        });
+
+        console.log('debug toggle bookmark insertResult', insertResult)
+    }
+
+    const db_delete = async () => {
+        // const { data, error } = await supabaseClient.auth.getUser();
+        // if (error) {
+        //     console.warn('Cannot bookmark getUser', error);
+        //     return;
+        // }
+
+        const deleteResult = await supabaseClient.from('bookmarks').delete().match({
+            user_id: user.id,
+            post_id: post.id
+        });
+
+        console.log('debug toggle bookmark deleteResult', deleteResult)
+    }
+
+
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     const new_value = sharedAsyncState.bookmarks[post.id] ? undefined
         : {
@@ -773,16 +805,38 @@ export const toggleBookmark = (post: any) => {
             bookmark_datetime: (new Date()).toISOString()
         };
     sharedAsyncState.bookmarks[post.id] = new_value;
+
+    // if (!db_to_local) {
+    if (new_value) {
+        db_insert();
+    } else {
+        db_delete();
+    }
+    // }
+
     executeListeners(`BookmarkChangelisteners/${post.id}`);
+    console.log('sharedAsyncState.bookmarks||', Object.values(sharedAsyncState.bookmarks)
+        .map((b: any) => b?.bookmark_datetime)
+    )
     return new_value
 }
 
-export const hookListeners = (key: string, f: () => void) => {
-    if (!sharedAsyncState[key]) sharedAsyncState[key] = [];
-    sharedAsyncState[key].push(f)
+export const hookListener = (key: string, f: () => void) => {
+    if (!sharedAsyncState[key]) sharedAsyncState[key] = {};
+    const randomSubkey = `${Math.random()}`
+    sharedAsyncState[key][randomSubkey] = f;
+    // sharedAsyncState[key].push(f)
+    return randomSubkey
 }
 
 export const executeListeners = (key: string) => {
     if (!sharedAsyncState[key]) return;
-    sharedAsyncState[key].forEach((f: () => void) => f());
+    Object.values(sharedAsyncState[key]).forEach((f: any) => f());
+}
+
+
+export const unhookListener = (key: string, subkey: string) => {
+    if (!sharedAsyncState[key]) return;
+    delete sharedAsyncState[key][subkey];
+    // Object.values(sharedAsyncState[key]).forEach((f: any) => f());
 }

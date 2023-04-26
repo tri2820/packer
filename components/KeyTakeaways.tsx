@@ -65,6 +65,7 @@ function KeyTakeaways(props: any) {
                     style={{
                         width: 20,
                         height: 20,
+                        borderRadius: 2,
                     }}
                     source={require('../assets/smallicon.png')}
                 />

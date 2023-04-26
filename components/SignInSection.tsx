@@ -74,9 +74,9 @@ function SignInSection(props: any) {
                 source={require('../assets/icon.png')}
             />
 
-            <Text style={styles.text_1}>Unlock your curiosity.</Text>
+            <Text style={styles.text_1}>Intelligence made simple.</Text>
 
-            <Text style={styles.text_2}>Together with Packer.</Text>
+            <Text style={styles.text_2}>Meet Packer.</Text>
 
             <View style={styles.loginButtons}>
                 <View style={styles.loginButton}>
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     text_1: {
         marginTop: 24,
         color: 'white',
-        fontSize: scaledown(30),
+        fontSize: scaledown(26),
         // fontWeight: '700',
         alignSelf: 'center',
         textAlign: 'center',
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     },
     text_2: {
         color: 'white',
-        fontSize: scaledown(30),
+        fontSize: scaledown(26),
         // fontWeight: '700',
         alignSelf: 'center',
         textAlign: 'center',

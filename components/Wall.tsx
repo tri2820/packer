@@ -88,14 +88,15 @@ function WelcomePost(props: any) {
                         color: '#c2c2c2',
                         fontSize: scaledown(20),
                         // textAlign: 'center'
-                    }}>What factors contributed to the record profits?
+                    }}>How is Amazon's performance impacting the broader e-commerce industry?
                     </Text>
                     <Text style={{
                         marginVertical: 8,
                         color: '#c2c2c2',
                         fontSize: scaledown(20),
                         // textAlign: 'center'
-                    }}>How can individuals contribute to supporting homeless shelters in their area?
+                    }}>
+                        How can my family clothing business in California pivot towards environmentally-friendly practices?
                     </Text>
                 </View>
             </View>
@@ -153,6 +154,7 @@ function Wall(props: any) {
             scrolledOn={scrolledOn}
             setSelectedComment={props.setSelectedComment}
             setMode={props.setMode}
+            user={props.user}
         />
     }
 

@@ -1,8 +1,7 @@
-import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { Platform, TouchableOpacity, View } from 'react-native';
+import { Platform, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -10,7 +9,7 @@ import * as Sentry from 'sentry-expo';
 import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { Mode, addCommentsToPost, constants, sharedAsyncState, theEmptyFunction, toggleBookmark, updateCommentsOfPost } from './utils';
+import { Mode, addCommentsToPost, constants, executeListeners, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
@@ -35,7 +34,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 import { useHeaderHeight } from '@react-navigation/elements';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Post, { MemoPost } from './components/Post';
+import { MemoPost } from './components/Post';
 
 
 SplashScreen.preventAutoHideAsync();
@@ -82,7 +81,7 @@ function Main(props: any) {
   const gesture = Gesture
     .Pan()
     .enabled(!isSinglePost && (mode === 'comment'))
-    .activeOffsetX([-50, 50])
+    .activeOffsetX([-10, 10])
     .onChange((e) => {
 
       if (e.changeX < 0) {
@@ -160,6 +159,7 @@ function Main(props: any) {
                   scrolledOn={true}
                   setSelectedComment={() => { }}
                   setMode={setMode}
+                  user={props.user}
                 /> :
                 <Wall
                   offsetZoomStyles={offsetZoomStyles}
@@ -278,10 +278,34 @@ function App() {
 
   useEffect(() => {
     // console.log('props.user changed', props.user)
-    if (user == null) return
+
+    if (user == null) {
+      // Clear local cache
+      if (sharedAsyncState.bookmarks) {
+        Object.keys(sharedAsyncState.bookmarks).forEach((previous_user_bookmarked_post_id: string) => {
+          if (!sharedAsyncState.bookmarks[previous_user_bookmarked_post_id]) return;
+          sharedAsyncState.bookmarks[previous_user_bookmarked_post_id] = undefined;
+          executeListeners(`BookmarkChangelisteners/${previous_user_bookmarked_post_id}`);
+        })
+      }
+      return;
+    }
     // Cancel account deletion
     (async () => {
       const { error } = await supabaseClient.from('deletions').delete().eq('user_id', user.id)
+    })();
+
+    (async () => {
+      const { data, error } = await supabaseClient.rpc('get_bookmarked_posts');
+      console.log('debug bookmarks', data.map((r: any) => r.author_name), error);
+      if (error) {
+        console.warn('Cannot load bookmarks', error);
+        return;
+      }
+      data.forEach((post: any) => {
+        sharedAsyncState.bookmarks[post.id] = post;
+        executeListeners(`BookmarkChangelisteners/${post.id}`);
+      })
     })()
   }, [user])
 

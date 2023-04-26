@@ -5,7 +5,7 @@ import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View 
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { constants, normalizedHostname, scaleup } from '../utils';
+import { constants, normalizedHostname, scaleup, sharedAsyncState } from '../utils';
 import { MemoInputSend } from './InputSend';
 import { MemoSignInSection } from './SignInSection';
 import { MemoUserList } from './UserList';
@@ -35,6 +35,9 @@ function Bar(props: any) {
     //     inputref.current?.focus();
     // }
 
+    sharedAsyncState['barstateListener'] = () => {
+        changeState('maximize');
+    }
 
     const inputStyles = useAnimatedStyle(() => {
         const k = -(offset.value)

@@ -9,6 +9,7 @@ import { supabaseClient } from '../supabaseClient';
 import { getSourceName, randomNickName, sharedAsyncState } from '../utils';
 import * as Haptics from 'expo-haptics';
 import { useIsFocused } from '@react-navigation/native';
+import { Image } from 'expo-image';
 
 function UserList(props: any) {
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
@@ -18,7 +19,7 @@ function UserList(props: any) {
     const bookmarked_posts = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.bookmark_datetime)).getTime() - (new Date(a.bookmark_datetime)).getTime());
     bookmarked_posts.length = Math.max(bookmarked_posts.length, 15);
     const data = bookmarked_posts;
-    console.log('debug data', data)
+    // console.log('debug data', data)
 
     const signOutAndUpdateProfile = async () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy)
@@ -170,43 +171,66 @@ function UserList(props: any) {
                                     props.navProps.navigation.push('SinglePost', {
                                         singlePost: item
                                     })
-                                } : undefined}>
+                                } : undefined}
+                                    style={{
+                                        marginVertical: 4
+                                    }}
+                                >
                                     {
                                         item ?
                                             <View style={{
                                                 height: 60,
                                                 width: '100%',
-                                                backgroundColor: '#323233',
+                                                // backgroundColor: '#323233',
                                                 borderRadius: 8,
-                                                marginVertical: 8,
+                                                // marginVertical: 8,
                                                 // borderStyle: 'dashed',
                                                 // borderWidth: 2,
                                                 borderColor: '#5D5F64',
                                                 flexDirection: 'row',
-                                                alignItems: 'center'
+                                                // paddingHorizontal: 8,
                                             }}>
+                                                <Image
+                                                    style={{
+                                                        alignSelf: 'center',
+                                                        width: 50,
+                                                        height: 50,
+                                                        // borderRadius: 2
+                                                    }}
+                                                    source={{
+                                                        uri: item.image
+                                                    }}
+                                                    placeholder={require('../assets/empty.jpg')}
+                                                    placeholderContentFit='cover'
+                                                />
                                                 <View style={{
-                                                    // backgroundColor: 'red',
-                                                    paddingHorizontal: 8,
-                                                    flex: 1
+                                                    flex: 1,
+                                                    flexDirection: 'row',
+                                                    alignItems: 'center',
+                                                    // backgroundColor: 'red'
                                                 }}>
-                                                    <Text style={{
-                                                        color: '#f1f1f1',
-                                                        fontSize: 16,
-                                                        fontFamily: 'Rubik_500Medium'
-                                                    }}
-                                                        numberOfLines={1}
-                                                    >
-                                                        {item.title}
-                                                    </Text>
-                                                    <Text style={{
-                                                        color: '#A3A3A3',
-                                                        fontSize: 12,
-                                                    }}
-                                                        numberOfLines={1}
-                                                    >
-                                                        {getSourceName(item.source_url)}
-                                                    </Text>
+                                                    <View style={{
+                                                        marginLeft: 12,
+                                                        flex: 1
+                                                    }}>
+                                                        <Text style={{
+                                                            color: '#f1f1f1',
+                                                            fontSize: 15,
+                                                            fontFamily: 'Rubik_500Medium'
+                                                        }}
+                                                            numberOfLines={1}
+                                                        >
+                                                            {item.title}
+                                                        </Text>
+                                                        <Text style={{
+                                                            color: '#A3A3A3',
+                                                            fontSize: 12
+                                                        }}
+                                                            numberOfLines={1}
+                                                        >
+                                                            {getSourceName(item.source_url, true)}
+                                                        </Text>
+                                                    </View>
                                                 </View>
                                             </View>
                                             :
@@ -326,7 +350,7 @@ const styles = StyleSheet.create({
         width: '100%',
         // backgroundColor: 'blue',
         borderRadius: 8,
-        marginVertical: 8,
+        // marginVertical: 8,
         borderStyle: 'dashed',
         borderWidth: 2,
         borderColor: '#5D5F64'

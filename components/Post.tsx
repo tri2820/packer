@@ -32,10 +32,12 @@ function ListHeader(props: any) {
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
         <PostHeader
+            user={props.user}
             isSinglePost={props.isSinglePost}
             openLink={props.openLink}
             post={props.post}
             imageLoaded={props.imageLoaded}
+            mode={props.mode}
         />
         <KeyTakeaways content={props.post.keytakeaways} />
         {
@@ -184,7 +186,8 @@ function Post(props: any) {
     const openLink = useCallback(async (url: string) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         const result = await WebBrowser.openBrowserAsync(url, {
-            presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN
+            presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+            controlsColor: '#FFC542'
         });
         console.log('debug browser result', result);
     }, [])
@@ -209,6 +212,7 @@ function Post(props: any) {
             :
             item.type == 'post-header' ?
                 <ListHeader
+                    user={props.user}
                     key={item.id}
                     isSinglePost={props.isSinglePost}
                     index={props.index}
@@ -393,6 +397,7 @@ const shouldRerenderTheSame = (p: any, c: any) => {
         && p.height == c.height
         && p.shouldActive == c.shouldActive
         && p.scrolledOn == c.scrolledOn
+        && p.user == c.user
 }
 export const MemoPost = memo(Post
     , shouldRerenderTheSame

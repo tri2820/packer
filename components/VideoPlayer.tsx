@@ -84,7 +84,7 @@ function VideoPlayer(props: any) {
     // 560x315
     // console.log(constants.width, Math.floor(constants.width / 16 * 9))
     return <View style={{
-        paddingBottom: 4,
+        // paddingBottom: 4,
     }}>
         <YoutubePlayer
             ref={ref}
