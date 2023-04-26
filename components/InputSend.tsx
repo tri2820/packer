@@ -37,7 +37,7 @@ function InputSend(props: any) {
         //     'Down the rabbit hole we go!' :
         (props.selectedComment ?
             `Replying to "${getQuote()}"` :
-            (props.focus ? 'How do you feel about this news?' : 'Chat with Packer...')
+            (props.focus ? '"Tell me one good thing about this"' : 'Chat with Packer...')
         )
 
     const press = () => {

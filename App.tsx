@@ -403,19 +403,22 @@ function App() {
       body: JSON.stringify(body)
     })
 
-    const newId = response.headers.get("comment_id");
-    const childId = response.headers.get("child_id")
+    let newId = response.headers.get("comment_id") ?? `${Math.random()}`;
+    const childId = response.headers.get("child_id") ?? `${Math.random()}`;
     console.log('debug comment_id', newId)
     console.log('debug childId', childId)
-
-    if (!response.body || !response.ok || !childId) {
-      console.log('ERROR: response', response)
-      return
-    }
 
     updateCommentsOfPost(post_id, childPlaceholderId, 'id', childId)
     updateCommentsOfPost(post_id, childId, 'parent_id', newId)
     updateCommentsOfPost(post_id, placeholderId, 'id', newId)
+
+
+    if (!response.body || !response.ok) {
+      console.log('ERROR: response', response);
+      updateCommentsOfPost(post_id, childId, 'blinking', false);
+      updateCommentsOfPost(post_id, childId, 'content', 'Error: Packer cannot reply you, try again?');
+      return
+    }
 
     const utf8Decoder = new TextDecoder('utf-8')
 
