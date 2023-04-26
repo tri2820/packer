@@ -1,7 +1,7 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { memo, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View, Pressable } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform } from 'react-native';
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
@@ -10,6 +10,8 @@ import { getSourceName, randomNickName, sharedAsyncState } from '../utils';
 import * as Haptics from 'expo-haptics';
 import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
+import * as Application from 'expo-application';
+
 
 function UserList(props: any) {
     const [showDeleteAccount, setShowDeleteAccount] = useState(false)
@@ -245,25 +247,15 @@ function UserList(props: any) {
                         entering={FadeIn}
                         exiting={FadeOut}
                     >
-                        <View>
-                            {/* <View style={styles.header}>
-                                <Text style={styles.heading}>
-                                    Settings
-                                </Text>
 
-                                <TouchableOpacity onPress={setModeNormal} style={styles.icon} >
-                                    <Ionicons name="person-circle" size={30} color='#A3A3A3' />
-                                </TouchableOpacity>
-                            </View> */}
-
-                            <View style={styles.buttons}>
-                                <TouchableOpacity onPress={signOutAndUpdateProfile} style={[styles.button, {
-                                    marginBottom: 32
-                                }]} >
-                                    {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                                    <Text style={styles.button_text}>Sign Out</Text>
-                                </TouchableOpacity>
-                                {/* <View
+                        <View style={styles.buttons}>
+                            <TouchableOpacity onPress={signOutAndUpdateProfile} style={[styles.button, {
+                                marginBottom: 32
+                            }]} >
+                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                <Text style={styles.button_text}>Sign Out</Text>
+                            </TouchableOpacity>
+                            {/* <View
                                     style={{
                                         // marginVertical: 20,
                                         borderBottomColor: '#3C3D3F',
@@ -271,53 +263,74 @@ function UserList(props: any) {
                                     }}
                                 /> */}
 
-                                {
-                                    showDeleteAccount
-                                        ?
-                                        <>
-                                            <Pressable style={{
-                                                flexDirection: 'row',
-                                                alignItems: 'center',
-                                                marginBottom: 12
-                                            }}
-                                                onPress={() => {
-                                                    setShowDeleteAccount(false)
-                                                }}
-                                            >
-                                                <Ionicons name="chevron-down" size={20} color='#c2c2c2' />
-                                                <Text style={{
-                                                    color: '#c2c2c2'
-                                                }}>Advanced Settings</Text>
-                                            </Pressable>
-                                            <TouchableOpacity
-                                                onPress={createDeleteConfirmationAlert}
-                                                style={styles.button} >
-                                                {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
-                                                <Text style={styles.deletion_text}>Request account deletion</Text>
-                                            </TouchableOpacity>
-
-                                            <Text style={styles.deletion_info}>
-                                                Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
-                                            </Text>
-                                        </>
-                                        :
+                            {
+                                showDeleteAccount
+                                    ?
+                                    <View style={{
+                                        marginBottom: 16
+                                    }}>
                                         <Pressable style={{
                                             flexDirection: 'row',
-                                            alignItems: 'center'
+                                            alignItems: 'center',
+                                            marginBottom: 12
                                         }}
                                             onPress={() => {
-                                                setShowDeleteAccount(true)
+                                                setShowDeleteAccount(false)
                                             }}
                                         >
-                                            <Ionicons name="chevron-forward" size={20} color='#c2c2c2' />
+                                            <Ionicons name="chevron-down" size={20} color='#c2c2c2' />
                                             <Text style={{
                                                 color: '#c2c2c2'
                                             }}>Advanced Settings</Text>
                                         </Pressable>
-                                }
+                                        <TouchableOpacity
+                                            onPress={createDeleteConfirmationAlert}
+                                            style={styles.button} >
+                                            {/* <FontAwesome name='close' color='#E6E6E6' size={24} /> */}
+                                            <Text style={styles.deletion_text}>Request account deletion</Text>
+                                        </TouchableOpacity>
 
-                            </View>
+                                        <Text style={styles.deletion_info}>
+                                            Please note that it may take up to 14 days for us to process your request. During this time, your account will remain active. If you change your mind, you can cancel the request by signing in to your account. Thank you for your understanding.
+                                        </Text>
+                                    </View>
+                                    :
+                                    <Pressable style={{
+                                        flexDirection: 'row',
+                                        alignItems: 'center'
+                                    }}
+                                        onPress={() => {
+                                            setShowDeleteAccount(true)
+                                        }}
+                                    >
+                                        <Ionicons name="chevron-forward" size={20} color='#c2c2c2' />
+                                        <Text style={{
+                                            color: '#c2c2c2'
+                                        }}>Advanced Settings</Text>
+                                    </Pressable>
+                            }
+
                         </View>
+
+                        <View style={{
+                            marginTop: 16,
+                            flexDirection: 'row',
+                            alignItems: 'center'
+                        }}>
+                            <Ionicons name="logo-twitter"
+                                size={20}
+                                color='#c2c2c2'
+                                style={{
+                                    // backgroundColor: 'red',
+                                }}
+                            />
+                            <Text style={{
+                                color: '#c2c2c2'
+                            }}>
+                                @fixedp0int | {Platform.OS}.{Application.nativeBuildVersion}
+                            </Text>
+                        </View>
+
                     </Animated.View>
             }
         </View >
