@@ -13,7 +13,7 @@ import { Mode, addCommentsToPost, constants, executeListeners, sharedAsyncState,
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
-  tracesSampleRate: 1.0,
+  tracesSampleRate: 0.5,
   enableInExpoDevelopment: true,
   // debug: true
 });
