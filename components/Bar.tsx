@@ -41,15 +41,12 @@ function Bar(props: any) {
     }
 
     const inputStyles = useAnimatedStyle(() => {
+        const keyboard_shown = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING;
         const k = -(offset.value)
             - HANDLER_HEIGHT
             + props.minBarHeight
             - keyboard.height.value
-            +
-            (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ?
-                insets.bottom
-                - (Platform.OS == 'android' && props.navigationBarVisible ? 0 : 0)
-                : 0);
+            + (keyboard_shown ? insets.bottom : 0);
 
         return {
             maxHeight: k,
@@ -254,7 +251,7 @@ function Bar(props: any) {
                         {
                             showUserList &&
                             props.user !== null &&
-                            <MemoUserList navProps={props.navProps} mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                            <MemoUserList navProps={props.navProps} mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} minOffset={minOffset} />
                         }
                     </Animated.View>
                 </GestureDetector >

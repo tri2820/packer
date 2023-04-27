@@ -56,8 +56,8 @@ function UserList(props: any) {
     return (
         <View style={{
             marginHorizontal: 20,
-            height: props.listHeight,
-            flex: 1
+            flex: 1,
+            // backgroundColor: 'yellow'
         }}
         >
             <View style={{
