@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
         alignSelf: 'stretch',
         flex: 1,
         marginLeft: 16,
-        backgroundColor: 'red'
+        // backgroundColor: 'red'
     },
     sourceNameView: {
         width: '100%',

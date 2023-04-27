@@ -192,6 +192,8 @@ function Bar(props: any) {
 
             <View style={{
                 // backgroundColor: 'green',
+                borderTopColor: '#3C3D3F',
+                borderTopWidth: StyleSheet.hairlineWidth,
                 width: '100%',
                 flex: 1,
                 alignSelf: 'stretch'

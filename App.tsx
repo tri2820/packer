@@ -9,7 +9,7 @@ import * as Sentry from 'sentry-expo';
 import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { Mode, addCommentsToPost, constants, executeListeners, randomColor, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
+import { Mode, addCommentsToPost, constants, executeListeners, randomColor, scaleup, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
@@ -97,7 +97,7 @@ function Main(props: any) {
       runOnJS(setMode)('normal')
     });
 
-  const minBarHeight = 60;
+  const minBarHeight = scaleup(60);
   const [safeHeight, setSafeHeight] = useState<number>(0);
 
   const onLayoutRootView = useCallback(async (event: any) => {
@@ -118,7 +118,7 @@ function Main(props: any) {
       onLayout={onLayoutRootView}
       style={{
         flex: 1,
-        backgroundColor: props.mode == 'normal' ? '#151316' : '#272727'
+        backgroundColor: (props.mode == 'comment' || isSinglePost) ? '#272727' : '#151316'
         // backgroundColor: 'blue'
       }}>
       <View style={{
