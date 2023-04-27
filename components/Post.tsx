@@ -1,9 +1,8 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { Image, ActivityIndicator, Platform, StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, noComment, requestComments, sharedAsyncState, toUIList } from '../utils';
 import { MemoComment } from './Comment';
@@ -13,21 +12,17 @@ import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
 // import { Image } from 'expo-image';
-import * as Haptics from 'expo-haptics';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import Animated from 'react-native-reanimated';
+import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
 import { WebBrowserPresentationStyle } from 'expo-web-browser';
-import { useIsFocused } from '@react-navigation/native';
+import Animated from 'react-native-reanimated';
 
 
 
 function ListHeader(props: any) {
-    const insets = useSafeAreaInsets();
-
-
     return <View style={{
-        paddingTop: props.mode == 'normal' ? insets.top : 0
+
     }}>
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
@@ -53,7 +48,6 @@ function ListHeader(props: any) {
 function Post(props: any) {
     const [refreshing, _] = useState(false);
     const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
-    const insets = useSafeAreaInsets();
     const ref = useRef<any>(null);
     const comments = sharedAsyncState[`comments/${props.post.id}`] ?? [];
     const [__, update] = useState(false);
@@ -155,7 +149,7 @@ function Post(props: any) {
         if (!props.scrolledOn) return;
 
         if (props.mode == 'normal') {
-            ref.current?.scrollToOffset({ offset: -insets.top });
+            ref.current?.scrollToOffset({ offset: 0 });
             return;
         }
 
@@ -274,7 +268,6 @@ function Post(props: any) {
         </View> : undefined
 
     const nav = () => props.mode == 'comment' && !props.isSinglePost ? <View style={{
-        paddingTop: props.isSinglePost ? 0 : insets.top,
         paddingBottom: 8,
         // marginBottom: 8,
         backgroundColor: '#272727',
@@ -313,7 +306,7 @@ function Post(props: any) {
                 bottom: 0,
                 height: constants.height / 2,
                 width: '100%',
-                backgroundColor: '#151316'
+                backgroundColor: '#151316',
             }}
         />
 

@@ -1,15 +1,15 @@
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { Platform, View } from 'react-native';
+import { Platform, Text, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
-import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Sentry from 'sentry-expo';
 import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { Mode, addCommentsToPost, constants, executeListeners, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
+import { Mode, addCommentsToPost, constants, executeListeners, randomColor, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
@@ -41,9 +41,6 @@ SplashScreen.preventAutoHideAsync();
 
 
 function Main(props: any) {
-  const insets = useSafeAreaInsets();
-  const [navigationBarVisible, setNavigationBarVisible] = useState(false);
-
   // const wallref = useRef<any>(undefined);
   const isSinglePost = props.navProps.route.params?.singlePost ? true : false;
   const mode = isSinglePost ? 'comment' : props.mode;
@@ -100,103 +97,97 @@ function Main(props: any) {
       runOnJS(setMode)('normal')
     });
 
-  // Note: Some Android treats the bottom handle as navigationBar, so navigationBarVisible is true
-  // In thoses cases, this still works as intended
-  const minBarHeight = 60 + (Platform.OS == 'android' && !navigationBarVisible ? 16 : 0);
-  const wallHeight = constants.height
-    - (
-      Platform.OS == 'android'
-        ? constants.statusBarHeight + Math.max((navigationBarVisible ? constants.navigationBarHeight : 0), insets.bottom)
-        : 0
-    )
-    - (
-      Platform.OS == 'ios'
-        ? insets.bottom
-        : 0
-    )
-    - minBarHeight
-    - useHeaderHeight()
-    ;
-  console.log('debug wallheight', wallHeight, insets.bottom, navigationBarVisible)
+  const minBarHeight = 60;
+  const [safeHeight, setSafeHeight] = useState<number>(0);
 
-  useEffect(() => {
-    (async () => {
-      if (Platform.OS == 'ios') return;
-      const visibility = await NavigationBar.getVisibilityAsync();
-      setNavigationBarVisible(visibility == 'visible')
-    })()
-  }, [])
-
-
-  const onLayoutRootView = useCallback(async () => {
+  const onLayoutRootView = useCallback(async (event: any) => {
     if (!props.fontsLoaded || props.posts.length <= 1) return;
     await SplashScreen.hideAsync();
   }, [props.fontsLoaded, props.posts])
 
+
+  const calculateHeights = async (event: any) => {
+    console.log('layout', event.nativeEvent.layout)
+    setSafeHeight(event.nativeEvent.layout.height);
+  }
+
   if (!props.fontsLoaded || props.posts.length <= 1) return null;
-
-  console.log('navProps', props.navProps)
-
   return (
-    <GestureHandlerRootView>
-      <View
-        onLayout={onLayoutRootView}
-        style={{
-          height: constants.height,
-          width: constants.width,
-          backgroundColor: 'black'
-        }}>
-        <GestureDetector gesture={gesture}>
-          <Animated.View style={animatedStyles}>
-            {
-              isSinglePost ?
-                <MemoPost
-                  isSinglePost
-                  mode={mode}
-                  height={wallHeight}
-                  post={props.navProps.route.params?.singlePost}
-                  shouldActive={true}
-                  scrolledOn={true}
-                  setSelectedComment={() => { }}
-                  setMode={setMode}
-                  user={props.user}
-                /> :
-                <Wall
-                  offsetZoomStyles={offsetZoomStyles}
-                  user={props.user}
-                  // wallref={wallref}
-                  setSelectedComment={props.setSelectedComment}
-                  setMode={setMode}
-                  requestPost={props.requestPost}
-                  posts={props.posts}
-                  mode={mode}
-                  activePostIndex={props.activePostIndex}
-                  setActivePostIndex={props.setActivePostIndex}
-                  height={wallHeight}
-                />
-            }
-            <MemoBar
-              isSinglePost={props.navProps.route.params?.singlePostId}
-              navProps={props.navProps}
-              activePostIndex={props.activePostIndex}
-              onSubmit={props.onSubmit}
-              // wallref={wallref}
-              navigationBarVisible={navigationBarVisible}
-              mode={mode}
-              setMode={setMode}
-              setSelectedComment={props.setSelectedComment}
-              selectedComment={props.selectedComment}
-              user={props.user}
-              setUser={props.setUser}
-              minBarHeight={minBarHeight}
-              offset={offset}
-              wallHeight={wallHeight}
-            />
-
-          </Animated.View>
-        </GestureDetector>
+    <SafeAreaView
+      edges={isSinglePost ? ['bottom'] : ['bottom', 'top']}
+      onLayout={onLayoutRootView}
+      style={{
+        flex: 1,
+        backgroundColor: props.mode == 'normal' ? '#151316' : '#272727'
+        // backgroundColor: 'blue'
+      }}>
+      <View style={{
+        // backgroundColor: 'red',
+        flex: 1
+      }}
+        onLayout={calculateHeights}
+      >
+        <GestureHandlerRootView>
+          <GestureDetector gesture={gesture}>
+            <Animated.View style={[animatedStyles, {
+              // backgroundColor: 'pink',
+              height: '100%'
+            }]}>
+              <View style={{
+                height: safeHeight - minBarHeight,
+                // backgroundColor: 'pink'
+              }}>
+                {
+                  isSinglePost ?
+                    <MemoPost
+                      isSinglePost
+                      mode={mode}
+                      height={safeHeight - minBarHeight}
+                      post={props.navProps.route.params?.singlePost}
+                      shouldActive={true}
+                      scrolledOn={true}
+                      setSelectedComment={() => { }}
+                      setMode={setMode}
+                      user={props.user}
+                    /> :
+                    <Wall
+                      offsetZoomStyles={offsetZoomStyles}
+                      user={props.user}
+                      // wallref={wallref}
+                      setSelectedComment={props.setSelectedComment}
+                      setMode={setMode}
+                      requestPost={props.requestPost}
+                      posts={props.posts}
+                      mode={mode}
+                      activePostIndex={props.activePostIndex}
+                      setActivePostIndex={props.setActivePostIndex}
+                      height={safeHeight - minBarHeight}
+                    />
+                }
+              </View>
+              <MemoBar
+                isSinglePost={props.navProps.route.params?.singlePostId}
+                navProps={props.navProps}
+                activePostIndex={props.activePostIndex}
+                onSubmit={props.onSubmit}
+                // wallref={wallref}
+                // navigationBarVisible={navigationBarVisible}
+                mode={mode}
+                setMode={setMode}
+                setSelectedComment={props.setSelectedComment}
+                selectedComment={props.selectedComment}
+                user={props.user}
+                setUser={props.setUser}
+                minBarHeight={minBarHeight}
+                offset={offset}
+                safeHeight={safeHeight}
+              // wallHeight={wallHeight}
+              />
+            </Animated.View>
+          </GestureDetector>
+        </GestureHandlerRootView>
       </View>
-    </GestureHandlerRootView>
+    </SafeAreaView>
   )
 }
 const MemoMain = memo(Main);

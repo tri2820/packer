@@ -6,11 +6,14 @@ import Animated, { Platform, Text, Pressable, StyleSheet, TouchableOpacity, View
 // import { TextInput } from 'react-native-gesture-handler';
 import { constants } from '../utils';
 import { FadeIn } from 'react-native-reanimated';
+import { TextInput } from 'react-native-gesture-handler';
 
 const HANDLER_HEIGHT = 20;
 
 function InputSend(props: any) {
     const [text, setText] = useState('');
+
+
 
     const getQuote = () => {
         const text = props.selectedComment.content;
@@ -72,8 +75,11 @@ function InputSend(props: any) {
             }
 
             {props.focus ?
-                <>
-                    <Animated.TextInput
+                <View style={{
+                    flexDirection: 'row',
+                    flex: 1
+                }}>
+                    <TextInput
                         autoFocus
                         multiline
                         onBlur={blur}
@@ -91,11 +97,17 @@ function InputSend(props: any) {
                         })
                         }
                     />
-                    <TouchableOpacity onPress={send}>
+                    <TouchableOpacity onPress={send} style={{
+                        paddingHorizontal: 16,
+                        // backgroundColor: 'red',
+                        alignSelf: 'baseline'
+                    }}>
                         <Ionicons name="send" size={24} color='#FFC542' />
                     </TouchableOpacity>
-                </> :
-                <Pressable style={styles.press}
+                </View> :
+                // <Text>154</Text>
+                <Pressable
+                    style={styles.press}
                     onPress={press}
                 >
                     {
@@ -111,7 +123,6 @@ function InputSend(props: any) {
                                 }}>Sign in to chat with Packer</Text>
                             </View>
                     }
-
                 </Pressable>
             }
         </>
@@ -122,10 +133,9 @@ export default InputSend;
 const styles = StyleSheet.create({
     press: {
         paddingTop: 5,
-        height: '100%',
-        width: '100%',
+        paddingLeft: 16,
         flex: 1,
-        // backgroundColor: 'blue'
+        // backgroundColor: 'yellow'
     },
     overlay:
     {
@@ -179,11 +189,10 @@ const styles = StyleSheet.create({
     },
     textinput: {
         color: '#F1F1F1',
-        height: '100%',
-        width: '100%',
+        alignSelf: 'stretch',
         flex: 1,
-        // backgroundColor: 'red',
-        textAlignVertical: 'top'
+        marginLeft: 16,
+        // backgroundColor: 'red'
     },
     sourceNameView: {
         width: '100%',

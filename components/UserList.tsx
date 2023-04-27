@@ -162,7 +162,7 @@ function UserList(props: any) {
                             // listKey='userList'
                             style={{
                                 marginTop: 8,
-                                marginBottom: insets.bottom,
+                                // marginBottom: insets.bottom,
                                 // backgroundColor: 'red'
                                 // overflow: 'hidden'
                             }}

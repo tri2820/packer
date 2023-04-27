@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo } from 'react';
-import { StyleSheet, ImageBackground, Linking, Text, TouchableOpacity, View, Platform } from 'react-native';
+import { StyleSheet, ImageBackground, Linking, Text, TouchableOpacity, View, Platform, Pressable } from 'react-native';
 import Animated, { FadeOut, useAnimatedStyle } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signIn } from '../auth';
@@ -57,9 +57,17 @@ function SignInSection(props: any) {
     // console.log('debug sign in section')
     return (
         <Animated.View
-            style={[animatedStyles, styles.view]}
+            style={[
+                animatedStyles,
+                {
+                    position: 'absolute',
+                    height: props.maxBarHeight + insets.bottom,
+                    width: '100%',
+                    flex: 1
+                }]}
             exiting={FadeOut}
         >
+
             <ImageBackground style={styles.background}
                 source={require('../assets/loginBackground.jpg')}
             >
@@ -74,9 +82,8 @@ function SignInSection(props: any) {
                 source={require('../assets/icon.png')}
             />
 
-            <Text style={styles.text_1}>Intelligence made simple.</Text>
-
-            <Text style={styles.text_2}>Meet Packer.</Text>
+            <Text style={styles.text}>Intelligence made simple.</Text>
+            <Text style={styles.text}>Meet Packer.</Text>
 
             <View style={styles.loginButtons}>
                 <View style={styles.loginButton}>
@@ -101,26 +108,12 @@ function SignInSection(props: any) {
                     </Ionicons.Button>
                 </View>
             </View>
-            <View style={{
-                position: 'absolute',
-                left: 0,
-                right: 0,
-                bottom: insets.bottom + props.INSETS_OFFSET_BOTTOM + 20,
-                alignItems: 'center',
-            }}>
-                <Text style={styles.docHeader}>By signing in, you agree with our</Text>
-                <TouchableOpacity onPress={openEULA}>
-                    <Text style={styles.docText}>End-user license agreement</Text>
-                </TouchableOpacity>
+            <Text style={styles.docHeader}>By signing in, you agree with our
+                <Text onPress={openEULA}> End-user license agreement</Text>,
+                <Text onPress={openTermsAndConditions}> Terms & Conditions</Text>, and
+                <Text onPress={openPrivacyPolicy}> Privacy Policy</Text>
+            </Text>
 
-                <TouchableOpacity onPress={openTermsAndConditions}>
-                    <Text style={styles.docText}>
-                        Terms & Conditions</Text>
-                </TouchableOpacity>
-                <TouchableOpacity onPress={openPrivacyPolicy}>
-                    <Text style={styles.docText}>Privacy Policy</Text>
-                </TouchableOpacity>
-            </View>
         </Animated.View>
     );
 }
@@ -129,7 +122,7 @@ export default SignInSection;
 const styles = StyleSheet.create({
     view: {
         position: 'absolute',
-        width: constants.width,
+        width: '100%',
         height: '100%',
         // backgroundColor: 'blue'
     },
@@ -143,7 +136,8 @@ const styles = StyleSheet.create({
         height: '100%'
     },
     icon: {
-        marginTop: 100,
+        marginTop: scaledown(100),
+        marginBottom: scaledown(24),
         width: 80,
         height: 80,
         borderRadius: 4,
@@ -151,16 +145,7 @@ const styles = StyleSheet.create({
         // right: 'auto',
         alignSelf: 'center'
     },
-    text_1: {
-        marginTop: 24,
-        color: 'white',
-        fontSize: scaledown(26),
-        // fontWeight: '700',
-        alignSelf: 'center',
-        textAlign: 'center',
-        fontFamily: 'Rubik_700Bold',
-    },
-    text_2: {
+    text: {
         color: 'white',
         fontSize: scaledown(26),
         // fontWeight: '700',
@@ -169,7 +154,7 @@ const styles = StyleSheet.create({
         fontFamily: 'Rubik_700Bold',
     },
     loginButtons: {
-        marginTop: 24
+        marginTop: scaledown(24)
     },
     loginButton: {
         marginVertical: 10,
@@ -211,8 +196,10 @@ const styles = StyleSheet.create({
     docHeader: {
         color: '#A3A3A3',
         fontWeight: '300',
-        fontSize: scaledown(16),
-        marginBottom: 8,
+        marginTop: scaledown(32),
+        fontSize: scaledown(14),
+        marginHorizontal: scaledown(64),
+        textAlign: 'center'
     },
     docText: {
         color: '#A3A3A3',

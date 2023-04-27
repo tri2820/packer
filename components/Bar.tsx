@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { memo, useEffect, useRef, useState } from 'react';
 import { Linking, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, TextInput } from 'react-native-gesture-handler';
 import Animated, { KeyboardState, runOnJS, useAnimatedKeyboard, useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, normalizedHostname, scaleup, sharedAsyncState } from '../utils';
@@ -23,7 +23,8 @@ function Bar(props: any) {
         - MARGIN_TOP
         + INSETS_OFFSET_BOTTOM
         + (Platform.OS == 'android' ? props.minBarHeight : 0)
-    const minOffset = -(constants.height - insets.top - insets.bottom - MARGIN_TOP);
+    const maxBarHeight = props.safeHeight * 0.8;
+    const minOffset = -(maxBarHeight - props.minBarHeight);
     const allowShowingUserList = useSharedValue(true);
     const offset = useSharedValue(0);
     const _offset = useSharedValue(0);
@@ -43,14 +44,15 @@ function Bar(props: any) {
         const k = -(offset.value)
             - HANDLER_HEIGHT
             + props.minBarHeight
-            - keyboard.height.value +
+            - keyboard.height.value
+            +
             (keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING ?
                 insets.bottom
                 - (Platform.OS == 'android' && props.navigationBarVisible ? 0 : 0)
                 : 0);
 
         return {
-            height: k,
+            maxHeight: k,
             display: offset.value < -40 && (allowShowingUserList.value || props.user == null) ? 'none' : (!showUserList ? 'flex' : 'none'),
             // backgroundColor: 'blue'
         };
@@ -71,6 +73,7 @@ function Bar(props: any) {
 
 
     const changeState = (state: 'maximize' | 'minimize') => {
+        console.log('debug changeState')
         if (state == 'maximize') {
             allowShowingUserList.value = false;
 
@@ -82,6 +85,7 @@ function Bar(props: any) {
                 _offset.value = withTiming(minOffset, { duration: 100 });
 
                 setTimeout(() => {
+                    console.log('debug set focus true')
                     setFocus(true)
                 }, 300);
             }
@@ -105,7 +109,7 @@ function Bar(props: any) {
     }
 
     const [showUserList, setShowUserList] = useState(false);
-    const barStyles = useAnimatedStyle(() => {
+    const barAnimationUpDown = useAnimatedStyle(() => {
         // console.log('offset.value', offset.value, focus, showUserList, allowShowingUserList.value, keyboard.state.value, KeyboardState.UNKNOWN)
         if (offset.value < -40 && !focus && !showUserList && allowShowingUserList.value
             &&
@@ -120,9 +124,10 @@ function Bar(props: any) {
 
         return {
             transform: [{
-                translateY: offset.value,
+                translateY: offset.value
             }],
-            display: props.activePostIndex == 0 ? 'none' : 'flex'
+            height: props.minBarHeight - offset.value
+            // display: props.activePostIndex == 0 ? 'none' : 'flex'
         };
     });
 
@@ -134,14 +139,6 @@ function Bar(props: any) {
         // .activeOffsetX([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
-            // TWO
-            // const keyboardOffset = -(keyboard.height.value - insets.bottom);
-            // if (keyboardOffset < newValue) {
-            //     _offset.value = keyboardOffset;
-            //     offset.value = keyboardOffset;
-            //     return;
-            // }
-
             if (minOffset <= newValue) {
                 _offset.value = newValue;
                 offset.value = newValue;
@@ -158,21 +155,11 @@ function Bar(props: any) {
             if (newOffset > minOffset / 2) {
                 // THREE
                 const value = 0;
-                // keyboard.state.value == 
-                // KeyboardState.OPEN
-                //     || keyboard.state.value == KeyboardState.OPENING ?
-                //     -(keyboard.height.value - insets.bottom +
-                //         (Platform.OS == 'android' ? (props.navigationBarVisible ? constants.navigationBarHeight : -32) : 0)
-                //     )
-                //     : 0;
                 _offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
                 offset.value = withSpring(value, { velocity: event.velocityY, mass: 0.15, overshootClamping: true })
-                // if (value == 0) {
-                // changeState();
                 runOnJS(changeState)('minimize')
                 runOnJS(setUserListMode)('normal')
                 if (props.user === null) runOnJS(props.setSelectedComment)(null)
-                // }
                 return;
             }
 
@@ -206,74 +193,72 @@ function Bar(props: any) {
                 <Pressable onPress={hideInput} style={styles.expand} />
             </Animated.View>
 
+            <View style={{
+                // backgroundColor: 'green',
+                width: '100%',
+                flex: 1,
+                alignSelf: 'stretch'
+            }}>
 
-            {/* Sheet */}
-            <GestureDetector gesture={gesture}>
-                <Animated.View style={[{
-                    top: props.wallHeight,
-                    backgroundColor:
-                        // 'blue',
-                        props.mode == 'comment' ? '#272727' : '#151316',
-                    height: HEIGHT
-                }, styles.sheet,
-                    barStyles,
-                    // { backgroundColor: 'red' }
-                ]}
-                >
-                    {
-                        props.user === null && <MemoSignInSection
-                            INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM}
-                            minOffset={minOffset}
-                            offset={offset}
-                            mode={props.mode}
-                            user={props.user}
-                            setUser={props.setUser}
-                            // setUserListMode={setUserListMode}
-                            changeState={changeState}
-                        />
-                    }
-
-                    <View style={styles.handler}>
+                <GestureDetector gesture={gesture}>
+                    <Animated.View style={[
                         {
-                            !props.isSinglePost &&
-                            <View style={styles.handler_inside} />
+                            backgroundColor: props.mode == 'normal' ? '#151316' : '#272727',
+                            // flex: 1
+                        },
+                        barAnimationUpDown
+                    ]}>
+                        {
+                            props.user === null && <MemoSignInSection
+                                INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM}
+                                minOffset={minOffset}
+                                offset={offset}
+                                mode={props.mode}
+                                user={props.user}
+                                setUser={props.setUser}
+                                // setUserListMode={setUserListMode}
+                                changeState={changeState}
+                                maxBarHeight={maxBarHeight}
+                            />
                         }
-                    </View>
 
-                    {
-                        <Animated.View
-                            style={[styles.inputbar, inputStyles,
-                                // { backgroundColor: 'yellow' }
-                            ]}
-                        >
 
-                            <View style={styles.inputHeader}>
-                                <MemoInputSend
-                                    // wallref={props.wallref}
-                                    focus={focus}
-                                    onBlur={onBlur}
-                                    inputref={inputref}
-                                    selectedComment={props.selectedComment}
-                                    setSelectedComment={props.setSelectedComment}
-                                    changeState={changeState}
-                                    onSubmit={props.onSubmit}
-                                    activePostIndex={props.activePostIndex}
-                                    user={props.user}
-                                    setMode={props.setMode}
-                                />
-                            </View>
+                        <View style={styles.handler}>
+                            {
+                                !props.isSinglePost &&
+                                <View style={styles.handler_inside} />
+                            }
+                        </View>
 
+
+                        <Animated.View style={[inputStyles, {
+                            flex: 1,
+                            // backgroundColor: 'orange'
+                        }]}>
+                            <MemoInputSend
+                                // wallref={props.wallref}
+                                focus={focus}
+                                onBlur={onBlur}
+                                inputref={inputref}
+                                selectedComment={props.selectedComment}
+                                setSelectedComment={props.setSelectedComment}
+                                changeState={changeState}
+                                onSubmit={props.onSubmit}
+                                activePostIndex={props.activePostIndex}
+                                user={props.user}
+                                setMode={props.setMode}
+                            />
                         </Animated.View>
-                    }
 
-                    {
-                        showUserList &&
-                        props.user !== null &&
-                        <MemoUserList navProps={props.navProps} mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
-                    }
 
-                </Animated.View>
-            </GestureDetector>
+                        {
+                            showUserList &&
+                            props.user !== null &&
+                            <MemoUserList navProps={props.navProps} mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} listHeight={HEIGHT - HANDLER_HEIGHT - INSETS_OFFSET_BOTTOM - insets.bottom} minOffset={minOffset} />
+                        }
+                    </Animated.View>
+                </GestureDetector >
+            </View >
         </>
     );
 }
@@ -290,9 +275,10 @@ const styles = StyleSheet.create({
     {
         backgroundColor: 'black',
         opacity: 0.8,
-        height: constants.height,
-        width: constants.width,
-        position: 'absolute'
+        height: '100%',
+        width: '100%',
+        position: 'absolute',
+        top: 0
     },
     expand: {
         width: '100%',

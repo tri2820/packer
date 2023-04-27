@@ -4,7 +4,7 @@ import { memo, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { constants, scaledown, sharedAsyncState } from '../utils';
+import { constants, randomColor, scaledown, sharedAsyncState } from '../utils';
 import Post, { MemoPost } from './Post';
 import { supabaseClient } from '../supabaseClient';
 
@@ -143,6 +143,7 @@ function Wall(props: any) {
             sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`] = true
             analytics(props.user.id, item.id);
         }
+        console.log('debug render', index);
         return <MemoPost
             offsetZoomStyles={props.offsetZoomStyles}
             key={item.id}
@@ -169,7 +170,6 @@ function Wall(props: any) {
         props.setActivePostIndex(Math.floor(offset / props.height) + 1);
     }
 
-    // console.log('debug render flatlist');
     return (
         <Animated.FlatList
             scrollsToTop={false}
@@ -179,10 +179,6 @@ function Wall(props: any) {
             maxToRenderPerBatch={2}
             updateCellsBatchingPeriod={500}
             showsVerticalScrollIndicator={false}
-            style={{
-                width: constants.width,
-                height: props.height
-            }}
             scrollEnabled={props.mode == 'normal'}
             // Only works on IOS
             pagingEnabled={true}
