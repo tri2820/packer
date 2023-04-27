@@ -43,7 +43,7 @@ function PostHeader(props: any) {
         toggleBookmark(props.post, props.user)
     }
 
-    console.log('debug re render this with', bookmarked, sharedAsyncState[`BookmarkChangelisteners/${props.post.id}`])
+    // console.log('debug re render this with', bookmarked, sharedAsyncState[`BookmarkChangelisteners/${props.post.id}`])
     return <View>
         <Animated.View style={longPressedStyle}>
             <TouchableOpacity
