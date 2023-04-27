@@ -118,8 +118,7 @@ function Main(props: any) {
       onLayout={onLayoutRootView}
       style={{
         flex: 1,
-        backgroundColor: (props.mode == 'comment' || isSinglePost) ? '#272727' : '#151316'
-        // backgroundColor: 'blue'
+        backgroundColor: props.activePostIndex == 0 ? 'black' : (props.mode == 'comment' || isSinglePost) ? '#272727' : '#151316'
       }}>
       <View style={{
         // backgroundColor: 'red',
@@ -146,7 +145,7 @@ function Main(props: any) {
                       post={props.navProps.route.params?.singlePost}
                       shouldActive={true}
                       scrolledOn={true}
-                      setSelectedComment={() => { }}
+                      setSelectedComment={props.setSelectedComment}
                       setMode={setMode}
                       user={props.user}
                     /> :
@@ -166,10 +165,16 @@ function Main(props: any) {
                 }
               </View>
               <MemoBar
-                isSinglePost={props.navProps.route.params?.singlePostId}
+                isSinglePost={isSinglePost}
                 navProps={props.navProps}
                 activePostIndex={props.activePostIndex}
-                onSubmit={props.onSubmit}
+                onSubmit={(text: string, selectedComment: any) => {
+                  const post_id = isSinglePost ?
+                    props.navProps.route.params.singlePost.id :
+                    props.posts[props.activePostIndex].id;
+                  // console.log('debug submit >', text, selectedComment, post_id)
+                  props.submitContent(text, selectedComment, post_id)
+                }}
                 // wallref={wallref}
                 // navigationBarVisible={navigationBarVisible}
                 mode={mode}
@@ -294,6 +299,7 @@ function App() {
         return;
       }
       data.forEach((post: any) => {
+        sharedAsyncState[`count/${post.id}`] = post.comment_count;
         sharedAsyncState.bookmarks[post.id] = post;
         executeListeners(`BookmarkChangelisteners/${post.id}`);
       })
@@ -445,11 +451,6 @@ function App() {
     updateCommentsOfPost(post_id, childId, 'blinking', false)
   }
 
-  const onSubmit = (text: string, selectedComment: any) => {
-    console.log('submitted', activePostIndex);
-    submitComment(text, selectedComment, posts[activePostIndex].id);
-  }
-
 
   const requestPost = async () => {
     await rp(sharedAsyncState, setPosts)
@@ -463,7 +464,7 @@ function App() {
   }, [])
 
   const memoRequestPost = React.useCallback(requestPost, [])
-  const memoOnSubmit = React.useCallback(onSubmit, [posts, selectedComment, activePostIndex])
+  const memoSubmitComment = React.useCallback(submitComment, [user, posts, selectedComment, activePostIndex])
 
   console.log('debug big re-render');
   return (
@@ -479,7 +480,8 @@ function App() {
             user={user}
             mode={mode}
             posts={posts}
-            onSubmit={memoOnSubmit}
+            submitComment={submitComment}
+            submitContent={memoSubmitComment}
             setSelectedComment={setSelectedComment}
             setUser={setUser}
             setActivePostIndex={setActivePostIndex}

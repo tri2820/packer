@@ -66,19 +66,21 @@ function InputSend(props: any) {
     // console.log('render')
     return (
         <>
-            {
-                props.selectedComment &&
-                <Octicons name="reply" size={12} style={{
-                    marginTop: 7,
-                    marginRight: 8
-                }} color="#A3A3A3" />
-            }
+
 
             {props.focus ?
                 <View style={{
                     flexDirection: 'row',
-                    flex: 1
+                    flex: 1,
                 }}>
+
+                    {
+                        props.selectedComment &&
+                        <Octicons name="reply" size={12} style={{
+                            marginTop: 6,
+                            marginLeft: 16
+                        }} color="#A3A3A3" />
+                    }
                     <TextInput
                         autoFocus
                         multiline
@@ -88,7 +90,13 @@ function InputSend(props: any) {
                         onChangeText={setText}
                         placeholder={placeHolder}
                         placeholderTextColor='#C2C2C2'
-                        style={styles.textinput}
+                        style={{
+                            color: '#F1F1F1',
+                            alignSelf: 'stretch',
+                            flex: 1,
+                            marginLeft: props.selectedComment ? 8 : 16,
+                            // backgroundColor: 'red'
+                        }}
                         keyboardAppearance='dark'
                         {...(Platform.OS == 'ios' ? {
                             selectionColor: '#FFC542'
@@ -186,13 +194,6 @@ const styles = StyleSheet.create({
         width: '100%',
         flexDirection: 'row',
         alignItems: 'flex-start'
-    },
-    textinput: {
-        color: '#F1F1F1',
-        alignSelf: 'stretch',
-        flex: 1,
-        marginLeft: 16,
-        // backgroundColor: 'red'
     },
     sourceNameView: {
         width: '100%',

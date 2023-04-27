@@ -184,6 +184,7 @@ function Bar(props: any) {
     }, [props.selectedComment])
 
     console.log('debug bar')
+    if (props.activePostIndex == 0) return <></>
     return (
         <>
             <Animated.View style={[styles.overlay, overlayStyles]}>

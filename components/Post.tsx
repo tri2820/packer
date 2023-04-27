@@ -247,25 +247,26 @@ function Post(props: any) {
         progressBackgroundColor='transparent'
         tintColor={'transparent'}
     />
-    const footer = sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
-        !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
-            props.numTopLevelComments == 0)
-        ? <View style={{
-            marginTop: 20,
-            paddingBottom: 16
-            // alignSelf: 'stretch'
-        }}>
-            <ActivityIndicator
-                style={styles.loading_indicator}
-                size="small"
-            />
-            <Text style={{
-                color: '#A3A3A3',
-                alignSelf: 'center'
+    const footer =
+        sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
+            !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
+                props.numTopLevelComments == 0)
+            ? <View style={{
+                marginTop: 20,
+                paddingBottom: 16
+                // alignSelf: 'stretch'
             }}>
-                Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
-            </Text>
-        </View> : undefined
+                <ActivityIndicator
+                    style={styles.loading_indicator}
+                    size="small"
+                />
+                <Text style={{
+                    color: '#A3A3A3',
+                    alignSelf: 'center'
+                }}>
+                    Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
+                </Text>
+            </View> : undefined
 
     const nav = () => props.mode == 'comment' && !props.isSinglePost ? <View style={{
         paddingBottom: 8,
