@@ -7,6 +7,11 @@ export default {
             "ios": {
               "useFrameworks": "static"
             }
+          },
+          {
+            "android": {
+              "package": "com.tri2820.packer" 
+            }
           }
         ],
       ],
