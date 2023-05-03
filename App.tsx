@@ -12,8 +12,6 @@ import { supabaseClient } from './supabaseClient';
 import { Mode, addCommentsToPost, constants, executeListeners, randomColor, scaleup, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 import { firebase } from '@react-native-firebase/analytics';
 
-// Initialize Firebase Analytics
-firebase.analytics().setAnalyticsCollectionEnabled(true);
 
 Sentry.init({
   dsn: 'https://d474c02a976d4a0091626611d20d5da6@o4505035763679232.ingest.sentry.io/4505035768594432',
