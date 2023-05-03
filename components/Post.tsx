@@ -181,7 +181,8 @@ function Post(props: any) {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
         const result = await WebBrowser.openBrowserAsync(url, {
             presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-            controlsColor: '#f5a30c'
+            controlsColor: '#f5a30c',
+            enableBarCollapsing: true
         });
         console.log('debug browser result', result);
     }, [])

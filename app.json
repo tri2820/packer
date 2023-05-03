@@ -16,6 +16,7 @@
       "**/*"
     ],
     "ios": {
+      "googleServicesFile": "./GoogleService-Info.plist",
       "supportsTablet": true,
       "bundleIdentifier": "com.tri2820.packer",
       "entitlements": {
@@ -28,6 +29,7 @@
       }
     },
     "android": {
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#151316"
@@ -49,7 +51,11 @@
       "url": "https://u.expo.dev/99a4fb77-5ba1-404f-8f20-f9680db3e4dc"
     },
     "plugins": [
-      "sentry-expo"
+      "sentry-expo",
+      "@react-native-firebase/app",
+      "@react-native-firebase/perf",
+      "@react-native-firebase/crashlytics",
+      "@react-native-firebase/analytics"
     ],
     "hooks": {
       "postPublish": [

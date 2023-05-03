@@ -193,8 +193,6 @@ function Bar(props: any) {
 
             <View style={{
                 // backgroundColor: 'green',
-                borderTopColor: '#3C3D3F',
-                borderTopWidth: StyleSheet.hairlineWidth,
                 width: '100%',
                 flex: 1,
                 alignSelf: 'stretch'
@@ -203,6 +201,8 @@ function Bar(props: any) {
                 <GestureDetector gesture={gesture}>
                     <Animated.View style={[
                         {
+                            borderTopColor: '#3C3D3F',
+                            borderTopWidth: StyleSheet.hairlineWidth,
                             backgroundColor: props.mode == 'normal' ? '#151316' : '#272727',
                             // flex: 1
                         },

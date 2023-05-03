@@ -124,8 +124,8 @@ function UserList(props: any) {
             {
                 props.mode == 'normal'
                     ? <Animated.View
-                        entering={FadeIn}
-                        exiting={FadeOut.duration(200)}
+                        // entering={FadeIn}
+                        // exiting={FadeOut.duration(200)}
                         style={{
                             // backgroundColor: 'blue',
                             flex: 1
@@ -244,8 +244,8 @@ function UserList(props: any) {
 
                     </Animated.View> :
                     <Animated.View
-                        entering={FadeIn}
-                        exiting={FadeOut}
+                    // entering={FadeIn}
+                    // exiting={FadeOut}
                     >
 
                         <View style={styles.buttons}>
