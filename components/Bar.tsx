@@ -132,7 +132,9 @@ function Bar(props: any) {
     const gesture = Gesture
         .Pan()
         .enabled(!props.isSinglePost)
-        .activeOffsetY(showUserList && Platform.OS == 'android' ? [-100, 100] : [-10, 10])
+        .activeOffsetY(
+            // showUserList && Platform.OS == 'android' ? [-100, 100] : 
+            [-10, 10])
         // .activeOffsetX([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
@@ -247,6 +249,7 @@ function Bar(props: any) {
                                 activePostIndex={props.activePostIndex}
                                 user={props.user}
                                 setMode={props.setMode}
+                            // mode={props.mode}
                             />
                         </Animated.View>
 

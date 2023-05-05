@@ -15,12 +15,12 @@ export const constants = {
 }
 
 export function scaledown(size: number) {
-    const newSize = size / PixelRatio.getFontScale();
+    const newSize = Math.round(size / PixelRatio.getFontScale());
     return newSize
 }
 
 export function scaleup(size: number) {
-    const newSize = size * PixelRatio.getFontScale();
+    const newSize = Math.round(size * PixelRatio.getFontScale());
     return newSize
 }
 

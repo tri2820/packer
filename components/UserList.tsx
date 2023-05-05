@@ -1,8 +1,8 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { memo, useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import { Alert, StyleSheet, Text, TouchableOpacity, View, Animated, Pressable, Platform } from 'react-native';
+import { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
 import { supabaseClient } from '../supabaseClient';
@@ -11,6 +11,7 @@ import * as Haptics from 'expo-haptics';
 import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import * as Application from 'expo-application';
+import { FlatList } from 'react-native-gesture-handler';
 
 
 function UserList(props: any) {
@@ -123,7 +124,7 @@ function UserList(props: any) {
 
             {
                 props.mode == 'normal'
-                    ? <Animated.View
+                    ? <View
                         // entering={FadeIn}
                         // exiting={FadeOut.duration(200)}
                         style={{
@@ -155,7 +156,7 @@ function UserList(props: any) {
                                 }</Text>
                         </View>
 
-                        <Animated.FlatList
+                        <FlatList
                             overScrollMode={'always'}
                             horizontal={false}
                             showsVerticalScrollIndicator={false}
@@ -242,8 +243,8 @@ function UserList(props: any) {
                             }
                         />
 
-                    </Animated.View> :
-                    <Animated.View
+                    </View> :
+                    <View
                     // entering={FadeIn}
                     // exiting={FadeOut}
                     >
@@ -331,7 +332,7 @@ function UserList(props: any) {
                             </Text>
                         </View>
 
-                    </Animated.View>
+                    </View>
             }
         </View >
 

@@ -333,7 +333,8 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 8,
-        paddingVertical: 4
+        paddingVertical: 4,
+        // backgroundColor: 'red'
     },
     created_at: {
         color: '#A3A3A3',

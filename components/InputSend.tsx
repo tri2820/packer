@@ -91,11 +91,12 @@ function InputSend(props: any) {
                         placeholder={placeHolder}
                         placeholderTextColor='#C2C2C2'
                         style={{
+                            textAlignVertical: 'top',
                             color: '#F1F1F1',
                             alignSelf: 'stretch',
                             flex: 1,
                             marginLeft: props.selectedComment ? 8 : 16,
-                            // backgroundColor: 'red'
+                            // backgroundColor: 'red',
                         }}
                         keyboardAppearance='dark'
                         {...(Platform.OS == 'ios' ? {
@@ -120,12 +121,34 @@ function InputSend(props: any) {
                 >
                     {
                         props.user ?
-                            <Text style={{
-                                color: text == '' ? '#C2C2C2' : '#F1F1F1'
-                            }}>{
-                                    text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)
-                                }
-                            </Text> : <View>
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center',
+                                // backgroundColor: 'yellow',
+                                // flex: 1,
+                                // paddingVertical: 8,
+                                // paddingHorizontal: 16,
+                                // marginRight: 'auto',
+                                // marginLeft: 0,
+                                // borderRadius: 16
+                            }}>
+                                <Ionicons name="add-outline" size={24} color='#989B9C' style={{
+                                    backgroundColor: '#323233',
+                                    paddingVertical: 4,
+                                    paddingLeft: 6,
+                                    paddingRight: 4,
+                                    borderRadius: 16,
+                                    overflow: 'hidden'
+                                }} />
+                                <Text style={{
+                                    color: text == '' ? '#C2C2C2' : '#F1F1F1',
+                                    marginLeft: 12,
+                                }}>{
+                                        text == '' ? placeHolder : (text.length > 30 ? `${text.slice(0, 30)}...` : text)
+                                    }
+                                </Text>
+                            </View>
+                            : <View>
                                 <Text style={{
                                     color: '#C2C2C2'
                                 }}>Sign in to chat with Packer</Text>
@@ -140,8 +163,8 @@ function InputSend(props: any) {
 export default InputSend;
 const styles = StyleSheet.create({
     press: {
-        paddingTop: 5,
-        paddingLeft: 16,
+        // paddingTop: 5,
+        paddingHorizontal: 16,
         flex: 1,
         // backgroundColor: 'yellow'
     },

@@ -182,7 +182,8 @@ function Post(props: any) {
         const result = await WebBrowser.openBrowserAsync(url, {
             presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
             controlsColor: '#f5a30c',
-            enableBarCollapsing: true
+            enableBarCollapsing: true,
+            createTask: false
         });
         console.log('debug browser result', result);
     }, [])
