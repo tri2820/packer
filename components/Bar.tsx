@@ -133,8 +133,8 @@ function Bar(props: any) {
         .Pan()
         .enabled(!props.isSinglePost)
         .activeOffsetY(
-            // showUserList && Platform.OS == 'android' ? [-100, 100] : 
-            [-10, 10])
+            showUserList && Platform.OS == 'android' ? [-100, 100] :
+                [-10, 10])
         // .activeOffsetX([-10, 10])
         .onChange((e) => {
             const newValue = _offset.value + e.changeY;
