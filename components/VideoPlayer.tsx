@@ -11,20 +11,21 @@ function VideoPlayer(props: any) {
     const appState = useRef(AppState.currentState);
     const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
     const [videoShouldPlaying, setVideoShouldPlaying] = useState(false);
+    const [error, setError] = useState(false);
     const ref = useRef<any>(null);
     const [intervalObj, setIntervalObj] = useState<any>(null);
 
     const startSyncTime = () => {
         const id = setInterval(async () => {
             const sec = await ref.current?.getCurrentTime();
-            console.log('debug SEC', sec);
+            // console.log('debug SEC', sec);
             sharedAsyncState[`player/${props.id}/second`] = sec;
         }, 1000);
         setIntervalObj(id);
     };
 
     useEffect(() => {
-        console.log('debug appStateCurrent', appStateCurrent)
+        console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
         const playing = props.scrolledOn && appStateCurrent == 'active' && youtubeVideoId != '';
         setVideoShouldPlaying(playing);
     }, [props.scrolledOn, appStateCurrent, youtubeVideoId]);
@@ -70,7 +71,7 @@ function VideoPlayer(props: any) {
     const onError = (e: string) => {
         console.log('error yt', e, youtubeVideoId)
         if (e != 'embed_not_allowed' || reloadN > 0) {
-            // setError(true);
+            setError(true);
             return;
         }
         setReloadN((reloadN) => reloadN + 1);
@@ -83,9 +84,11 @@ function VideoPlayer(props: any) {
     if (youtubeVideoId == '') return <></>
     // 560x315
     // console.log(constants.width, Math.floor(constants.width / 16 * 9))
-    return <View style={{
+    return (error || reloadN > 1) ? <></> : <View style={{
         // paddingBottom: 4,
-    }}>
+    }}
+        pointerEvents={props.scrolling ? 'none' : 'auto'}
+    >
         <YoutubePlayer
             ref={ref}
             key={reloadN}
@@ -99,7 +102,7 @@ function VideoPlayer(props: any) {
                 showClosedCaptions: true
             }}
             onReady={() => {
-                // console.log('READYYYY')
+                console.log('READYYYY')
                 const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
                 console.log('LOAD SEC', second, ref.current);
                 ref.current?.seekTo(second, true)

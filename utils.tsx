@@ -24,6 +24,37 @@ export function scaleup(size: number) {
     return newSize
 }
 
+export function isVideoPost(source_url: string) {
+    const url = new URL(source_url);
+    return normalizedHostname(url.hostname) == 'youtube.com'
+}
+
+export function getPastelColor(seed: string) {
+    const x = randomWithSeed(seed);
+    return "hsl(" + 360 * x + ',' +
+        (25 + 70 * x) + '%,' +
+        (85 + 10 * x) + '%)'
+}
+
+function hashString(str: string): number {
+    let hash = 0;
+    if (str.length == 0) {
+        return hash;
+    }
+    for (let i = 0; i < str.length; i++) {
+        let char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
+}
+
+export function randomWithSeed(seed: string): number {
+    let seedValue = hashString(seed);
+    let x = Math.sin(seedValue++) * 10000;
+    return x - Math.floor(x);
+}
+
 
 export const calcStatusBarColor = (backgroundColor: any) => {
     let [r, g, b, a] = backgroundColor.slice(backgroundColor.startsWith('rgba') ? 5 : 4, -1).split(',').map((s: any) => parseInt(s))

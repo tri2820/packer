@@ -7,13 +7,13 @@ import { MemoContentMenu } from './ReportMenu';
 
 
 function KeyTakeaways(props: any) {
-    const [showKeyTakeaways, setShowKeyTakeaways] = useState(true);
+    // const [showKeyTakeaways, setShowKeyTakeaways] = useState(true);
     const [inited, setInited] = useState(false);
 
-    useEffect(() => {
-        if (!inited) return;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-    }, [showKeyTakeaways])
+    // useEffect(() => {
+    //     if (!inited) return;
+    //     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    // }, [showKeyTakeaways])
 
     useEffect(() => {
         setInited(true);
@@ -37,48 +37,39 @@ function KeyTakeaways(props: any) {
         };
     });
 
-    return <Animated.View style={longPressedStyle}>
-        <View style={{
-            borderBottomColor: '#3C3D3F',
-            borderBottomWidth: StyleSheet.hairlineWidth,
-            marginHorizontal: 16
-        }} />
+    return <Animated.View style={[longPressedStyle, {
+        marginBottom: 8,
+    }]}>
+
 
         <Pressable
-            onPress={() => {
-                setShowKeyTakeaways(!showKeyTakeaways);
-            }}
+            // onPress={() => {
+            //     setShowKeyTakeaways(!showKeyTakeaways);
+            // }}
             onLongPress={openMenu}
             style={{
                 paddingHorizontal: 16,
-                marginBottom: 12,
+                paddingVertical: 8
             }}
         >
 
             <View style={{
-                marginTop: 12,
+                // marginTop: 12,
                 flex: 1,
                 flexDirection: 'row',
                 alignItems: 'center'
             }}>
-                <Image
-                    style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: 2,
-                    }}
-                    source={require('../assets/smallicon.png')}
-                />
 
-                <Text style={{
+
+                {/* <Text style={{
                     color: '#E6E6E6',
                     fontWeight: 'bold',
                     marginLeft: 8
-                }}>Packer's Report</Text>
+                }}>Packer's Report</Text> */}
 
 
 
-                {
+                {/* {
                     !showKeyTakeaways &&
 
                     <Animated.Text style={{
@@ -91,7 +82,7 @@ function KeyTakeaways(props: any) {
                     > • {props.content}
                     </Animated.Text>
 
-                }
+                } */}
 
                 <MemoContentMenu
                     menuref={menuref}
@@ -102,17 +93,28 @@ function KeyTakeaways(props: any) {
                 />
             </View>
 
-            {
-                showKeyTakeaways &&
-                <Animated.Text style={{
-                    color: '#E6E6E6',
-                    marginTop: 8
-                }}
-                    entering={inited ? FadeInUp : undefined}
-                >
-                    {props.content}
-                </Animated.Text>
-            }
+
+            <Animated.Text style={{
+                color: '#E6E6E6',
+                // marginTop: 8
+            }}
+                entering={inited ? FadeInUp : undefined}
+            >
+                {/* <View style={{
+                    marginLeft: 4
+                }}>
+                    <Image
+                        style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: 2,
+                        }}
+                        source={require('../assets/smallicon.png')}
+                    />
+                </View> */}
+                {props.content}
+            </Animated.Text>
+
         </Pressable>
 
     </Animated.View>

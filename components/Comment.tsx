@@ -8,6 +8,7 @@ import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } fr
 import BlinkingCursor from './BlinkingCursor';
 import { MemoContentMenu } from './ReportMenu';
 import { fixText } from '../utils';
+import AnonAvatar from './AnonAvatar';
 
 
 const quote: MarkdownRule = {
@@ -123,9 +124,15 @@ function Comment(props: any) {
                         // backgroundColor: 'red'
                     }}>
                         <View style={styles.left}>
-                            <Text style={styles.author_name}>
-                                {props.comment.author_name}
-                            </Text>
+                            <View style={{
+                                flexDirection: 'row',
+                                alignItems: 'center'
+                            }}>
+                                <AnonAvatar author_name={props.comment.author_name} />
+                                <Text style={styles.author_name}>
+                                    {props.comment.author_name}
+                                </Text>
+                            </View>
                             {/* <Text style={styles.author_name}>
                                 {props.comment.id}
                             </Text> */}
@@ -140,7 +147,10 @@ function Comment(props: any) {
                                 }}
                                     numberOfLines={1}
                                     entering={FadeInDown}
-                                > • {fixText(props.comment.content, props.comment.author_name)}
+                                > • {
+                                        created_at
+                                        // fixText(props.comment.content, props.comment.author_name)
+                                    }
                                 </Animated.Text>}
                         </View>
 
@@ -310,7 +320,8 @@ const styles = StyleSheet.create({
         justifyContent: 'flex-start',
         flexDirection: 'row',
         // backgroundColor: 'green',
-        flex: 1
+        flex: 1,
+        alignItems: 'center'
     },
     triggerOuterWrapper: {
         // marginLeft: 'auto',
@@ -352,7 +363,8 @@ const styles = StyleSheet.create({
     },
     author_name: {
         fontFamily: 'Rubik_500Medium',
-        color: 'white'
+        color: 'white',
+        marginLeft: 8
     },
     level0: {
         marginTop: 8,

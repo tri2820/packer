@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { setStatusBarBackgroundColor, setStatusBarStyle } from 'expo-status-bar';
 import React, { memo, useCallback, useEffect, useState } from 'react';
-import { Platform, Text, View } from 'react-native';
+import { StyleSheet, Platform, Text, View } from 'react-native';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -11,6 +11,9 @@ import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
 import { Mode, addCommentsToPost, constants, executeListeners, randomColor, scaleup, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 import { firebase } from '@react-native-firebase/analytics';
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+import { BlurView } from 'expo-blur';
+import Ionicons from '@expo/vector-icons/Ionicons';
 
 
 Sentry.init({
@@ -37,16 +40,24 @@ import { useHeaderHeight } from '@react-navigation/elements';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { MemoPost } from './components/Post';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import Settings from './components/Settings';
+
+const Tab = createBottomTabNavigator();
 
 
-SplashScreen.preventAutoHideAsync();
+
+// SplashScreen.preventAutoHideAsync();
 
 
 function Main(props: any) {
+  const insets = useSafeAreaInsets();
+  const minBarHeight = scaleup(60) + insets.bottom;
   // const wallref = useRef<any>(undefined);
   const isSinglePost = props.navProps.route.params?.singlePost ? true : false;
   const mode = isSinglePost ? 'comment' : props.mode;
   const setMode = isSinglePost ? theEmptyFunction : props.setMode;
+  const [activePostIndex, setActivePostIndex] = useState(0);
 
   const updateAndroidBarsColor = () => {
     if (Platform.OS == 'ios') return;
@@ -102,8 +113,11 @@ function Main(props: any) {
       runOnJS(setMode)('normal')
     });
 
-  const minBarHeight = scaleup(60);
+
   const [safeHeight, setSafeHeight] = useState<number>(0);
+  // const minBarHeight = useBottomTabBarHeight();
+
+
 
   const onLayoutRootView = useCallback(async (event: any) => {
     if (!props.fontsLoaded || props.posts.length <= 1) return;
@@ -116,59 +130,63 @@ function Main(props: any) {
     setSafeHeight(event.nativeEvent.layout.height);
   }
 
-  if (!props.fontsLoaded || props.posts.length <= 1) return null;
+  if (!props.fontsLoaded || props.posts.length <= 1) return <View style={{
+    backgroundColor: 'black',
+    flex: 1
+  }}
+    onLayout={calculateHeights}
+  />;
   return (
-    <SafeAreaView
-      edges={isSinglePost ? ['bottom'] : ['bottom', 'top']}
-      onLayout={onLayoutRootView}
-      style={{
-        flex: 1,
-        backgroundColor: props.activePostIndex == 0 ? 'black' : (props.mode == 'comment' || isSinglePost) ? '#272727' : '#151316'
-      }}>
-      <View style={{
-        // backgroundColor: 'red',
-        flex: 1
-      }}
-        onLayout={calculateHeights}
-      >
-        <GestureHandlerRootView>
-          <GestureDetector gesture={gesture}>
-            <Animated.View style={[animatedStyles, {
-              // backgroundColor: 'pink',
-              height: '100%'
-            }]}>
-              <View style={{
-                height: safeHeight - minBarHeight,
-                // backgroundColor: 'pink'
-              }}>
-                {
-                  isSinglePost ?
-                    <MemoPost
-                      isSinglePost
-                      mode={mode}
-                      height={safeHeight - minBarHeight}
-                      post={props.navProps.route.params?.singlePost}
-                      shouldActive={true}
-                      scrolledOn={true}
-                      setSelectedComment={props.setSelectedComment}
-                      setMode={setMode}
-                      user={props.user}
-                    /> :
-                    <Wall
-                      offsetZoomStyles={offsetZoomStyles}
-                      user={props.user}
-                      // wallref={wallref}
-                      setSelectedComment={props.setSelectedComment}
-                      setMode={setMode}
-                      requestPost={props.requestPost}
-                      posts={props.posts}
-                      mode={mode}
-                      activePostIndex={props.activePostIndex}
-                      setActivePostIndex={props.setActivePostIndex}
-                      height={safeHeight - minBarHeight}
-                    />
-                }
-              </View>
+    <View style={{
+      backgroundColor: 'black',
+      flex: 1
+    }}
+      onLayout={calculateHeights}
+    >
+      <GestureHandlerRootView>
+        <GestureDetector gesture={gesture}>
+          <Animated.View style={[animatedStyles, {
+            // backgroundColor: 'red',
+            height: safeHeight
+          }]}>
+            <View style={{
+              height: isSinglePost ? safeHeight - minBarHeight : safeHeight,
+              // backgroundColor: 'pink'
+            }}>
+              {
+                isSinglePost ?
+
+                  <MemoPost
+                    isSinglePost
+                    mode={mode}
+                    height={isSinglePost ? safeHeight - minBarHeight : safeHeight}
+                    post={props.navProps.route.params?.singlePost}
+                    shouldActive={true}
+                    scrolledOn={true}
+                    setSelectedComment={props.setSelectedComment}
+                    setMode={setMode}
+                    user={props.user}
+                  />
+
+                  :
+                  <Wall
+                    navProps={props.navProps}
+                    offsetZoomStyles={offsetZoomStyles}
+                    user={props.user}
+                    // wallref={wallref}
+                    setSelectedComment={props.setSelectedComment}
+                    setMode={setMode}
+                    requestPost={props.requestPost}
+                    posts={props.posts}
+                    mode={mode}
+                    activePostIndex={activePostIndex}
+                    setActivePostIndex={setActivePostIndex}
+                    height={safeHeight}
+                  />
+              }
+            </View>
+            {
+              isSinglePost &&
               <MemoBar
                 isSinglePost={isSinglePost}
                 navProps={props.navProps}
@@ -193,14 +211,14 @@ function Main(props: any) {
                 safeHeight={safeHeight}
               // wallHeight={wallHeight}
               />
-            </Animated.View>
-          </GestureDetector>
-        </GestureHandlerRootView>
-      </View>
-    </SafeAreaView>
+            }
+          </Animated.View>
+        </GestureDetector>
+      </GestureHandlerRootView>
+    </View>
   )
 }
-const MemoMain = memo(Main);
+// const MemoMain = memo(Main);
 
 const rp = async (sharedAsyncState: any, setData: any) => {
   console.log('debug post get requested');
@@ -209,9 +227,10 @@ const rp = async (sharedAsyncState: any, setData: any) => {
 
   const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
   if (error) {
-    console.log('error post', error)
+    console.error('error get post', error)
     return;
   }
+  console.log('debug posts', data);
   if (data.length > 0) setData((posts: any) => posts.concat(data))
   data.forEach((p: any) => {
     sharedAsyncState[`count/${p.id}`] = p.comment_count;
@@ -222,16 +241,50 @@ const Stack = createNativeStackNavigator();
 
 function MyStack(props: any) {
   const TheMain = (navProps: any) => {
-    return <MemoMain {...props} navProps={navProps} />
+    // console.log('debug navProps++', navProps)
+    return <Main {...props} navProps={navProps} />
   };
 
+  const TheSettings = (navProps: any) => {
+    return <Settings {...props} navProps={navProps} />
+  };
+
+
+
+  const TheTab = () => {
+    return <Tab.Navigator screenOptions={{
+      tabBarStyle: {
+        position: 'absolute',
+        borderTopColor: '#3C3D3F',
+        borderTopWidth: StyleSheet.hairlineWidth,
+        backgroundColor: Platform.OS == 'android' ? '#151316' : undefined,
+      },
+      tabBarActiveTintColor: '#FFC542',
+      tabBarInactiveTintColor: '#A3A3A3',
+      tabBarBackground: () => (
+        <BlurView tint="dark" intensity={100} style={StyleSheet.absoluteFill} />
+      ),
+    }}
+    >
+      <Tab.Screen name="News" children={TheMain} options={{
+        headerShown: false,
+        tabBarIcon: ({ focused }) => <Ionicons name="newspaper" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />,
+      }} />
+      <Tab.Screen name="Settings" component={TheSettings}
+        options={{
+          headerShown: false,
+          tabBarIcon: ({ focused }) => <Ionicons name="settings-sharp" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />
+        }}
+      />
+    </Tab.Navigator>
+  }
 
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name="Main"
+        name="TheTab"
         options={{ headerShown: false }}
-        children={TheMain}
+        children={TheTab}
       />
       <Stack.Screen
         name="SinglePost"
@@ -269,9 +322,11 @@ function App() {
     Rubik_800ExtraBold_Italic,
     Rubik_900Black_Italic,
   });
-  const [posts, setPosts] = useState<any[]>([{ type: 'welcomePost', id: 'welcome' }]);
+  const [posts, setPosts] = useState<any[]>([
+    // { type: 'welcomePost', id: 'welcome' }
+  ]);
   const [selectedComment, setSelectedComment] = useState<any>(null);
-  const [activePostIndex, setActivePostIndex] = useState(0);
+
   const [user, setUser] = useState<any>(null);
   const [mode, setMode] = useState<Mode>('normal');
 
@@ -308,6 +363,7 @@ function App() {
         sharedAsyncState.bookmarks[post.id] = post;
         executeListeners(`BookmarkChangelisteners/${post.id}`);
       })
+      executeListeners(`BookmarksChanged`);
     })()
   }, [user])
 
@@ -469,7 +525,7 @@ function App() {
   }, [])
 
   const memoRequestPost = React.useCallback(requestPost, [])
-  const memoSubmitComment = React.useCallback(submitComment, [user, posts, selectedComment, activePostIndex])
+  // const memoSubmitComment = React.useCallback(submitComment, [user, posts, selectedComment, activePostIndex])
 
   console.log('debug big re-render');
   return (
@@ -481,15 +537,15 @@ function App() {
           <MyStack
             fontsLoaded={fontsLoaded}
             selectedComment={selectedComment}
-            activePostIndex={activePostIndex}
+            // activePostIndex={activePostIndex}
             user={user}
             mode={mode}
             posts={posts}
-            submitComment={submitComment}
-            submitContent={memoSubmitComment}
+            // submitComment={submitComment}
+            // submitContent={memoSubmitComment}
             setSelectedComment={setSelectedComment}
             setUser={setUser}
-            setActivePostIndex={setActivePostIndex}
+            // setActivePostIndex={setActivePostIndex}
             requestPost={memoRequestPost}
             setMode={setMode}
           />

@@ -1,14 +1,12 @@
-import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { FlatList, RefreshControl } from 'react-native-gesture-handler';
+import { RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, noComment, requestComments, sharedAsyncState, toUIList } from '../utils';
+import { constants, getPastelColor, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
-import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
 // import { Image } from 'expo-image';
@@ -18,17 +16,83 @@ import * as WebBrowser from 'expo-web-browser';
 import { WebBrowserPresentationStyle } from 'expo-web-browser';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { hookListener, unhookListener } from '../utils';
+import AnonAvatar from './AnonAvatar';
 
 
+function AnonAvatarList(props: any) {
+    // console.log('debug ', props.author_names)
+    if (props.author_names.length == 0) return <View style={{
+        flexDirection: 'row',
+        alignItems: 'center'
+    }}>
+        <Text style={{
+            color: '#a3a3a3'
+        }}>Be first to comment</Text>
+
+        <Ionicons name="caret-forward" size={14} color='#a3a3a3' />
+    </View>
+
+    return <View style={{
+        alignItems: 'center',
+        flexDirection: 'row'
+    }}>
+        <AnonAvatar author_name={props.author_names[0]} />
+        {
+            props.author_names.length >= 2 &&
+            <View style={{
+                marginLeft: -8
+            }}>
+                <AnonAvatar author_name={props.author_names[1]} />
+            </View>
+        }
+        <Text style={{
+            color: '#a3a3a3',
+            marginLeft: 4
+        }}>
+            commented
+        </Text>
+        <Ionicons name="caret-forward" size={14} color='#a3a3a3' />
+    </View>
+
+}
 
 function ListHeader(props: any) {
     const insets = useSafeAreaInsets();
+    const [bookmarked, setBookmarked] = useState(sharedAsyncState.bookmarks[props.post.id] ? true : false);
+    useEffect(() => {
+        const key = `BookmarkChangelisteners/${props.post.id}`;
+        const mySubkey = hookListener(key, () => {
+            console.log('update!', props.post.id);
+            setBookmarked(sharedAsyncState.bookmarks[props.post.id] ? true : false)
+        })
+        return () => unhookListener(key, mySubkey)
+    }, [])
+
+
+
+    const _toggleBookmark = () => {
+        if (!props.user) {
+            sharedAsyncState['barstateListener']?.();
+            return;
+        }
+        toggleBookmark(props.post, props.user)
+    }
+
+
     return <View style={{
-        paddingTop: props.mode == 'normal' ? insets.top : 0
+        // paddingTop: 8
+        backgroundColor: '#151316'
     }}>
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
-        <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
+        <VideoPlayer
+            scrolling={props.scrolling}
+            id={props.post.id}
+            scrolledOn={props.scrolledOn}
+            source_url={props.post.source_url}
+        />
         <PostHeader
+            // scrolling={props.scrolling}
             user={props.user}
             isSinglePost={props.isSinglePost}
             openLink={props.openLink}
@@ -37,17 +101,69 @@ function ListHeader(props: any) {
             mode={props.mode}
         />
         <KeyTakeaways content={props.post.keytakeaways} />
-        {
+
+        <View style={{
+            flexDirection: 'row',
+            marginBottom: 16,
+            marginHorizontal: 16,
+            flex: 1,
+            // backgroundColor: 'blue'
+        }}>
+            <TouchableOpacity
+                onPress={_toggleBookmark}
+                style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    // justifyContent: 'center'
+                }}
+            >
+                <Ionicons
+                    name={bookmarked ? "bookmark" : "bookmark-outline"}
+                    size={18}
+                    color={bookmarked ? '#FFC542' : '#5c5c5c'}
+                />
+                <Text style={{
+                    color: bookmarked ? '#FFC542' : '#737373',
+                    marginLeft: 4
+                }}>{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={() => {
+                props.navProps.navigation.push('SinglePost', {
+                    singlePost: props.post
+                })
+            }} style={{
+                alignSelf: 'flex-end',
+                flex: 1,
+            }}>
+                {/* {
+                props.comments.length > 0 &&
+                <AnonAvatar author_name={props.comments[0].author_name} />
+            } */}
+                <View style={{
+                    marginRight: 0,
+                    marginLeft: 'auto',
+                }}>
+                    <AnonAvatarList author_names={
+                        Array.from(
+                            props.comments.reduce((set: Set<any>, c: any) => set.add(c.author_name), new Set<string>())
+                        )
+                    } />
+                </View>
+            </TouchableOpacity>
+        </View>
+        {/* {
             sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
             props.numTopLevelComments == 0 &&
             props.post.keytakeaways == '' &&
             noComment
-        }
+        } */}
     </View>
 }
 
 
-function Post(props: any) {
+function SmallPost(props: any) {
     const [refreshing, _] = useState(false);
     const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
     const ref = useRef<any>(null);
@@ -306,104 +422,36 @@ function Post(props: any) {
             </View>
             : null
 
-    return <View style={{
-        backgroundColor: (props.mode == 'normal' || props.isSinglePost) ? '#151316' : '#272727',
-        height: props.height
-    }}>
-        <View
-            style={{
-                position: 'absolute',
-                bottom: 0,
-                height: constants.height / 2,
-                width: '100%',
-                backgroundColor: '#151316',
-            }}
-        />
-
-        {
-            props.shouldActive
-            &&
-            <FlatList
-                contentContainerStyle={{
-                    backgroundColor: '#151316',
-                    minHeight: props.height,
-                }}
-                stickyHeaderIndices={[0]}
-                // See, for windowSize, if I set this to a number, 2 for example, there are comments at the end not rendered.
-                //  This might be because we have nested list (affect onEndReached also)
-                // Here it's set to 21 by default, is there a performance impact?
-                // Nevertheless there is now a limit (21) that comments will not get rendered, but it's really long so meh for now
-                // windowSize={1}
-                initialNumToRender={3}
-                maxToRenderPerBatch={3}
-                updateCellsBatchingPeriod={200}
-                showsVerticalScrollIndicator={props.mode == 'comment'}
-                ref={ref}
-                scrollEnabled={props.mode == 'comment'}
-                refreshControl={refresh}
-                scrollEventThrottle={6}
-                data={uiList}
-                onScroll={props.isSinglePost ? undefined : onScroll}
-                // @ts-ignore
-                listKey={props.post.id}
-                onEndReached={(distanceFromEnd) => {
-                    // console.log('D')
-                    if (!props.scrolledOn) return;
-                    console.log('*****************end reached', props.post.id, distanceFromEnd, props.mode)
-                    loadComments();
-                }}
-                keyExtractor={keyExtractor}
-                renderItem={renderItem}
-                ListHeaderComponent={nav}
-                ListFooterComponent={footer}
-            // style={{ backgroundColor: 'blue' }}
-            />
-        }
-
-        {
-            props.mode == 'normal' &&
-            <>
-                <LinearGradient
-                    colors={gradient}
-                    style={styles.gradient}
-                    pointerEvents='none'
-                />
-                <View style={{
-                    position: 'absolute',
-                    bottom: 12,
-                    right: 16,
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    flex: 1
-                }}>
-                    {/* <TouchableOpacity
-                        onPress={() => alert('This is a button!')}
-                        style={{
-                            paddingRight: 12
-                        }}
-                    >
-                        <Ionicons name="bookmark" size={24} color='white' />
-                    </TouchableOpacity> */}
-                    {
-                        (comments.length > 0 || props.post.keytakeaways) && props.shouldActive &&
-                        <MemoMoreDiscussionsButton onPress={changeModeToComment} />
-                    }
-                </View>
-            </>
-        }
-    </View >
+    return <ListHeader
+        scrolling={props.scrolling}
+        comments={comments}
+        navProps={props.navProps}
+        user={props.user}
+        key={props.post.id}
+        isSinglePost={props.isSinglePost}
+        index={props.index}
+        imageLoaded={imageLoaded}
+        openLink={openLink}
+        scrolledOn={props.scrolledOn}
+        shouldActive={props.shouldActive}
+        post={props.post}
+        numTopLevelComments={numTopLevelComments}
+        setMode={props.setMode}
+        mode={props.mode}
+    // timesLoaded={timesLoaded}
+    />
 }
 
-export default Post;
-const shouldRerenderTheSame = (p: any, c: any) => {
-    return p.mode == c.mode
-        && p.height == c.height
-        && p.shouldActive == c.shouldActive
-        && p.scrolledOn == c.scrolledOn
-        && p.user == c.user
-}
-export const MemoPost = memo(Post
-    , shouldRerenderTheSame
+export default SmallPost;
+// const shouldRerenderTheSame = (p: any, c: any) => {
+//     return p.mode == c.mode
+//         && p.height == c.height
+//         && p.shouldActive == c.shouldActive
+//         && p.scrolledOn == c.scrolledOn
+//         && p.user == c.user
+// }
+export const MemoSmallPost = memo(SmallPost
+    // , shouldRerenderTheSame
 );
 const styles = StyleSheet.create({
     loading_indicator: {

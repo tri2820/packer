@@ -15,6 +15,7 @@
     "@react-native-firebase/app": "^17.4.3",
     "@react-native-firebase/crashlytics": "^17.4.3",
     "@react-native-firebase/perf": "^17.4.3",
+    "@react-navigation/bottom-tabs": "^6.5.7",
     "@react-navigation/native": "^6.1.6",
     "@react-navigation/native-stack": "^6.9.12",
     "@sentry/react-native": "4.13.0",
@@ -59,7 +60,8 @@
     "sentry-expo": "~6.1.0",
     "text-decoding": "^1.0.0",
     "uuid": "^9.0.0",
-    "web-streams-polyfill": "^3.2.1"
+    "web-streams-polyfill": "^3.2.1",
+    "expo-blur": "~12.2.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

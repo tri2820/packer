@@ -16,8 +16,9 @@ function InputSend(props: any) {
 
 
     const getQuote = () => {
-        const text = props.selectedComment.content;
-        return text.length > 30 ? `${text.slice(0, 30)}...` : text;
+        const text = props.selectedComment.author_name;
+        return text
+        // text.length > 30 ? `${text.slice(0, 30)}...` : text;
     }
 
     useEffect(() => {
@@ -39,8 +40,8 @@ function InputSend(props: any) {
         // props.activePostIndex == 0 ?
         //     'Down the rabbit hole we go!' :
         (props.selectedComment ?
-            `Replying to "${getQuote()}"` :
-            (props.focus ? '"Tell me one good thing about this"' : 'Chat with Packer...')
+            `Replying to ${getQuote()}` :
+            (props.focus ? '' : 'Add a comment...')
         )
 
     const press = () => {

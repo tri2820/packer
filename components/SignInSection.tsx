@@ -17,7 +17,7 @@ function SignInSection(props: any) {
         if (!user) return;
 
         // props.setUserListMode('normal');
-        props.changeState('minimize')
+        // props.changeState('minimize')
         console.log('debug user', JSON.stringify(user));
         props.setUser(user);
 
@@ -26,11 +26,11 @@ function SignInSection(props: any) {
         // await syncProfile();
     }
 
-    const animatedStyles = useAnimatedStyle(() => {
-        return {
-            opacity: Math.pow(props.offset.value / props.minOffset, 0.3)
-        };
-    });
+    // const animatedStyles = useAnimatedStyle(() => {
+    //     return {
+    //         opacity: Math.pow(props.offset.value / props.minOffset, 0.3)
+    //     };
+    // });
 
     const signInWithApple = () => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
@@ -58,10 +58,10 @@ function SignInSection(props: any) {
     return (
         <Animated.View
             style={[
-                animatedStyles,
+                // animatedStyles,
                 {
                     position: 'absolute',
-                    height: props.maxBarHeight + insets.bottom,
+                    height: '100%',
                     width: '100%',
                     flex: 1
                 }]}
@@ -71,7 +71,7 @@ function SignInSection(props: any) {
             <ImageBackground style={styles.background}
                 source={require('../assets/loginBackground.jpg')}
             >
-                <LinearGradient colors={['transparent', props.mode == 'comment' ? '#313337' : '#151316']} style={styles.linear}
+                <LinearGradient colors={['transparent', '#151316']} style={styles.linear}
                     pointerEvents='none'
                 />
             </ImageBackground>
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
         height: '100%'
     },
     icon: {
-        marginTop: scaledown(100),
+        marginTop: scaledown(200),
         marginBottom: scaledown(24),
         width: 80,
         height: 80,
