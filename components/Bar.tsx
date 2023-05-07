@@ -36,9 +36,6 @@ function Bar(props: any) {
     //     inputref.current?.focus();
     // }
 
-    sharedAsyncState['barstateListener'] = () => {
-        changeState('maximize');
-    }
 
     const inputStyles = useAnimatedStyle(() => {
         const keyboard_shown = keyboard.state.value == KeyboardState.OPEN || keyboard.state.value == KeyboardState.OPENING;
@@ -131,7 +128,7 @@ function Bar(props: any) {
 
     const gesture = Gesture
         .Pan()
-        .enabled(!props.isSinglePost)
+        .enabled(focus)
         .activeOffsetY(
             showUserList && Platform.OS == 'android' ? [-100, 100] :
                 [-10, 10])
@@ -206,37 +203,27 @@ function Bar(props: any) {
                             borderTopColor: '#3C3D3F',
                             borderTopWidth: StyleSheet.hairlineWidth,
                             backgroundColor: props.mode == 'normal' ? '#151316' : '#272727',
+                            // backgroundColor: 'red'
                             // flex: 1
                         },
                         barAnimationUpDown
                     ]}>
-                        {
-                            props.user === null && <MemoSignInSection
-                                INSETS_OFFSET_BOTTOM={INSETS_OFFSET_BOTTOM}
-                                minOffset={minOffset}
-                                offset={offset}
-                                mode={props.mode}
-                                user={props.user}
-                                setUser={props.setUser}
-                                // setUserListMode={setUserListMode}
-                                changeState={changeState}
-                                maxBarHeight={maxBarHeight}
-                            />
-                        }
-
 
                         <View style={styles.handler}>
                             {
-                                !props.isSinglePost &&
+                                focus &&
                                 <View style={styles.handler_inside} />
                             }
                         </View>
 
 
-                        <Animated.View style={[inputStyles, {
-                            flex: 1,
-                            // backgroundColor: 'orange'
-                        }]}>
+                        <Animated.View style={[
+                            // inputStyles, 
+                            {
+                                flex: 1,
+                                // height: '100%',
+                                // backgroundColor: 'orange'
+                            }]}>
                             <MemoInputSend
                                 // wallref={props.wallref}
                                 focus={focus}
@@ -249,16 +236,10 @@ function Bar(props: any) {
                                 activePostIndex={props.activePostIndex}
                                 user={props.user}
                                 setMode={props.setMode}
+                                navProps={props.navProps}
                             // mode={props.mode}
                             />
                         </Animated.View>
-
-
-                        {
-                            showUserList &&
-                            props.user !== null &&
-                            <MemoUserList navProps={props.navProps} mode={userListMode} setMode={setUserListMode} offset={offset} user={props.user} setUser={props.setUser} minOffset={minOffset} />
-                        }
                     </Animated.View>
                 </GestureDetector >
             </View >

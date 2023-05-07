@@ -73,7 +73,7 @@ function ListHeader(props: any) {
 
     const _toggleBookmark = () => {
         if (!props.user) {
-            sharedAsyncState['barstateListener']?.();
+            props.navProps.navigation.navigate('Settings')
             return;
         }
         toggleBookmark(props.post, props.user)
@@ -86,7 +86,7 @@ function ListHeader(props: any) {
     }}>
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer
-            scrolling={props.scrolling}
+            // scrolling={props.scrolling}
             id={props.post.id}
             scrolledOn={props.scrolledOn}
             source_url={props.post.source_url}
@@ -99,6 +99,7 @@ function ListHeader(props: any) {
             post={props.post}
             imageLoaded={props.imageLoaded}
             mode={props.mode}
+            navProps={props.navProps}
         />
         <KeyTakeaways content={props.post.keytakeaways} />
 
@@ -125,7 +126,7 @@ function ListHeader(props: any) {
                 <Text style={{
                     color: bookmarked ? '#FFC542' : '#737373',
                     marginLeft: 4
-                }}>{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+                }}>{props.user ? (bookmarked ? 'Bookmarked' : 'Bookmark') : 'Sign in to bookmark'}</Text>
 
             </TouchableOpacity>
 
@@ -219,9 +220,16 @@ function SmallPost(props: any) {
     }, [props.shouldActive])
 
 
-    sharedAsyncState[`commentsChangeListener/${props.post.id}`] = () => {
-        update((d) => !d);
-    }
+
+    useEffect(() => {
+        const key = `commentsChangeListeners/${props.post.id}`;
+        const mySubkey = hookListener(key, () => {
+            console.log('update!', props.post.id);
+            update((d) => !d);
+        })
+        return () => unhookListener(key, mySubkey)
+    }, [])
+
 
     const commentAsksForComments = React.useCallback(async (parent_id: string) => {
         await requestComments(sharedAsyncState, props.post.id, parent_id);
@@ -423,7 +431,7 @@ function SmallPost(props: any) {
             : null
 
     return <ListHeader
-        scrolling={props.scrolling}
+        // scrolling={props.scrolling}
         comments={comments}
         navProps={props.navProps}
         user={props.user}

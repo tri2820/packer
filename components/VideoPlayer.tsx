@@ -25,7 +25,7 @@ function VideoPlayer(props: any) {
     };
 
     useEffect(() => {
-        console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
+        // console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
         const playing = props.scrolledOn && appStateCurrent == 'active' && youtubeVideoId != '';
         setVideoShouldPlaying(playing);
     }, [props.scrolledOn, appStateCurrent, youtubeVideoId]);
@@ -87,7 +87,7 @@ function VideoPlayer(props: any) {
     return (error || reloadN > 1) ? <></> : <View style={{
         // paddingBottom: 4,
     }}
-        pointerEvents={props.scrolling ? 'none' : 'auto'}
+    // pointerEvents={props.scrolling ? 'none' : 'auto'}
     >
         <YoutubePlayer
             ref={ref}

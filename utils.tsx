@@ -130,7 +130,8 @@ export const requestComments = async (sharedAsyncState: any, post_id: string, pa
     }, 1000)
 
     if (result == 'has no comment' || result == 'error') {
-        sharedAsyncState[`commentsChangeListener/${post_id}`]?.(false)
+        executeListeners(`commentsChangeListeners/${post_id}`)
+        // sharedAsyncState[`commentsChangeListener/${post_id}`]?.(false)
     }
 }
 
@@ -178,7 +179,9 @@ export const updateCommentsOfPost = (post_id: string, id: string, key: any, valu
     const index = comments.findIndex((c: any) => c.id == id);
     comments[index][key] = typeof value === 'function' ? value(comments[index][key]) : value;
     comments[index] = { ...comments[index] }
-    sharedAsyncState[`commentsChangeListener/${post_id}`]?.(true)
+    // sharedAsyncState[`commentsChangeListener/${post_id}`]?.(true)
+
+    executeListeners(`commentsChangeListeners/${post_id}`)
 }
 
 export const addCommentsToPost = (post_id: string, data: any[], atHead = false) => {
@@ -187,7 +190,9 @@ export const addCommentsToPost = (post_id: string, data: any[], atHead = false) 
     } else {
         sharedAsyncState[`comments/${post_id}`] = insert(data, [], atHead);
     }
-    sharedAsyncState[`commentsChangeListener/${post_id}`]?.(true)
+    // sharedAsyncState[`commentsChangeListener/${post_id}`]?.(true)
+
+    executeListeners(`commentsChangeListeners/${post_id}`)
 }
 
 const insert = (cs: any[], where: any[], atHead: boolean) => {
@@ -846,9 +851,9 @@ export const toggleBookmark = async (post: any, user: any) => {
     // }
 
     executeListeners(`BookmarkChangelisteners/${post.id}`);
-    console.log('sharedAsyncState.bookmarks||', Object.values(sharedAsyncState.bookmarks)
-        .map((b: any) => b?.bookmark_datetime)
-    )
+    // console.log('sharedAsyncState.bookmarks||', Object.values(sharedAsyncState.bookmarks)
+    //     .map((b: any) => b?.bookmark_datetime)
+    // )
     return new_value
 }
 

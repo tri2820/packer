@@ -157,6 +157,7 @@ function Main(props: any) {
                 isSinglePost ?
 
                   <MemoPost
+                    navProps={props.navProps}
                     isSinglePost
                     mode={mode}
                     height={isSinglePost ? safeHeight - minBarHeight : safeHeight}
@@ -186,8 +187,7 @@ function Main(props: any) {
               }
             </View>
             {
-              isSinglePost &&
-              <MemoBar
+              isSinglePost && <MemoBar
                 isSinglePost={isSinglePost}
                 navProps={props.navProps}
                 activePostIndex={props.activePostIndex}
@@ -195,7 +195,7 @@ function Main(props: any) {
                   const post_id = isSinglePost ?
                     props.navProps.route.params.singlePost.id :
                     props.posts[props.activePostIndex].id;
-                  // console.log('debug submit >', text, selectedComment, post_id)
+                  console.log('debug submit >', text, selectedComment, post_id)
                   props.submitContent(text, selectedComment, post_id)
                 }}
                 // wallref={wallref}
@@ -230,7 +230,7 @@ const rp = async (sharedAsyncState: any, setData: any) => {
     console.error('error get post', error)
     return;
   }
-  console.log('debug posts', data);
+  // console.log('debug posts', data);
   if (data.length > 0) setData((posts: any) => posts.concat(data))
   data.forEach((p: any) => {
     sharedAsyncState[`count/${p.id}`] = p.comment_count;
@@ -389,14 +389,14 @@ function App() {
     );
   }, [])
 
-  const submitComment = async (text: string, selectedComment: any, post_id: string) => {
+  const submitComment = async (text: string, selectedComment: any, post_id: string, need_bot_comment = false) => {
     const parent_id = selectedComment?.id ?? null;
     console.log('submit content', text, parent_id, post_id)
     const body = {
       content: text,
       post_id: post_id,
       parent_id: parent_id,
-      need_bot_comment: true
+      need_bot_comment: need_bot_comment
     }
 
     polyfillEncoding()
@@ -435,81 +435,99 @@ function App() {
       author_id: 'self'
     }
 
-    const childPlaceholderId = `placeholder-${Math.random()}`;
-    const childComment = {
-      id: childPlaceholderId,
-      created_at: new Date(),
-      content: '',
-      author_name: 'Packer',
-      parent_id: placeholderId,
-      post_id: post_id,
-      blinking: true,
-      blockRequestChildren: true,
-      author_id: null
-    }
-
     addCommentsToPost(post_id, [placeholderComment], true)
-    addCommentsToPost(post_id, [childComment]);
 
-    const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
-      // @ts-ignore
-      reactNative: { textStreaming: true },
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`
-      },
-      body: JSON.stringify(body)
-    })
+    const f = async () => {
+      const response = await fetch('https://djhuyrpeqcbvqbhfnibz.functions.supabase.co/comment', {
+        // @ts-ignore
+        reactNative: { textStreaming: true },
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body: JSON.stringify(body)
+      })
 
-    let newId = response.headers.get("comment_id") ?? `${Math.random()}`;
-    const childId = response.headers.get("child_id") ?? `${Math.random()}`;
-    console.log('debug comment_id', newId)
-    console.log('debug childId', childId)
-
-    updateCommentsOfPost(post_id, childPlaceholderId, 'id', childId)
-    updateCommentsOfPost(post_id, childId, 'parent_id', newId)
-    updateCommentsOfPost(post_id, placeholderId, 'id', newId)
+      let newId = response.headers.get("comment_id") ?? `placeholder-${Math.random()}`;
+      const childId = response.headers.get("child_id") ?? `placeholder-child-${Math.random()}`;
+      console.log('debug comment_id', newId)
+      console.log('debug childId', childId)
 
 
-    if (!response.body || !response.ok) {
-      console.log('ERROR: response', response);
-      updateCommentsOfPost(post_id, childId, 'blinking', false);
-      updateCommentsOfPost(post_id, childId, 'content', 'Error: Packer cannot reply you, try again?');
-      return
+      updateCommentsOfPost(post_id, placeholderId, 'id', newId)
+      return { response, newId, childId }
     }
 
-    const utf8Decoder = new TextDecoder('utf-8')
-
-    const decodeResponse = (response?: Uint8Array) => {
-      if (!response) {
-        return ''
+    const g = async () => {
+      const childPlaceholderId = `placeholder-${Math.random()}`;
+      const childComment = {
+        id: childPlaceholderId,
+        created_at: new Date(),
+        content: '',
+        author_name: 'Packer',
+        parent_id: placeholderId,
+        post_id: post_id,
+        blinking: true,
+        blockRequestChildren: true,
+        author_id: null
       }
 
-      const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
-      const decodedText = utf8Decoder.decode(response)
-      const matches: string[] = []
+      addCommentsToPost(post_id, [childComment]);
+      console.log('what')
+      const { response, newId, childId } = await f();
+      console.log('debug { response, newId, childId } ', { response, newId, childId })
+      updateCommentsOfPost(post_id, childPlaceholderId, 'id', childId)
+      updateCommentsOfPost(post_id, childId, 'parent_id', newId)
 
-      let match
-      while ((match = pattern.exec(decodedText)) !== null) {
-        matches.push(JSON.parse(match[1]).content)
+
+      if (!response.body || !response.ok) {
+        console.log('ERROR: response', response);
+        updateCommentsOfPost(post_id, childId, 'blinking', false);
+        updateCommentsOfPost(post_id, childId, 'content', 'Error: Packer cannot reply you, try again?');
+        return
       }
-      return matches.join('')
+
+      const utf8Decoder = new TextDecoder('utf-8')
+
+      const decodeResponse = (response?: Uint8Array) => {
+        if (!response) {
+          return ''
+        }
+
+        const pattern = /"delta":\s*({.*?"content":\s*".*?"})/g
+        const decodedText = utf8Decoder.decode(response)
+        const matches: string[] = []
+
+        let match
+        while ((match = pattern.exec(decodedText)) !== null) {
+          matches.push(JSON.parse(match[1]).content)
+        }
+        return matches.join('')
+      }
+
+      async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
+        const { value, done } = await reader.read()
+        if (done) return
+        const delta = decodeResponse(value)
+        partialUpdate(delta);
+        await read(reader, partialUpdate)
+      }
+
+      const reader = response.body.getReader()
+      await read(reader, async (update) => {
+        updateCommentsOfPost(post_id, childId, 'content', (old: string) => old + update);
+      });
+
+      updateCommentsOfPost(post_id, childId, 'blinking', false)
     }
 
-    async function read(reader: ReadableStreamDefaultReader<Uint8Array>, partialUpdate: (update: string) => Promise<void>) {
-      const { value, done } = await reader.read()
-      if (done) return
-      const delta = decodeResponse(value)
-      partialUpdate(delta);
-      await read(reader, partialUpdate)
+    if (need_bot_comment) {
+      console.log('GGGG')
+      await g()
+    } else {
+      console.log('FFFF')
+      await f()
     }
-
-    const reader = response.body.getReader()
-    await read(reader, async (update) => {
-      updateCommentsOfPost(post_id, childId, 'content', (old: string) => old + update);
-    });
-
-    updateCommentsOfPost(post_id, childId, 'blinking', false)
   }
 
 
@@ -525,7 +543,7 @@ function App() {
   }, [])
 
   const memoRequestPost = React.useCallback(requestPost, [])
-  // const memoSubmitComment = React.useCallback(submitComment, [user, posts, selectedComment, activePostIndex])
+  const memoSubmitComment = React.useCallback(submitComment, [user, posts, selectedComment])
 
   console.log('debug big re-render');
   return (
@@ -542,7 +560,7 @@ function App() {
             mode={mode}
             posts={posts}
             // submitComment={submitComment}
-            // submitContent={memoSubmitComment}
+            submitContent={memoSubmitComment}
             setSelectedComment={setSelectedComment}
             setUser={setUser}
             // setActivePostIndex={setActivePostIndex}

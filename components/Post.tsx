@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, noComment, requestComments, sharedAsyncState, toUIList } from '../utils';
+import { constants, hookListener, noComment, requestComments, sharedAsyncState, toUIList, unhookListener } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -29,6 +29,7 @@ function ListHeader(props: any) {
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
         <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
         <PostHeader
+            navProps={props.navProps}
             user={props.user}
             isSinglePost={props.isSinglePost}
             openLink={props.openLink}
@@ -103,9 +104,14 @@ function Post(props: any) {
     }, [props.shouldActive])
 
 
-    sharedAsyncState[`commentsChangeListener/${props.post.id}`] = () => {
-        update((d) => !d);
-    }
+    useEffect(() => {
+        const key = `commentsChangeListeners/${props.post.id}`;
+        const mySubkey = hookListener(key, () => {
+            console.log('update!', props.post.id);
+            update((d) => !d);
+        })
+        return () => unhookListener(key, mySubkey)
+    }, [])
 
     const commentAsksForComments = React.useCallback(async (parent_id: string) => {
         await requestComments(sharedAsyncState, props.post.id, parent_id);
@@ -210,6 +216,7 @@ function Post(props: any) {
             :
             item.type == 'post-header' ?
                 <ListHeader
+                    navProps={props.navProps}
                     user={props.user}
                     key={item.id}
                     isSinglePost={props.isSinglePost}
@@ -229,7 +236,13 @@ function Post(props: any) {
                     hidden={hiddenCommentIds[item.id]}
                     comment={item}
                     openLink={openLink}
-                    setSelectedComment={props.setSelectedComment}
+                    setSelectedComment={(c: any) => {
+                        if (!props.user) {
+                            props.navProps.navigation.navigate('TheTab', { screen: 'Settings' })
+                            return;
+                        }
+                        props.setSelectedComment(c)
+                    }}
                     toggle={toggle}
                 />
     }

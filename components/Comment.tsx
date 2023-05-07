@@ -129,7 +129,11 @@ function Comment(props: any) {
                                 alignItems: 'center'
                             }}>
                                 <AnonAvatar author_name={props.comment.author_name} />
-                                <Text style={styles.author_name}>
+                                <Text style={{
+                                    fontFamily: 'Rubik_500Medium',
+                                    color: props.comment.id.startsWith('placeholder') ? '#a3a3a3' : 'white',
+                                    marginLeft: 8
+                                }}>
                                     {props.comment.author_name}
                                 </Text>
                             </View>

@@ -45,6 +45,11 @@ function InputSend(props: any) {
         )
 
     const press = () => {
+        if (!props.user) {
+            props.navProps.navigation.navigate('TheTab', { screen: 'Settings' })
+            return;
+        }
+
         // if (props.activePostIndex == 0) {
         // props.wallref.current?.scrollToIndex({ index: 1 })
         // return;
@@ -73,6 +78,7 @@ function InputSend(props: any) {
                 <View style={{
                     flexDirection: 'row',
                     flex: 1,
+                    // backgroundColor: 'red'
                 }}>
 
                     {
@@ -133,14 +139,14 @@ function InputSend(props: any) {
                                 // marginLeft: 0,
                                 // borderRadius: 16
                             }}>
-                                <Ionicons name="add-outline" size={24} color='#989B9C' style={{
+                                {/* <Ionicons name="add-outline" size={24} color='#989B9C' style={{
                                     backgroundColor: '#323233',
                                     paddingVertical: 4,
                                     paddingLeft: 6,
                                     paddingRight: 4,
                                     borderRadius: 16,
                                     overflow: 'hidden'
-                                }} />
+                                }} /> */}
                                 <Text style={{
                                     color: text == '' ? '#C2C2C2' : '#F1F1F1',
                                     marginLeft: 12,
@@ -151,8 +157,9 @@ function InputSend(props: any) {
                             </View>
                             : <View>
                                 <Text style={{
-                                    color: '#C2C2C2'
-                                }}>Sign in to chat with Packer</Text>
+                                    color: '#C2C2C2',
+                                    // backgroundColor: 'yellow'
+                                }}>Sign in to add a comment</Text>
                             </View>
                     }
                 </Pressable>

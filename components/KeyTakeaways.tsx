@@ -96,6 +96,8 @@ function KeyTakeaways(props: any) {
 
             <Animated.Text style={{
                 color: '#E6E6E6',
+                lineHeight: 18,
+
                 // marginTop: 8
             }}
                 entering={inited ? FadeInUp : undefined}

@@ -28,7 +28,7 @@ function PostHeader(props: any) {
 
     const _toggleBookmark = () => {
         if (!props.user) {
-            sharedAsyncState['barstateListener']?.();
+            props.navProps.navigation.navigate('TheTab', { screen: 'Settings' })
             return;
         }
         toggleBookmark(props.post, props.user)
@@ -153,7 +153,7 @@ function PostHeader(props: any) {
                                 <Text style={{
                                     color: bookmarked ? '#FFC542' : '#737373',
                                     marginLeft: 4
-                                }}>{bookmarked ? 'Bookmarked' : 'Bookmark'}</Text>
+                                }}>{props.user ? (bookmarked ? 'Bookmarked' : 'Bookmark') : 'Sign in to bookmark'}</Text>
 
                             </TouchableOpacity>
 

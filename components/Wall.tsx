@@ -149,7 +149,7 @@ const analytics = async (user_id: any, post_id: any) => {
 
 function Wall(props: any) {
     const [viewableMap, setViewableMap] = useState<any>({})
-    const [scrolling, setScrolling] = useState<boolean>(false)
+    // const [scrolling, setScrolling] = useState<boolean>(false)
     // console.log('debug props', props.posts)
 
     // const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
@@ -183,7 +183,7 @@ function Wall(props: any) {
             setSelectedComment={props.setSelectedComment}
             setMode={props.setMode}
             user={props.user}
-            scrolling={scrolling}
+        // scrolling={scrolling}
         />
         // <MemoPost
         //     offsetZoomStyles={props.offsetZoomStyles}
@@ -231,14 +231,14 @@ function Wall(props: any) {
             backgroundColor: '#151316'
         }}>
             <Animated.FlatList
-                onScrollBeginDrag={() => {
-                    console.log('debug true')
-                    setScrolling(true)
-                }}
-                onMomentumScrollEnd={() => {
-                    console.log('debug false')
-                    setScrolling(false)
-                }}
+                // onScrollBeginDrag={() => {
+                //     console.log('debug true')
+                //     setScrolling(true)
+                // }}
+                // onMomentumScrollEnd={() => {
+                //     console.log('debug false')
+                //     setScrolling(false)
+                // }}
                 scrollsToTop={false}
                 ref={props.wallref}
                 onViewableItemsChanged={handleViewableItemsChanged}
