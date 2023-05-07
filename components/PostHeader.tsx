@@ -68,6 +68,7 @@ function PostHeader(props: any) {
                     <View>
                         <Animated.Image
                             style={[styles.image, {
+                                // marginTop: props.isSinglePost ? 16 : 0
                                 marginTop: 16
                             }]}
                             source={{

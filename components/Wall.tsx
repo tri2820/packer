@@ -218,12 +218,13 @@ function Wall(props: any) {
             acc[item.item.id] = true;
             return acc;
         }, {});
-        // console.log('debug idObj', idObj)
+        console.log('debug idObj', idObj)
 
         setViewableMap(idObj)
     }, []);
 
     const insets = useSafeAreaInsets()
+    const separator = () => <View style={styles.hair} />
 
     return (
 
@@ -259,7 +260,7 @@ function Wall(props: any) {
                 renderItem={renderItem}
                 onEndReachedThreshold={2}
                 onEndReached={props.requestPost}
-                ItemSeparatorComponent={() => <View style={styles.hair} />}
+                ItemSeparatorComponent={separator}
             // getItemLayout={getItemLayout}
             // onScroll={onScroll}
             // scrollEventThrottle={6}

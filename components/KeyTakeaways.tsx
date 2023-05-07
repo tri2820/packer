@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { MemoContentMenu } from './ReportMenu';
+import { constants } from '../utils';
 
 
 function KeyTakeaways(props: any) {
@@ -38,7 +39,7 @@ function KeyTakeaways(props: any) {
     });
 
     return <Animated.View style={[longPressedStyle, {
-        marginBottom: 8,
+        width: constants.width
     }]}>
 
 
@@ -49,7 +50,13 @@ function KeyTakeaways(props: any) {
             onLongPress={openMenu}
             style={{
                 paddingHorizontal: 16,
-                paddingVertical: 8
+                paddingVertical: 8,
+                // backgroundColor: '#303030',
+                // marginHorizontal: 8,
+                // borderRadius: 8,
+                // borderColor: '#3C3D3F',
+                // borderWidth: StyleSheet.hairlineWidth,
+                // marginTop: 8
             }}
         >
 

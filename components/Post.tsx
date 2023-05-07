@@ -27,7 +27,12 @@ function ListHeader(props: any) {
         paddingTop: props.mode == 'normal' ? insets.top : 0
     }}>
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
-        <VideoPlayer id={props.post.id} scrolledOn={props.scrolledOn} source_url={props.post.source_url} />
+        <VideoPlayer
+            id={props.post.id}
+            scrolledOn={props.scrolledOn}
+            source_url={props.post.source_url}
+            isSinglePost={true}
+        />
         <PostHeader
             navProps={props.navProps}
             user={props.user}

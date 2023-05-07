@@ -10,15 +10,16 @@ function VideoPlayer(props: any) {
     const [reloadN, setReloadN] = useState(0);
     const appState = useRef(AppState.currentState);
     const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
-    const [videoShouldPlaying, setVideoShouldPlaying] = useState(false);
+    const [videoShouldPlaying, setVideoShouldPlaying] = useState(true);
     const [error, setError] = useState(false);
+    const [_, setStepper] = useState(false);
     const ref = useRef<any>(null);
     const [intervalObj, setIntervalObj] = useState<any>(null);
 
     const startSyncTime = () => {
         const id = setInterval(async () => {
             const sec = await ref.current?.getCurrentTime();
-            // console.log('debug SEC', sec);
+            console.log('debug SEC', sec);
             sharedAsyncState[`player/${props.id}/second`] = sec;
         }, 1000);
         setIntervalObj(id);
@@ -26,8 +27,13 @@ function VideoPlayer(props: any) {
 
     useEffect(() => {
         // console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
-        const playing = props.scrolledOn && appStateCurrent == 'active' && youtubeVideoId != '';
+        const playing = props.scrolledOn
+            && appStateCurrent == 'active'
+            && youtubeVideoId != ''
+            && props.isSinglePost;
+
         setVideoShouldPlaying(playing);
+        // setStepper(d => !d)
     }, [props.scrolledOn, appStateCurrent, youtubeVideoId]);
 
     useEffect(() => {
@@ -77,6 +83,10 @@ function VideoPlayer(props: any) {
         setReloadN((reloadN) => reloadN + 1);
     }
 
+    const onChangeState = (event: string) => {
+        setVideoShouldPlaying(event == 'playing')
+    }
+
     // const onReady = () => {
     //     setReady(true);
     // }
@@ -90,6 +100,7 @@ function VideoPlayer(props: any) {
     // pointerEvents={props.scrolling ? 'none' : 'auto'}
     >
         <YoutubePlayer
+            onChangeState={onChangeState}
             ref={ref}
             key={reloadN}
             height={Math.floor(constants.width / 16 * 9)}
@@ -102,16 +113,17 @@ function VideoPlayer(props: any) {
                 showClosedCaptions: true
             }}
             onReady={() => {
-                console.log('READYYYY')
-                const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
-                console.log('LOAD SEC', second, ref.current);
-                ref.current?.seekTo(second, true)
+                if (props.isSinglePost) {
+                    const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
+                    ref.current?.seekTo(second, true)
+                }
+
                 startSyncTime();
             }}
             onError={onError}
             // onReady={onReady}
             webViewProps={{
-                startInLoadingState: true,
+                // startInLoadingState: true,
                 renderLoading: loadingView
             }}
         // baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}

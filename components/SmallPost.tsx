@@ -1,4 +1,6 @@
 import * as React from 'react';
+
+import { Octicons } from '@expo/vector-icons';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
@@ -11,10 +13,11 @@ import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
 // import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
 import { WebBrowserPresentationStyle } from 'expo-web-browser';
-import Animated from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { hookListener, unhookListener } from '../utils';
 import AnonAvatar from './AnonAvatar';
@@ -79,87 +82,244 @@ function ListHeader(props: any) {
         toggleBookmark(props.post, props.user)
     }
 
+    const renderItem = ({ item }: any) => {
+        // console.log('debug props.scrolledOn', props.scrolledOn)
+        if (item.type == 'post') return <View style={{
+            width: constants.width
+        }}>
+            <VideoPlayer
+                // scrolling={props.scrolling}
+                id={props.post.id}
+                scrolledOn={props.scrolledOn}
+                source_url={props.post.source_url}
+            />
+            <PostHeader
+                // scrolling={props.scrolling}
+                user={props.user}
+                isSinglePost={props.isSinglePost}
+                openLink={props.openLink}
+                post={props.post}
+                imageLoaded={props.imageLoaded}
+                mode={props.mode}
+                navProps={props.navProps}
+            />
+
+            <KeyTakeaways content={props.post.keytakeaways} />
+
+
+        </View>
+
+        if (item.type == 'goodvibes') return <View>
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                // justifyContent: 'center',
+                marginHorizontal: 16,
+                marginBottom: 8,
+                marginTop: 16,
+                // flex: 1,
+                // backgroundColor: 'red',
+                alignSelf: 'center'
+            }}>
+
+                <Text style={{
+                    color: 'white',
+                    fontFamily: 'Rubik_500Medium',
+                    // alignSelf: 'center'
+                    // backgroundColor: 'red',
+                    // marginRight: 4,
+                    // marginLeft: 4 + 24
+                }}
+                // numberOfLines={1}
+                >
+                    What does this mean?
+                </Text>
+                {/* <MaterialCommunityIcons name="pencil-circle" size={24} color="#FFC542" /> */}
+            </View>
+
+            <View style={{
+                width: constants.width - 32,
+                backgroundColor: '#303030',
+                // flex: 1,
+                borderRadius: 16,
+                // borderTopLeftRadius: 16,
+                // borderTopRightRadius: 16,
+                // borderBottomRightRadius: 16,
+                // borderBottomLeftRadius: 4,
+                marginHorizontal: 16,
+                padding: 16
+            }}>
+                <Text style={{
+                    color: 'white'
+                }}>( ͡° ͜ʖ ͡°) Well, if you're a fan of classic cars or just appreciate the history of automobiles, this news might make you happy. With GM killing off the Chevy Bolt and Bolt EUV, it's possible that the value of the existing models could go up in the future, making them more sought after by collectors. Plus, GM could use the resources they save from discontinuing these models to focus on developing newer, more innovative electric vehicles.</Text>
+
+                <TouchableOpacity
+                    // onPress={select}
+                    style={{
+                        alignSelf: 'flex-end',
+                        flexDirection: 'row',
+                        alignItems: 'center',
+                        // paddingHorizontal: 8,
+                        // paddingVertical: 4,
+                        // backgroundColor: 'red'
+                    }}
+                >
+                    <Octicons name="reply" size={12} color="#A3A3A3" />
+                    <Text style={{
+                        color: "#A3A3A3",
+                        marginLeft: 8
+                    }}>Reply</Text>
+                </TouchableOpacity>
+
+            </View>
+        </View>
+        return <View style={{
+            width: constants.width
+        }}>
+
+        </View>
+    }
+
+    const [activePostIndex, setActivePostIndex] = useState(0);
+    const updateIndex = (event: any) => {
+        let offset = event.nativeEvent.contentOffset.x;
+        if (offset < constants.width / 2) {
+            setActivePostIndex(0)
+            return;
+        }
+        offset -= constants.width / 2;
+        setActivePostIndex(Math.floor(offset / constants.width) + 1);
+    }
+
+    useEffect(() => {
+        console.log('debug activePostIndex', activePostIndex);
+    }, [activePostIndex])
+
+    const data = [
+        { type: 'post' },
+        { type: 'goodvibes' }
+    ]
 
     return <View style={{
         // paddingTop: 8
         backgroundColor: '#151316'
     }}>
+        <Animated.FlatList
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            style={{
+                marginBottom: 8,
+            }}
+            data={data}
+            renderItem={renderItem}
+            onScroll={updateIndex}
+            alwaysBounceVertical={false}
+            alwaysBounceHorizontal={false}
+            bounces={false}
+        />
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
-        <VideoPlayer
-            // scrolling={props.scrolling}
-            id={props.post.id}
-            scrolledOn={props.scrolledOn}
-            source_url={props.post.source_url}
-        />
-        <PostHeader
-            // scrolling={props.scrolling}
-            user={props.user}
-            isSinglePost={props.isSinglePost}
-            openLink={props.openLink}
-            post={props.post}
-            imageLoaded={props.imageLoaded}
-            mode={props.mode}
-            navProps={props.navProps}
-        />
-        <KeyTakeaways content={props.post.keytakeaways} />
+
 
         <View style={{
-            flexDirection: 'row',
             marginBottom: 16,
-            marginHorizontal: 16,
-            flex: 1,
-            // backgroundColor: 'blue'
+            // marginHorizontal: 16
         }}>
-            <TouchableOpacity
-                onPress={_toggleBookmark}
-                style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    // justifyContent: 'center'
-                }}
-            >
-                <Ionicons
-                    name={bookmarked ? "bookmark" : "bookmark-outline"}
-                    size={18}
-                    color={bookmarked ? '#FFC542' : '#5c5c5c'}
-                />
-                <Text style={{
-                    color: bookmarked ? '#FFC542' : '#737373',
-                    marginLeft: 4
-                }}>{props.user ? (bookmarked ? 'Bookmarked' : 'Bookmark') : 'Sign in to bookmark'}</Text>
 
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={() => {
-                props.navProps.navigation.push('SinglePost', {
-                    singlePost: props.post
-                })
-            }} style={{
-                alignSelf: 'flex-end',
+            <View style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 8,
+                marginHorizontal: 16,
                 flex: 1,
+                // backgroundColor: 'blue'
             }}>
-                {/* {
+                <TouchableOpacity
+                    onPress={_toggleBookmark}
+                    style={{
+                        marginLeft: -4
+                        // backgroundColor: 'blue'
+                        // flexDirection: 'row',
+                        // alignItems: 'center',
+                        // flex: 1
+                        // justifyContent: 'center'
+                    }}
+                >
+                    <Ionicons
+                        name={bookmarked ? "bookmark" : "bookmark-outline"}
+                        size={24}
+                        color={bookmarked ? '#FFC542' : '#5c5c5c'}
+                    />
+                    {/* <Text style={{
+                        color: bookmarked ? '#FFC542' : '#737373',
+                        marginLeft: 4
+                    }}>{props.user ? (bookmarked ? 'Bookmarked' : 'Bookmark') : 'Sign in to bookmark'}</Text> */}
+
+                </TouchableOpacity>
+
+                <View style={{
+                    flexDirection: 'row',
+                    marginLeft: 8
+                    // flex: 1
+                    // marginHorizontal: 16,
+                    // backgroundColor: 'red'
+                }}
+                // entering={FadeIn}
+                // exiting={FadeOut}
+                >
+                    {
+                        data.map((item: any, index: any) => {
+                            console.log('debug index', index, activePostIndex)
+                            return <View key={index} style={{
+                                height: 8,
+                                width: 8,
+                                borderRadius: 4,
+                                backgroundColor: activePostIndex == index ? 'white' : '#6E6E6E',
+                                marginHorizontal: 4
+                            }} />
+                        })
+                    }
+                </View>
+
+                <TouchableOpacity onPress={() => {
+                    props.navProps.navigation.push('SinglePost', {
+                        singlePost: props.post
+                    })
+                }} style={{
+                    // alignSelf: 'stretch',
+                    flex: 1,
+                }}>
+                    {/* {
                 props.comments.length > 0 &&
                 <AnonAvatar author_name={props.comments[0].author_name} />
             } */}
-                <View style={{
-                    marginRight: 0,
-                    marginLeft: 'auto',
-                }}>
-                    <AnonAvatarList author_names={
-                        Array.from(
-                            props.comments.reduce((set: Set<any>, c: any) => set.add(c.author_name), new Set<string>())
-                        )
-                    } />
-                </View>
-            </TouchableOpacity>
+                    <View style={{
+                        marginRight: 0,
+                        marginLeft: 'auto',
+                    }}>
+                        <AnonAvatarList author_names={
+                            Array.from(
+                                props.comments.reduce((set: Set<any>, c: any) => set.add(c.author_name), new Set<string>())
+                            )
+                        } />
+                    </View>
+                </TouchableOpacity>
+            </View>
+            {
+                // props.scrolledOn ?
+
+                //  : <Animated.View style={{
+                //     borderBottomColor: '#3C3D3F',
+                //     borderBottomWidth: StyleSheet.hairlineWidth,
+                //     marginHorizontal: 16,
+                //     height: 2,
+                //     // backgroundColor: 'red'
+                // }}
+                //     entering={FadeIn}
+                //     exiting={FadeOut}
+                // />
+            }
         </View>
-        {/* {
-            sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
-            props.numTopLevelComments == 0 &&
-            props.post.keytakeaways == '' &&
-            noComment
-        } */}
     </View>
 }
 
