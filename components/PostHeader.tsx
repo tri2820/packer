@@ -57,7 +57,7 @@ function PostHeader(props: any) {
     return <View>
         <Animated.View style={longPressedStyle}>
             <Pressable
-                style={styles.touch}
+                // style={styles.touch}
                 onPress={() => {
                     props.openLink(props.post.source_url)
                 }}
@@ -65,24 +65,23 @@ function PostHeader(props: any) {
             >
 
                 {props.imageLoaded &&
-                    <View>
-                        <Animated.Image
-                            style={[styles.image, {
-                                // marginTop: props.isSinglePost ? 16 : 0
-                                marginTop: 16
-                            }]}
-                            source={{
-                                uri: props.post.image
-                            }}
-                            entering={FadeIn}
-                        />
 
-                    </View>
+                    <Animated.Image
+                        style={[styles.image, {
+                            // marginTop: props.isSinglePost ? 16 : 0
+                            // marginTop: 16
+                        }]}
+                        source={{
+                            uri: props.post.image
+                        }}
+                        entering={FadeIn}
+                    />
                 }
 
 
                 <View style={{
                     paddingTop: 8,
+                    marginHorizontal: 16
                     // paddingBottom: 4
                 }}>
 
@@ -107,13 +106,14 @@ function PostHeader(props: any) {
                         alignItems: 'center',
                         // backgroundColor: 'red'
                     }}>
-                        <Ionicons name='link' color='#A3A3A3' size={12} style={{
+                        {/* <Ionicons name='link' color='#A3A3A3' size={12} style={{
                             marginTop: 2,
                             // backgroundColor: 'blue'
-                        }} />
+                        }} /> */}
                         <Text style={{
                             color: '#a3a3a3',
-                            marginLeft: 4,
+                            // marginLeft: 4,
+                            fontWeight: '300'
                             // backgroundColor: 'black',
                             // borderRadius: 4,
                             // paddingVertical: 4,
@@ -144,6 +144,7 @@ function PostHeader(props: any) {
                                     flexDirection: 'row',
                                     alignItems: 'center',
                                     // justifyContent: 'center'
+                                    marginLeft: -2
                                 }}
                             >
                                 <Ionicons
@@ -198,9 +199,9 @@ function PostHeader(props: any) {
 export default PostHeader;
 const styles = StyleSheet.create({
     image: {
-        width: constants.width - 32,
-        height: constants.width / 4 * 1.8,
-        borderRadius: 8
+        width: constants.width,
+        height: constants.width / 4 * 2,
+        // borderRadius: 8
     },
     touch: {
         // paddingTop: 8,
@@ -240,7 +241,8 @@ const styles = StyleSheet.create({
         // height: 20
     },
     created_at: {
-        color: '#A3A3A3'
+        color: '#A3A3A3',
+        fontWeight: '300'
     },
     author_name: {
         color: '#A3A3A3',

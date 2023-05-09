@@ -1,11 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
-import { Dimensions, PixelRatio, View } from "react-native";
+import { StyleSheet, Dimensions, TouchableOpacity, Pressable, PixelRatio, Platform, View, Text } from "react-native";
 import { MemoNoComment } from "./components/NoComment";
 import { supabaseClient } from "./supabaseClient";
 import * as Haptics from 'expo-haptics';
+import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
+import { Ionicons } from '@expo/vector-icons';
 
 import url from 'url';
+
 export const constants = {
     width: Dimensions.get('screen').width,
     height: Dimensions.get('screen').height,
@@ -34,6 +37,18 @@ export function getPastelColor(seed: string) {
     return "hsl(" + 360 * x + ',' +
         (25 + 70 * x) + '%,' +
         (85 + 10 * x) + '%)'
+}
+
+function getDarkBackground(type: string) {
+    const darkBackgrounds: any = {
+        'B-MISC': '#FFC542',
+        'B-PER': '#FFC542',
+        'B-LOC': '#FFC542',
+        'B-ORG': '#FFC542'
+    }
+    const returnedType = darkBackgrounds[type];
+    if (!returnedType) console.warn(type, 'is not found in getDarkBackground')
+    return returnedType ?? '#FFC542'
 }
 
 function hashString(str: string): number {
@@ -875,4 +890,238 @@ export const unhookListener = (key: string, subkey: string) => {
     if (!sharedAsyncState[key]) return;
     delete sharedAsyncState[key][subkey];
     // Object.values(sharedAsyncState[key]).forEach((f: any) => f());
+}
+
+export const mdstyles: MarkdownStyles = {
+
+    blockQuote: {
+        color: '#A3A3A3',
+        opacity: 1,
+        marginTop: 8,
+        marginBottom: 8,
+    },
+    codeBlock: {
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
+        color: '#e6e6e6',
+        backgroundColor: '#212326',
+        paddingVertical: 8,
+        paddingHorizontal: 0,
+        borderRadius: 4,
+        borderColor: '#1E1F22',
+        borderWidth: StyleSheet.hairlineWidth,
+        overflow: 'hidden',
+        fontWeight: '400',
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    del: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    em: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    heading: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+    heading1: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    heading2: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+    heading3: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    heading4: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    heading5: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+    heading6: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    hr: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    inlineCode: {
+        color: '#e6e6e6',
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
+        marginTop: 0,
+    },
+    link: {
+        color: '#FFC542',
+        marginTop: 0,
+
+    },
+    listItemNumber: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    listItemBullet: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    listItemOrderedContent: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    listItemUnorderedContent: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    paragraph: {
+        color: '#e6e6e6',
+        lineHeight: 18,
+        marginTop: 4,
+        marginBottom: 4,
+        // backgroundColor: 'blue'
+    },
+    strong: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    u: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+}
+
+
+const blockQuoteView = {
+    borderLeftColor: '#6F6F6F',
+    borderLeftWidth: 6,
+    marginBottom: -32
+}
+
+const quote: MarkdownRule = {
+    order: 0,
+    match: (source: string, state: any, lookbehind: any) => {
+        // console.log('debug source', source, 'state', state, 'lookbehind', lookbehind)
+        // const result = /^\\>(.+)/.exec(source)
+        return /^\\>(.+)/.exec(source)
+    },
+    parse: (capture: any, parse: any, state: any) => {
+        // console.log('debug parse', capture, parse, state)
+        var stateNested = { ...state, inline: true }
+        return { children: parse(capture[1].trim(), stateNested), key: capture[0] }
+    },
+    render: (node: any, output: any, state: any, styles: any) => {
+        const tag = <View
+            key={state.key}
+            style={blockQuoteView}>
+            <Text
+                style={styles.blockQuote}
+            >
+                {
+                    output(node.children, state)
+                }
+            </ Text>
+        </View>
+        return tag
+    }
+}
+
+const link = {
+    order: 0,
+    render: (node: any, output: any, state: any, styles: any) => {
+        return <Text
+            key={state.key}
+            onPress={
+                state.onLinkPress ?
+                    () => { state.onLinkPress(node.target) }
+                    : undefined
+            }
+            style={mdstyles.link}>
+            {output(node.content)}
+        </Text>
+    }
+}
+
+
+const nerHighLight: MarkdownRule = {
+    order: 0,
+    match: (source: string, state: any, lookbehind: any) => {
+        // console.log('debug source', source, 'state', state, 'lookbehind', lookbehind)
+        // const result = /^\\>(.+)/.exec(source)
+        // return /^\*\*([^*]+)\*\*/g.exec(source)
+        return /^<(B-MISC|B-PER|B-ORG|B-LOC)>(.*?)<\/\1>/.exec(source)
+    },
+    parse: (capture: any, parse: any, state: any) => {
+        // console.log('debug parse', capture)
+        var stateNested = { ...state, inline: true }
+        return { children: parse(capture[2], stateNested), key: capture[0], nerType: capture[1] }
+    },
+    render: (node: any, output: any, state: any, styles: any) => {
+        const tag = <TouchableOpacity
+            key={state.key}
+            onPress={() => {
+                console.log('whattt')
+            }}
+        >
+            <Text
+                style={{
+                    color: '#FFC542',
+                    fontWeight: '500',
+                    marginBottom: -2.5,
+                    marginTop: -2,
+                }}
+            >
+                {
+                    output(node.children, state)
+                }
+            </ Text>
+        </TouchableOpacity>
+        return tag
+    }
+}
+
+const square: MarkdownRule = {
+    order: 0,
+    match: (source: string, state: any, lookbehind: any) => {
+        // console.log('debug source', source, 'state', state, 'lookbehind', lookbehind)
+        // const result = /^\\>(.+)/.exec(source)
+        // return /^\*\*([^*]+)\*\*/g.exec(source)
+
+        return /^\{SQUARE\}/.exec(source)
+    },
+    parse: (capture: any, parse: any, state: any) => {
+        // console.log('debug parse', capture)
+        var stateNested = { ...state, inline: true }
+        return { children: parse(capture[1], stateNested), key: capture[0] }
+    },
+    render: (node: any, output: any, state: any, styles: any) => {
+        const tag = <View key={state.key} style={{
+            // alignSelf: 'center'
+            marginBottom: 1.5,
+            marginRight: 6
+        }}>
+            <Ionicons name="square-sharp" size={8} color="white" />
+        </View>
+        return tag
+    }
+}
+
+export const markdownRules = { quote, link }
+export const markdownNERRules = {
+    nerHighLight,
+    square
 }

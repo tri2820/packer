@@ -10,7 +10,7 @@ function VideoPlayer(props: any) {
     const [reloadN, setReloadN] = useState(0);
     const appState = useRef(AppState.currentState);
     const [appStateCurrent, setAppStateCurrent] = useState(appState.current)
-    const [videoShouldPlaying, setVideoShouldPlaying] = useState(true);
+    const [videoShouldPlaying, setVideoShouldPlaying] = useState(false);
     const [error, setError] = useState(false);
     const [_, setStepper] = useState(false);
     const ref = useRef<any>(null);
@@ -27,16 +27,18 @@ function VideoPlayer(props: any) {
 
     useEffect(() => {
         // console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
-        const playing = props.scrolledOn
-            && appStateCurrent == 'active'
-            && youtubeVideoId != ''
-            && props.isSinglePost;
-
-        setVideoShouldPlaying(playing);
-        // setStepper(d => !d)
+        let needToPause = !props.scrolledOn
+            || appStateCurrent != 'active'
+            || youtubeVideoId == '';
+        needToPause = needToPause ? true : false;
+        if (needToPause) {
+            console.log('debug need to pause');
+            setVideoShouldPlaying(false);
+        }
     }, [props.scrolledOn, appStateCurrent, youtubeVideoId]);
 
     useEffect(() => {
+        // console.log("debug videoShouldPlaying", videoShouldPlaying)
         if (videoShouldPlaying) {
             return;
         }
@@ -52,7 +54,7 @@ function VideoPlayer(props: any) {
     useEffect(() => {
         const subscription = AppState.addEventListener('change', nextAppState => {
             appState.current = nextAppState;
-            console.log('AppState', appState.current);
+            // console.log('AppState', appState.current);
             setAppStateCurrent(nextAppState);
         });
 
@@ -84,8 +86,18 @@ function VideoPlayer(props: any) {
     }
 
     const onChangeState = (event: string) => {
+        console.log('debug on change state', event);
+        if (event != 'playing' && event != 'paused') return;
         setVideoShouldPlaying(event == 'playing')
     }
+
+    useEffect(() => {
+        if (!videoShouldPlaying) {
+            clearInterval(intervalObj);
+            return;
+        }
+        startSyncTime();
+    }, [videoShouldPlaying])
 
     // const onReady = () => {
     //     setReady(true);
@@ -113,12 +125,11 @@ function VideoPlayer(props: any) {
                 showClosedCaptions: true
             }}
             onReady={() => {
-                if (props.isSinglePost) {
-                    const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
-                    ref.current?.seekTo(second, true)
-                }
-
-                startSyncTime();
+                if (!props.isSinglePost) return;
+                const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
+                ref.current?.seekTo(second, true)
+                console.log('debug need to play');
+                setVideoShouldPlaying(true);
             }}
             onError={onError}
             // onReady={onReady}

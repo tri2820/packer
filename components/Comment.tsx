@@ -7,55 +7,11 @@ import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdow
 import Animated, { FadeInDown, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import BlinkingCursor from './BlinkingCursor';
 import { MemoContentMenu } from './ReportMenu';
-import { fixText } from '../utils';
+import { fixText, markdownRules, mdstyles } from '../utils';
 import AnonAvatar from './AnonAvatar';
 
 
-const quote: MarkdownRule = {
-    order: 0,
-    match: (source: string, state: any, lookbehind: any) => {
-        // console.log('debug source', source, 'state', state, 'lookbehind', lookbehind)
-        // const result = /^\\>(.+)/.exec(source)
-        return /^\\>(.+)/.exec(source)
-    },
-    parse: (capture: any, parse: any, state: any) => {
-        // console.log('debug parse', capture, parse, state)
-        var stateNested = { ...state, inline: true }
-        return { children: parse(capture[1].trim(), stateNested), key: capture[0] }
-    },
-    render: (node: any, output: any, state: any, styles: any) => {
-        const tag = <View
-            key={state.key}
-            style={blockQuoteView}>
-            <Text
-                style={styles.blockQuote}
-            >
-                {
-                    output(node.children, state)
-                }
-            </ Text>
-        </View>
-        return tag
-    }
-}
 
-const link = {
-    order: 0,
-    render: (node: any, output: any, state: any, styles: any) => {
-        return <Text
-            key={state.key}
-            onPress={
-                state.onLinkPress ?
-                    () => { state.onLinkPress(node.target) }
-                    : undefined
-            }
-            style={mdstyles.link}>
-            {output(node.content)}
-        </Text>
-    }
-}
-
-const markdownRules = { quote, link }
 
 function Comment(props: any) {
     const [switchedOnce, setSwitchedOnce] = useState(false);
@@ -200,124 +156,7 @@ function Comment(props: any) {
     );
 }
 
-const mdstyles: MarkdownStyles = {
 
-    blockQuote: {
-        color: '#A3A3A3',
-        opacity: 1,
-        marginTop: 8,
-        marginBottom: 8,
-    },
-    codeBlock: {
-        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
-        color: '#e6e6e6',
-        backgroundColor: '#212326',
-        paddingVertical: 8,
-        paddingHorizontal: 0,
-        borderRadius: 4,
-        borderColor: '#1E1F22',
-        borderWidth: StyleSheet.hairlineWidth,
-        overflow: 'hidden',
-        fontWeight: '400',
-        marginTop: 4,
-        marginBottom: 4,
-    },
-    del: {
-        color: '#e6e6e6',
-        marginTop: 0
-    },
-    em: {
-        color: '#e6e6e6',
-        marginTop: 0
-    },
-    heading: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    heading1: {
-        color: '#e6e6e6',
-        marginTop: 0
-    },
-    heading2: {
-        color: '#e6e6e6',
-        marginTop: 0,
-    },
-    heading3: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    heading4: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    heading5: {
-        color: '#e6e6e6',
-        marginTop: 0,
-    },
-    heading6: {
-        color: '#e6e6e6',
-        marginTop: 0
-    },
-    hr: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    inlineCode: {
-        color: '#e6e6e6',
-        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
-        marginTop: 0,
-    },
-    link: {
-        color: '#FFC542',
-        marginTop: 0,
-
-    },
-    listItemNumber: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    listItemBullet: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    listItemOrderedContent: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    listItemUnorderedContent: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    paragraph: {
-        color: '#e6e6e6',
-        lineHeight: 18,
-        marginTop: 4,
-        marginBottom: 4
-    },
-    strong: {
-        color: '#e6e6e6',
-        marginTop: 0,
-
-    },
-    u: {
-        color: '#e6e6e6',
-        marginTop: 0,
-    },
-}
-
-const blockQuoteView = {
-    borderLeftColor: '#6F6F6F',
-    borderLeftWidth: 6,
-    marginBottom: -32
-}
 
 const styles = StyleSheet.create({
     left: {

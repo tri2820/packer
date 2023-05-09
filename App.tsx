@@ -266,14 +266,15 @@ function MyStack(props: any) {
       ),
     }}
     >
-      <Tab.Screen name="News" children={TheMain} options={{
+      <Tab.Screen name="Packs" children={TheMain} options={{
         headerShown: false,
-        tabBarIcon: ({ focused }) => <Ionicons name="newspaper" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />,
+        // briefcase, layers, albums
+        tabBarIcon: ({ focused }) => <Ionicons name="reader" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />,
       }} />
-      <Tab.Screen name="Settings" component={TheSettings}
+      <Tab.Screen name="Profile" component={TheSettings}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) => <Ionicons name="settings-sharp" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />
+          tabBarIcon: ({ focused }) => <Ionicons name="person" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />
         }}
       />
     </Tab.Navigator>

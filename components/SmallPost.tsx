@@ -2,12 +2,12 @@ import * as React from 'react';
 
 import { Octicons } from '@expo/vector-icons';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, getPastelColor, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
 import { MemoComment } from './Comment';
-import KeyTakeaways from './KeyTakeaways';
+import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
@@ -30,7 +30,8 @@ function AnonAvatarList(props: any) {
         alignItems: 'center'
     }}>
         <Text style={{
-            color: '#a3a3a3'
+            color: '#a3a3a3',
+            // fontWeight: '600'
         }}>Be first to comment</Text>
 
         <Ionicons name="caret-forward" size={14} color='#a3a3a3' />
@@ -49,13 +50,20 @@ function AnonAvatarList(props: any) {
                 <AnonAvatar author_name={props.author_names[1]} />
             </View>
         }
+        {/* <View style={{
+            marginLeft: 4
+        }}> */}
         <Text style={{
             color: '#a3a3a3',
-            marginLeft: 4
+            marginLeft: 4,
+            // fontWeight: '600'
         }}>
             commented
         </Text>
-        <Ionicons name="caret-forward" size={14} color='#a3a3a3' />
+        <Ionicons name="caret-forward" size={14} color='#a3a3a3' style={{
+            alignSelf: 'center'
+        }} />
+        {/* </View> */}
     </View>
 
 }
@@ -83,7 +91,7 @@ function ListHeader(props: any) {
     }
 
     const renderItem = ({ item }: any) => {
-        // console.log('debug props.scrolledOn', props.scrolledOn)
+        // console.log('debug props.post.ners', props.post)
         if (item.type == 'post') return <View style={{
             width: constants.width
         }}>
@@ -104,7 +112,7 @@ function ListHeader(props: any) {
                 navProps={props.navProps}
             />
 
-            <KeyTakeaways content={props.post.keytakeaways} />
+            <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
 
 
         </View>
@@ -115,41 +123,66 @@ function ListHeader(props: any) {
                 alignItems: 'center',
                 // justifyContent: 'center',
                 marginHorizontal: 16,
+                paddingBottom: 8,
                 marginBottom: 8,
                 marginTop: 16,
                 // flex: 1,
                 // backgroundColor: 'red',
-                alignSelf: 'center'
+                // alignSelf: 'center',
+                borderBottomColor: '#3C3D3F',
+                borderBottomWidth: StyleSheet.hairlineWidth,
             }}>
 
                 <Text style={{
-                    color: 'white',
-                    fontFamily: 'Rubik_500Medium',
+                    color: '#a3a3a3',
+                    fontFamily: 'Rubik_300Light',
+                    fontSize: 18,
                     // alignSelf: 'center'
-                    // backgroundColor: 'red',
+                    // backgroundColor: '#DAFE21',
+                    // color: '#861FFF'
                     // marginRight: 4,
                     // marginLeft: 4 + 24
                 }}
                 // numberOfLines={1}
                 >
-                    What does this mean?
+                    WHAT DOES THIS EVEN MEAN?
                 </Text>
+
                 {/* <MaterialCommunityIcons name="pencil-circle" size={24} color="#FFC542" /> */}
             </View>
 
+
+
             <View style={{
                 width: constants.width - 32,
-                backgroundColor: '#303030',
+                // backgroundColor: '#303030',
+                // borderRadius: 16,
                 // flex: 1,
-                borderRadius: 16,
                 // borderTopLeftRadius: 16,
                 // borderTopRightRadius: 16,
                 // borderBottomRightRadius: 16,
                 // borderBottomLeftRadius: 4,
                 marginHorizontal: 16,
-                padding: 16
+                // padding: 16
             }}>
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                }}>
+                    <AnonAvatar author_name={'Packer'} />
+                    <Text style={{
+                        fontFamily: 'Rubik_500Medium',
+                        color: 'white',
+                        marginLeft: 8
+                    }}>
+                        Packer
+                    </Text>
+                    {/* <Text style={{
+                        color: '#A3A3A3',
+                    }}> • recently</Text> */}
+                </View>
                 <Text style={{
+                    marginTop: 8,
                     color: 'white'
                 }}>( ͡° ͜ʖ ͡°) Well, if you're a fan of classic cars or just appreciate the history of automobiles, this news might make you happy. With GM killing off the Chevy Bolt and Bolt EUV, it's possible that the value of the existing models could go up in the future, making them more sought after by collectors. Plus, GM could use the resources they save from discontinuing these models to focus on developing newer, more innovative electric vehicles.</Text>
 
@@ -269,7 +302,7 @@ function ListHeader(props: any) {
                 >
                     {
                         data.map((item: any, index: any) => {
-                            console.log('debug index', index, activePostIndex)
+                            // console.log('debug index', index, activePostIndex)
                             return <View key={index} style={{
                                 height: 8,
                                 width: 8,

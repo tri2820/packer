@@ -134,7 +134,7 @@ function WelcomePost(props: any) {
 }
 const MemoWelcomePost = memo(WelcomePost);
 const analytics = async (user_id: any, post_id: any) => {
-    // if (__DEV__) return;
+    if (__DEV__) return;
     console.log('debug send analytics', user_id, post_id);
     const { data, error } = await supabaseClient.from('history').insert({
         user_id,
@@ -282,8 +282,8 @@ const styles = StyleSheet.create({
         height: 128
     },
     hair: {
-        borderBottomColor: '#3C3D3F',
-        borderBottomWidth: StyleSheet.hairlineWidth,
+        borderTopColor: '#3C3D3F',
+        borderTopWidth: StyleSheet.hairlineWidth,
         // marginBottom: 16,
         // marginTop: 16
         // StyleSheet.hairlineWidth

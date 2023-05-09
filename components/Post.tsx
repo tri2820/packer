@@ -6,7 +6,7 @@ import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, hookListener, noComment, requestComments, sharedAsyncState, toUIList, unhookListener } from '../utils';
 import { MemoComment } from './Comment';
-import KeyTakeaways from './KeyTakeaways';
+import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
@@ -42,7 +42,7 @@ function ListHeader(props: any) {
             imageLoaded={props.imageLoaded}
             mode={props.mode}
         />
-        <KeyTakeaways content={props.post.keytakeaways} />
+        <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
         {
             sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
             props.numTopLevelComments == 0 &&

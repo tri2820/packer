@@ -125,14 +125,14 @@ function Settings(props: any) {
                             setMode('settings')
                         }}
                     >
-                        <Ionicons name="person" size={20} color={
+                        <Ionicons name="settings" size={20} color={
                             mode == 'settings' ? 'black' : '#f1f1f1'
                         } />
-                        <Text style={{
+                        {/* <Text style={{
                             marginLeft: 6,
                             color: mode == 'settings' ? 'black' : '#f1f1f1',
                             fontWeight: 'bold'
-                        }}>Profile</Text>
+                        }}>Settings</Text> */}
                     </TouchableOpacity>
                 </View>
 
@@ -279,8 +279,15 @@ function Settings(props: any) {
                                 fontFamily: 'Rubik_800ExtraBold',
                                 fontSize: 28,
                                 color: '#FFC542',
-                                marginBottom: 16
+                                // marginBottom: 16
                             }}>{props.user.user_metadata.full_name}
+                            </Text>
+                            <Text style={{
+                                fontFamily: 'Rubik_400Regular',
+                                // fontSize: 28,
+                                color: '#a3a3a3',
+                                marginBottom: 32
+                            }}>{props.user.user_metadata.email}
                             </Text>
 
                             <View style={styles.buttons}>
