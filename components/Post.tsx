@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, hookListener, noComment, requestComments, sharedAsyncState, toUIList, unhookListener } from '../utils';
+import { constants, hookListener, noComment, openLink, requestComments, sharedAsyncState, toUIList, unhookListener } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -190,16 +190,6 @@ function Post(props: any) {
         }));
     }, []);
 
-    const openLink = useCallback(async (url: string) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        const result = await WebBrowser.openBrowserAsync(url, {
-            presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-            controlsColor: '#f5a30c',
-            enableBarCollapsing: true,
-            createTask: false
-        });
-        console.log('debug browser result', result);
-    }, [])
 
     const changeModeToComment = React.useCallback(() => {
         props.setMode('comment')
@@ -252,14 +242,14 @@ function Post(props: any) {
                 />
     }
 
-    const onScroll = (event: any) => {
-        // console.log('B')
-        // Hack because onEndReached doesn't work
-        const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-        const y = event.nativeEvent.contentOffset.y;
-        if (y < end - constants.height * 0.05) return;
-        loadComments();
-    }
+    // const onScroll = (event: any) => {
+    //     // console.log('B')
+    //     // Hack because onEndReached doesn't work
+    //     const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
+    //     const y = event.nativeEvent.contentOffset.y;
+    //     if (y < end - constants.height * 0.05) return;
+    //     loadComments();
+    // }
 
     const keyExtractor = (item: any) => item.id
     const refresh = props.isSinglePost || Platform.OS == 'android' ? undefined : <RefreshControl
@@ -272,7 +262,7 @@ function Post(props: any) {
     const footer =
         sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
             !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
-                props.numTopLevelComments == 0)
+                numTopLevelComments == 0)
             ? <View style={{
                 marginTop: 20,
                 paddingBottom: 16
@@ -288,7 +278,14 @@ function Post(props: any) {
                 }}>
                     Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
                 </Text>
-            </View> : undefined
+            </View> : < View style={{
+                alignSelf: 'center',
+                marginVertical: 16
+            }}>
+                <Text style={{ color: '#a3a3a3' }}>
+                    All comments loaded
+                </Text>
+            </View >
 
     const insets = useSafeAreaInsets();
     const nav = () =>
@@ -361,13 +358,10 @@ function Post(props: any) {
                 refreshControl={refresh}
                 scrollEventThrottle={6}
                 data={uiList}
-                onScroll={props.isSinglePost ? undefined : onScroll}
+                // onScroll={props.isSinglePost ? undefined : onScroll}
                 // @ts-ignore
                 listKey={props.post.id}
                 onEndReached={(distanceFromEnd) => {
-                    // console.log('D')
-                    if (!props.scrolledOn) return;
-                    console.log('*****************end reached', props.post.id, distanceFromEnd, props.mode)
                     loadComments();
                 }}
                 keyExtractor={keyExtractor}
@@ -394,14 +388,6 @@ function Post(props: any) {
                     alignItems: 'center',
                     flex: 1
                 }}>
-                    {/* <TouchableOpacity
-                        onPress={() => alert('This is a button!')}
-                        style={{
-                            paddingRight: 12
-                        }}
-                    >
-                        <Ionicons name="bookmark" size={24} color='white' />
-                    </TouchableOpacity> */}
                     {
                         (comments.length > 0 || props.post.keytakeaways) && props.shouldActive &&
                         <MemoMoreDiscussionsButton onPress={changeModeToComment} />

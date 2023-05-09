@@ -6,8 +6,10 @@ import { supabaseClient } from "./supabaseClient";
 import * as Haptics from 'expo-haptics';
 import { MarkdownRule, MarkdownStyles, MarkdownView } from 'react-native-markdown-view';
 import { Ionicons } from '@expo/vector-icons';
+import * as WebBrowser from 'expo-web-browser';
 
 import url from 'url';
+import { WebBrowserPresentationStyle } from 'expo-web-browser';
 
 export const constants = {
     width: Dimensions.get('screen').width,
@@ -1056,6 +1058,18 @@ const link = {
     }
 }
 
+export const openGoogle = async (term: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    let encodedQueryParam = encodeURIComponent(term);
+    let url = `https://www.google.com/search?q=${encodedQueryParam}`;
+    const result = await WebBrowser.openBrowserAsync(url, {
+        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+        controlsColor: '#f5a30c',
+        enableBarCollapsing: true,
+        createTask: false
+    });
+    console.log('debug browser result', result);
+}
 
 const nerHighLight: MarkdownRule = {
     order: 0,
@@ -1068,13 +1082,13 @@ const nerHighLight: MarkdownRule = {
     parse: (capture: any, parse: any, state: any) => {
         // console.log('debug parse', capture)
         var stateNested = { ...state, inline: true }
-        return { children: parse(capture[2], stateNested), key: capture[0], nerType: capture[1] }
+        return { children: parse(capture[2], stateNested), key: capture[0], nerType: capture[1], term: capture[2] }
     },
     render: (node: any, output: any, state: any, styles: any) => {
         const tag = <TouchableOpacity
             key={state.key}
             onPress={() => {
-                console.log('whattt')
+                openGoogle(node.term);
             }}
         >
             <Text
@@ -1124,4 +1138,15 @@ export const markdownRules = { quote, link }
 export const markdownNERRules = {
     nerHighLight,
     square
+}
+
+export const openLink = async (url: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
+    const result = await WebBrowser.openBrowserAsync(url, {
+        presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
+        controlsColor: '#f5a30c',
+        enableBarCollapsing: true,
+        createTask: false
+    });
+    console.log('debug browser result', result);
 }

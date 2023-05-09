@@ -6,7 +6,7 @@ export default function AnonAvatar(props: any) {
         <ImageBackground style={{
             width: 32,
             height: 32,
-            borderRadius: 16,
+            borderRadius: props.square ? 2 : 16,
             overflow: 'hidden',
             borderWidth: StyleSheet.hairlineWidth,
             borderColor: '#3C3D3F'

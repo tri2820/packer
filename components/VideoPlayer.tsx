@@ -32,7 +32,7 @@ function VideoPlayer(props: any) {
             || youtubeVideoId == '';
         needToPause = needToPause ? true : false;
         if (needToPause) {
-            console.log('debug need to pause');
+            // console.log('debug need to pause');
             setVideoShouldPlaying(false);
         }
     }, [props.scrolledOn, appStateCurrent, youtubeVideoId]);
@@ -128,7 +128,7 @@ function VideoPlayer(props: any) {
                 if (!props.isSinglePost) return;
                 const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
                 ref.current?.seekTo(second, true)
-                console.log('debug need to play');
+                // console.log('debug need to play');
                 setVideoShouldPlaying(true);
             }}
             onError={onError}

@@ -97,7 +97,11 @@ function PostHeader(props: any) {
                     </View>
 
                     <Text style={styles.title}>
-                        {props.post.title}
+                        {
+                            isVideoPost(props.post.source_url)
+                                ? props.post.title.replace(/#[^\s]+/g, '')
+                                : props.post.title
+                        }
                     </Text>
 
                     <View style={{
@@ -163,7 +167,7 @@ function PostHeader(props: any) {
                                 borderBottomColor: '#3C3D3F',
                                 borderBottomWidth: StyleSheet.hairlineWidth,
                                 // marginHorizontal: 16
-                                marginVertical: 8
+                                marginTop: 8
                             }} />
                         </View>
                     }

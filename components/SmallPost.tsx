@@ -5,7 +5,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getPastelColor, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
+import { constants, getPastelColor, openLink, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -37,6 +37,8 @@ function AnonAvatarList(props: any) {
         <Ionicons name="caret-forward" size={14} color='#a3a3a3' />
     </View>
 
+
+
     return <View style={{
         alignItems: 'center',
         flexDirection: 'row'
@@ -50,15 +52,12 @@ function AnonAvatarList(props: any) {
                 <AnonAvatar author_name={props.author_names[1]} />
             </View>
         }
-        {/* <View style={{
-            marginLeft: 4
-        }}> */}
+
         <Text style={{
             color: '#a3a3a3',
             marginLeft: 4,
-            // fontWeight: '600'
         }}>
-            commented
+            {props.author_names.length > 2 ? `and ${props.author_names.length - 2} ${props.author_names.length - 2 == 1 ? 'other' : 'others'}` : ''} commented
         </Text>
         <Ionicons name="caret-forward" size={14} color='#a3a3a3' style={{
             alignSelf: 'center'
@@ -132,7 +131,7 @@ function ListHeader(props: any) {
                 borderBottomColor: '#3C3D3F',
                 borderBottomWidth: StyleSheet.hairlineWidth,
             }}>
-
+                <AnonAvatar author_name={'Packer'} square />
                 <Text style={{
                     color: '#a3a3a3',
                     fontFamily: 'Rubik_300Light',
@@ -141,11 +140,11 @@ function ListHeader(props: any) {
                     // backgroundColor: '#DAFE21',
                     // color: '#861FFF'
                     // marginRight: 4,
-                    // marginLeft: 4 + 24
+                    marginLeft: 8
                 }}
                 // numberOfLines={1}
                 >
-                    WHAT DOES THIS EVEN MEAN?
+                    PARKER'S NOTE
                 </Text>
 
                 {/* <MaterialCommunityIcons name="pencil-circle" size={24} color="#FFC542" /> */}
@@ -165,44 +164,12 @@ function ListHeader(props: any) {
                 marginHorizontal: 16,
                 // padding: 16
             }}>
-                <View style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                }}>
-                    <AnonAvatar author_name={'Packer'} />
-                    <Text style={{
-                        fontFamily: 'Rubik_500Medium',
-                        color: 'white',
-                        marginLeft: 8
-                    }}>
-                        Packer
-                    </Text>
-                    {/* <Text style={{
-                        color: '#A3A3A3',
-                    }}> • recently</Text> */}
-                </View>
+
                 <Text style={{
                     marginTop: 8,
                     color: 'white'
                 }}>( ͡° ͜ʖ ͡°) Well, if you're a fan of classic cars or just appreciate the history of automobiles, this news might make you happy. With GM killing off the Chevy Bolt and Bolt EUV, it's possible that the value of the existing models could go up in the future, making them more sought after by collectors. Plus, GM could use the resources they save from discontinuing these models to focus on developing newer, more innovative electric vehicles.</Text>
 
-                <TouchableOpacity
-                    // onPress={select}
-                    style={{
-                        alignSelf: 'flex-end',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        // paddingHorizontal: 8,
-                        // paddingVertical: 4,
-                        // backgroundColor: 'red'
-                    }}
-                >
-                    <Octicons name="reply" size={12} color="#A3A3A3" />
-                    <Text style={{
-                        color: "#A3A3A3",
-                        marginLeft: 8
-                    }}>Reply</Text>
-                </TouchableOpacity>
 
             </View>
         </View>
@@ -358,19 +325,19 @@ function ListHeader(props: any) {
 
 
 function SmallPost(props: any) {
-    const [refreshing, _] = useState(false);
-    const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
-    const ref = useRef<any>(null);
+    // const [refreshing, _] = useState(false);
+    // const [hiddenCommentIds, setHiddenCommentIds] = useState<any>({});
+    // const ref = useRef<any>(null);
     const comments = sharedAsyncState[`comments/${props.post.id}`] ?? [];
     const [__, update] = useState(false);
-    const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self' ? comments[0] : null;
+    // const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self' ? comments[0] : null;
     const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
     const timer = useRef<any>(null);
-    const uiList = toUIList(comments, hiddenCommentIds)
-    uiList.unshift({
-        type: 'post-header',
-        id: 'post-header'
-    })
+    // const uiList = toUIList(comments, hiddenCommentIds)
+    // uiList.unshift({
+    //     type: 'post-header',
+    //     id: 'post-header'
+    // })
     // const isFocused = useIsFocused();
     // console.log('debug isFocused', isFocused)
     const [imageLoaded, setImageLoaded] = useState(
@@ -424,10 +391,6 @@ function SmallPost(props: any) {
     }, [])
 
 
-    const commentAsksForComments = React.useCallback(async (parent_id: string) => {
-        await requestComments(sharedAsyncState, props.post.id, parent_id);
-    }, [])
-
     const loadComments = async () => {
         // console.log('L')
         const key = `preloadStatus/${props.post.id}`;
@@ -440,7 +403,6 @@ function SmallPost(props: any) {
     }
 
     useEffect(() => {
-        // console.log('A')
         if (props.shouldActive) {
             if (sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 && props.mode == 'normal') return;
             loadComments();
@@ -452,176 +414,6 @@ function SmallPost(props: any) {
         sharedAsyncState[key] = 'done';
     }, [props.shouldActive])
 
-    useEffect(() => {
-        if (!props.scrolledOn) return;
-        if (!topLevelSelfComment) return;
-        console.log('debug CHECK scroll to topLevelSelfComment')
-        if (comments.length <= 0) return;
-        console.log('debug scroll to topLevelSelfComment')
-        ref.current?.scrollToIndex({
-            index: 0
-        });
-        return;
-    }, [topLevelSelfComment])
-
-    useEffect(() => {
-        if (!props.scrolledOn) return;
-
-        if (props.mode == 'normal') {
-            ref.current?.scrollToOffset({ offset: 0 });
-            return;
-        }
-
-        comments.length > 0 && ref.current?.scrollToOffset({ offset: constants.height / 5 });
-    }, [props.mode])
-
-    const onRefresh = React.useCallback(() => {
-        props.setMode('normal');
-    }, []);
-
-
-    const toggle = React.useCallback((commentId: string, show: boolean) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-        if (show) {
-            setHiddenCommentIds((hiddenCommentIds: any) => ({
-                ...hiddenCommentIds,
-                [commentId]: false
-            }));
-            return
-        }
-
-        setHiddenCommentIds((hiddenCommentIds: any) => ({
-            ...hiddenCommentIds,
-            [commentId]: true
-        }));
-    }, []);
-
-    const openLink = useCallback(async (url: string) => {
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium)
-        const result = await WebBrowser.openBrowserAsync(url, {
-            presentationStyle: WebBrowserPresentationStyle.FULL_SCREEN,
-            controlsColor: '#f5a30c',
-            enableBarCollapsing: true,
-            createTask: false
-        });
-        console.log('debug browser result', result);
-    }, [])
-
-    const changeModeToComment = React.useCallback(() => {
-        props.setMode('comment')
-    }, [])
-
-
-
-    const renderItem = ({ item, index }: any) => {
-        return item.type == 'load-comment-button' ?
-            <MemoLoadCommentButton
-                key={item.id}
-                level={item.level}
-                post_id={props.post.id}
-                ofId={item.ofId}
-                num={item.num}
-                requestComments={commentAsksForComments}
-                mode={props.mode}
-            />
-            :
-            item.type == 'post-header' ?
-                <ListHeader
-                    user={props.user}
-                    key={item.id}
-                    isSinglePost={props.isSinglePost}
-                    index={props.index}
-                    imageLoaded={imageLoaded}
-                    openLink={openLink}
-                    scrolledOn={props.scrolledOn}
-                    shouldActive={props.shouldActive}
-                    post={props.post}
-                    numTopLevelComments={numTopLevelComments}
-                    setMode={props.setMode}
-                    mode={props.mode}
-                // timesLoaded={timesLoaded}
-                /> :
-                <MemoComment
-                    key={item.id}
-                    hidden={hiddenCommentIds[item.id]}
-                    comment={item}
-                    openLink={openLink}
-                    setSelectedComment={props.setSelectedComment}
-                    toggle={toggle}
-                />
-    }
-
-    const onScroll = (event: any) => {
-        // console.log('B')
-        // Hack because onEndReached doesn't work
-        const end = event.nativeEvent.contentSize.height - event.nativeEvent.layoutMeasurement.height;
-        const y = event.nativeEvent.contentOffset.y;
-        if (y < end - constants.height * 0.05) return;
-        loadComments();
-    }
-
-    const keyExtractor = (item: any) => item.id
-    const refresh = props.isSinglePost || Platform.OS == 'android' ? undefined : <RefreshControl
-        refreshing={refreshing}
-        onRefresh={onRefresh}
-        colors={['transparent']}
-        progressBackgroundColor='transparent'
-        tintColor={'transparent'}
-    />
-    const footer =
-        sharedAsyncState[`count/${props.post.id}`] > numTopLevelComments &&
-            !(sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
-                props.numTopLevelComments == 0)
-            ? <View style={{
-                marginTop: 20,
-                paddingBottom: 16
-                // alignSelf: 'stretch'
-            }}>
-                <ActivityIndicator
-                    style={styles.loading_indicator}
-                    size="small"
-                />
-                <Text style={{
-                    color: '#A3A3A3',
-                    alignSelf: 'center'
-                }}>
-                    Loading {sharedAsyncState[`count/${props.post.id}`] - numTopLevelComments} comments
-                </Text>
-            </View> : undefined
-
-    const insets = useSafeAreaInsets();
-    const nav = () =>
-        props.mode == 'comment' && !props.isSinglePost ?
-            <View style={{
-                paddingTop: insets.top,
-                paddingBottom: 8,
-                // marginBottom: 8,
-                backgroundColor: '#272727',
-                borderBottomColor: '#3C3D3F',
-                borderBottomWidth: StyleSheet.hairlineWidth,
-            }}>
-                <TouchableOpacity onPress={() => {
-                    props.setMode('normal')
-                }} style={{
-                    flexDirection: 'row',
-                    alignItems: 'center'
-                }}>
-                    <Animated.View style={props.offsetZoomStyles}>
-                        <Ionicons name="chevron-back-sharp"
-                            size={26}
-                            color='white'
-                            style={{
-                                marginLeft: 8
-                            }} />
-                    </Animated.View>
-                    <Text style={{
-                        color: 'white',
-                        // fontFamily: 'Rubik_400Regular',
-                        fontSize: 16
-                    }}>Back</Text>
-                </TouchableOpacity>
-            </View>
-            : null
 
     return <ListHeader
         // scrolling={props.scrolling}
