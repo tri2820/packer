@@ -4,8 +4,8 @@ import { getPastelColor } from "../utils";
 export default function AnonAvatar(props: any) {
     if (props.author_name == 'Packer') return <View>
         <ImageBackground style={{
-            width: 32,
-            height: 32,
+            width: props.size ?? 32,
+            height: props.size ?? 32,
             borderRadius: props.square ? 2 : 16,
             overflow: 'hidden',
             borderWidth: StyleSheet.hairlineWidth,

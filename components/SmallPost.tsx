@@ -123,7 +123,7 @@ function ListHeader(props: any) {
                 // justifyContent: 'center',
                 marginHorizontal: 16,
                 paddingBottom: 8,
-                marginBottom: 8,
+                marginBottom: 4,
                 marginTop: 16,
                 // flex: 1,
                 // backgroundColor: 'red',
@@ -131,7 +131,7 @@ function ListHeader(props: any) {
                 borderBottomColor: '#3C3D3F',
                 borderBottomWidth: StyleSheet.hairlineWidth,
             }}>
-                <AnonAvatar author_name={'Packer'} square />
+                <AnonAvatar author_name={'Packer'} square size={24} />
                 <Text style={{
                     color: '#a3a3a3',
                     fontFamily: 'Rubik_300Light',
@@ -144,7 +144,7 @@ function ListHeader(props: any) {
                 }}
                 // numberOfLines={1}
                 >
-                    PARKER'S NOTE
+                    PACKER'S BRIGHT OUTLOOK
                 </Text>
 
                 {/* <MaterialCommunityIcons name="pencil-circle" size={24} color="#FFC542" /> */}
