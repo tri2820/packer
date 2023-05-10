@@ -279,7 +279,7 @@ function Settings(props: any) {
                                 fontFamily: 'Rubik_800ExtraBold',
                                 fontSize: 28,
                                 color: '#FFC542',
-                                // marginBottom: 16
+                                marginBottom: 4
                             }}>{props.user.user_metadata.full_name}
                             </Text>
                             <Text style={{

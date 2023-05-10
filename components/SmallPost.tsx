@@ -116,7 +116,7 @@ function ListHeader(props: any) {
 
         </View>
 
-        if (item.type == 'goodvibes') return <View>
+        if (item.type == 'outlook') return <View>
             <View style={{
                 flexDirection: 'row',
                 alignItems: 'center',
@@ -131,6 +131,11 @@ function ListHeader(props: any) {
                 borderBottomColor: '#3C3D3F',
                 borderBottomWidth: StyleSheet.hairlineWidth,
             }}>
+                {/* <Ionicons
+                    name={'people'}
+                    size={24}
+                    color={'#a3a3a3'}
+                /> */}
                 <AnonAvatar author_name={'Packer'} square size={24} />
                 <Text style={{
                     color: '#a3a3a3',
@@ -144,7 +149,7 @@ function ListHeader(props: any) {
                 }}
                 // numberOfLines={1}
                 >
-                    PACKER'S BRIGHT OUTLOOK
+                    PACKER'S REACTION (WIP)
                 </Text>
 
                 {/* <MaterialCommunityIcons name="pencil-circle" size={24} color="#FFC542" /> */}
@@ -168,7 +173,7 @@ function ListHeader(props: any) {
                 <Text style={{
                     marginTop: 8,
                     color: 'white'
-                }}>( ͡° ͜ʖ ͡°) Well, if you're a fan of classic cars or just appreciate the history of automobiles, this news might make you happy. With GM killing off the Chevy Bolt and Bolt EUV, it's possible that the value of the existing models could go up in the future, making them more sought after by collectors. Plus, GM could use the resources they save from discontinuing these models to focus on developing newer, more innovative electric vehicles.</Text>
+                }}>{props.post.outlook}</Text>
 
 
             </View>
@@ -191,14 +196,8 @@ function ListHeader(props: any) {
         setActivePostIndex(Math.floor(offset / constants.width) + 1);
     }
 
-    useEffect(() => {
-        console.log('debug activePostIndex', activePostIndex);
-    }, [activePostIndex])
-
-    const data = [
-        { type: 'post' },
-        { type: 'goodvibes' }
-    ]
+    const data = [{ type: 'post' }]
+    if (props.post.outlook != '') data.push({ type: 'outlook' })
 
     return <View style={{
         // paddingTop: 8
@@ -257,29 +256,32 @@ function ListHeader(props: any) {
 
                 </TouchableOpacity>
 
-                <View style={{
-                    flexDirection: 'row',
-                    marginLeft: 8
-                    // flex: 1
-                    // marginHorizontal: 16,
-                    // backgroundColor: 'red'
-                }}
-                // entering={FadeIn}
-                // exiting={FadeOut}
-                >
-                    {
-                        data.map((item: any, index: any) => {
-                            // console.log('debug index', index, activePostIndex)
-                            return <View key={index} style={{
-                                height: 8,
-                                width: 8,
-                                borderRadius: 4,
-                                backgroundColor: activePostIndex == index ? 'white' : '#6E6E6E',
-                                marginHorizontal: 4
-                            }} />
-                        })
-                    }
-                </View>
+                {
+                    data.length > 1 && <View style={{
+                        flexDirection: 'row',
+                        marginLeft: 8
+                        // flex: 1
+                        // marginHorizontal: 16,
+                        // backgroundColor: 'red'
+                    }}
+                    // entering={FadeIn}
+                    // exiting={FadeOut}
+                    >
+                        {
+                            data.map((item: any, index: any) => {
+                                // console.log('debug index', index, activePostIndex)
+                                return <View key={index} style={{
+                                    height: 8,
+                                    width: 8,
+                                    borderRadius: 4,
+                                    backgroundColor: activePostIndex == index ? 'white' : '#6E6E6E',
+                                    marginHorizontal: 4
+                                }} />
+                            })
+                        }
+                    </View>
+                }
+
 
                 <TouchableOpacity onPress={() => {
                     props.navProps.navigation.push('SinglePost', {
