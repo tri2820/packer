@@ -179,10 +179,11 @@ function Wall(props: any) {
             height={props.height}
             post={item}
             shouldActive={shouldActive}
-            scrolledOn={scrolledOn}
+            scrolledOn={scrolledOn ? true : false}
             setSelectedComment={props.setSelectedComment}
             setMode={props.setMode}
             user={props.user}
+            isSinglePost={false}
         // scrolling={scrolling}
         />
         // <MemoPost
@@ -218,7 +219,7 @@ function Wall(props: any) {
             acc[item.item.id] = true;
             return acc;
         }, {});
-        console.log('debug idObj', idObj)
+        // console.log('debug idObj', idObj)
 
         setViewableMap(idObj)
     }, []);
@@ -261,12 +262,12 @@ function Wall(props: any) {
                 onEndReachedThreshold={2}
                 onEndReached={props.requestPost}
                 ItemSeparatorComponent={separator}
-            // getItemLayout={getItemLayout}
-            // onScroll={onScroll}
-            // scrollEventThrottle={6}
-            // DO NOT USE removeClippedSubviews: Making title not clickable
-            // removeClippedSubviews
-            // windowSize={7}
+                // getItemLayout={getItemLayout}
+                // onScroll={onScroll}
+                scrollEventThrottle={6}
+                // DO NOT USE removeClippedSubviews: Making title not clickable
+                // removeClippedSubviews
+                windowSize={6}
             />
         </View>
     );

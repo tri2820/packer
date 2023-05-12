@@ -5,39 +5,31 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getPastelColor, openLink, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
+import { constants, getPastelColor, isVideoPost, openLink, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 import PostHeader from './PostHeader';
-import VideoPlayer from './VideoPlayer';
+import VideoPlayer, { MemoVideoPlayer } from './VideoPlayer';
 // import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import * as Haptics from 'expo-haptics';
 import * as WebBrowser from 'expo-web-browser';
 import { WebBrowserPresentationStyle } from 'expo-web-browser';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
+import Animated, { FadeIn, FadeOut, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { hookListener, unhookListener } from '../utils';
 import AnonAvatar from './AnonAvatar';
+import WebView from 'react-native-webview';
+import Slide from './Slide';
+import ImageView from "react-native-image-viewing";
+import { ImageSVG } from '@shopify/react-native-skia';
 
 
 function AnonAvatarList(props: any) {
     // console.log('debug ', props.author_names)
-    if (props.author_names.length == 0) return <View style={{
-        flexDirection: 'row',
-        alignItems: 'center'
-    }}>
-        <Text style={{
-            color: '#a3a3a3',
-            // fontWeight: '600'
-        }}>Be first to comment</Text>
-
-        <Ionicons name="caret-forward" size={14} color='#a3a3a3' />
-    </View>
-
-
+    if (props.author_names.length == 0) return <Ionicons name="chatbox-outline" size={20} color='#5c5c5c' />
 
     return <View style={{
         alignItems: 'center',
@@ -53,15 +45,9 @@ function AnonAvatarList(props: any) {
             </View>
         }
 
-        <Text style={{
-            color: '#a3a3a3',
-            marginLeft: 4,
-        }}>
-            {props.author_names.length > 2 ? `and ${props.author_names.length - 2} ${props.author_names.length - 2 == 1 ? 'other' : 'others'}` : ''} commented
-        </Text>
-        <Ionicons name="caret-forward" size={14} color='#a3a3a3' style={{
+        {/* <Ionicons name="caret-forward" size={14} color='#a3a3a3' style={{
             alignSelf: 'center'
-        }} />
+        }} /> */}
         {/* </View> */}
     </View>
 
@@ -89,16 +75,22 @@ function ListHeader(props: any) {
         toggleBookmark(props.post, props.user)
     }
 
-    const renderItem = ({ item }: any) => {
+    const imageSources: any[] = [];
+    if (props.post.image) imageSources.push({ uri: props.post.image });
+    imageSources.push({ uri: 'https://imgur.com/QpDXQe5.png' });
+
+    const renderItem = ({ item, index }: any) => {
         // console.log('debug props.post.ners', props.post)
-        if (item.type == 'post') return <View style={{
-            width: constants.width
+        if (item.type == 'post_with_attachment') return <View style={{
+            width: constants.width,
+            paddingBottom: 54,
         }}>
-            <VideoPlayer
+            <MemoVideoPlayer
                 // scrolling={props.scrolling}
                 id={props.post.id}
                 scrolledOn={props.scrolledOn}
                 source_url={props.post.source_url}
+                isSinglePost={false}
             />
             <PostHeader
                 // scrolling={props.scrolling}
@@ -111,105 +103,94 @@ function ListHeader(props: any) {
                 navProps={props.navProps}
             />
 
-            <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
-
-
-        </View>
-
-        if (item.type == 'outlook') return <View>
             <View style={{
                 flexDirection: 'row',
-                alignItems: 'center',
-                // justifyContent: 'center',
-                marginHorizontal: 16,
-                paddingBottom: 8,
-                marginBottom: 4,
-                marginTop: 16,
-                // flex: 1,
-                // backgroundColor: 'red',
-                // alignSelf: 'center',
-                borderBottomColor: '#3C3D3F',
-                borderBottomWidth: StyleSheet.hairlineWidth,
+                marginHorizontal: 16
             }}>
-                {/* <Ionicons
-                    name={'people'}
-                    size={24}
-                    color={'#a3a3a3'}
-                /> */}
-                <AnonAvatar author_name={'Packer'} square size={24} />
-                <Text style={{
-                    color: '#a3a3a3',
-                    fontFamily: 'Rubik_300Light',
-                    fontSize: 18,
-                    // alignSelf: 'center'
-                    // backgroundColor: '#DAFE21',
-                    // color: '#861FFF'
-                    // marginRight: 4,
-                    marginLeft: 8
-                }}
-                // numberOfLines={1}
-                >
-                    PACKER'S REACTION (WIP)
-                </Text>
 
-                {/* <MaterialCommunityIcons name="pencil-circle" size={24} color="#FFC542" /> */}
+                {props.imageLoaded &&
+
+                    <Animated.Image
+                        style={{
+                            width: 80,
+                            height: 80,
+                            marginRight: 16,
+                            marginTop: 8,
+                            // borderRadius: 0,
+                            // borderWidth: StyleSheet.hairlineWidth,
+                            // borderColor: '#3C3D3F'
+                        }}
+                        source={{
+                            uri: props.post.image
+                        }}
+                        entering={FadeIn}
+                    />
+                }
+                <View style={{
+                    flex: 1,
+                    marginTop: -4
+                    // backgroundColor: 'red'
+                }}>
+                    <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+                </View>
             </View>
 
 
 
-            <View style={{
-                width: constants.width - 32,
-                // backgroundColor: '#303030',
-                // borderRadius: 16,
-                // flex: 1,
-                // borderTopLeftRadius: 16,
-                // borderTopRightRadius: 16,
-                // borderBottomRightRadius: 16,
-                // borderBottomLeftRadius: 4,
-                marginHorizontal: 16,
-                // padding: 16
-            }}>
-
-                <Text style={{
-                    marginTop: 8,
-                    color: 'white'
-                }}>{props.post.outlook}</Text>
-
-
-            </View>
         </View>
-        return <View style={{
-            width: constants.width
-        }}>
 
-        </View>
+        return <Slide
+            height={height}
+            index={index}
+            activeSlideIndex={activeSlideIndex}
+            showImageViewer={(image: string) => {
+                if (imageSources.length == 0) return;
+                let index = imageSources.findIndex(s => s.uri == image);
+                if (index == -1) index = 0;
+                setImageViewerIndex(index);
+                setImageViewerIsVisible(true);
+            }}
+        />
     }
 
-    const [activePostIndex, setActivePostIndex] = useState(0);
+    const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+    const [imageViewerVisible, setImageViewerIsVisible] = useState(false);
+    const [imageViewerIndex, setImageViewerIndex] = useState(0);
+
     const updateIndex = (event: any) => {
         let offset = event.nativeEvent.contentOffset.x;
         if (offset < constants.width / 2) {
-            setActivePostIndex(0)
+            setActiveSlideIndex(0)
             return;
         }
         offset -= constants.width / 2;
-        setActivePostIndex(Math.floor(offset / constants.width) + 1);
+        setActiveSlideIndex(Math.floor(offset / constants.width) + 1);
     }
 
-    const data = [{ type: 'post' }]
+    const data = []
+    if (props.post.image != '' || isVideoPost(props.post.source_url)) {
+        data.push({ type: 'post_with_attachment' })
+        data.push({ type: 'keytakeaways' })
+    } else {
+        data.push({ type: 'post' })
+    }
     if (props.post.outlook != '') data.push({ type: 'outlook' })
 
-    return <View style={{
+    const [height, setHeight] = useState(0);
+
+    const onLayout = async (event: any) => {
+        setHeight(event.nativeEvent.layout.height);
+    }
+
+    return <><View style={{
         // paddingTop: 8
         backgroundColor: '#151316'
     }}>
         <Animated.FlatList
+            onLayout={onLayout}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
-            style={{
-                marginBottom: 8,
-            }}
             data={data}
             renderItem={renderItem}
             onScroll={updateIndex}
@@ -219,110 +200,77 @@ function ListHeader(props: any) {
         />
         {/* <Text style={{ color: 'white' }}>{props.post.id}@{props.index}</Text> */}
 
-
         <View style={{
-            marginBottom: 16,
-            // marginHorizontal: 16
+            flexDirection: 'row',
+            alignItems: 'center',
+            position: 'absolute',
+            bottom: 16,
+            left: 12,
         }}>
+            <TouchableOpacity
+                onPress={_toggleBookmark}
+            >
+                <Ionicons
+                    name={bookmarked ? "bookmark" : "bookmark-outline"}
+                    size={20}
+                    color={bookmarked ? '#FFC542' : (activeSlideIndex > 0 ? 'white' : '#5c5c5c')}
+                />
+            </TouchableOpacity>
 
-            <View style={{
+            <TouchableOpacity onPress={() => {
+                props.navProps.navigation.push('SinglePost', {
+                    singlePost: props.post
+                })
+            }} style={{
+                marginLeft: 8,
                 flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 8,
-                marginHorizontal: 16,
-                flex: 1,
-                // backgroundColor: 'blue'
+                alignItems: 'center'
             }}>
-                <TouchableOpacity
-                    onPress={_toggleBookmark}
-                    style={{
-                        marginLeft: -4
-                        // backgroundColor: 'blue'
-                        // flexDirection: 'row',
-                        // alignItems: 'center',
-                        // flex: 1
-                        // justifyContent: 'center'
-                    }}
-                >
-                    <Ionicons
-                        name={bookmarked ? "bookmark" : "bookmark-outline"}
-                        size={24}
-                        color={bookmarked ? '#FFC542' : '#5c5c5c'}
-                    />
-                    {/* <Text style={{
-                        color: bookmarked ? '#FFC542' : '#737373',
-                        marginLeft: 4
-                    }}>{props.user ? (bookmarked ? 'Bookmarked' : 'Bookmark') : 'Sign in to bookmark'}</Text> */}
-
-                </TouchableOpacity>
-
-                {
-                    data.length > 1 && <View style={{
-                        flexDirection: 'row',
-                        marginLeft: 8
-                        // flex: 1
-                        // marginHorizontal: 16,
-                        // backgroundColor: 'red'
-                    }}
-                    // entering={FadeIn}
-                    // exiting={FadeOut}
-                    >
-                        {
-                            data.map((item: any, index: any) => {
-                                // console.log('debug index', index, activePostIndex)
-                                return <View key={index} style={{
-                                    height: 8,
-                                    width: 8,
-                                    borderRadius: 4,
-                                    backgroundColor: activePostIndex == index ? 'white' : '#6E6E6E',
-                                    marginHorizontal: 4
-                                }} />
-                            })
-                        }
-                    </View>
-                }
-
-
-                <TouchableOpacity onPress={() => {
-                    props.navProps.navigation.push('SinglePost', {
-                        singlePost: props.post
-                    })
-                }} style={{
-                    // alignSelf: 'stretch',
-                    flex: 1,
-                }}>
-                    {/* {
-                props.comments.length > 0 &&
-                <AnonAvatar author_name={props.comments[0].author_name} />
-            } */}
-                    <View style={{
-                        marginRight: 0,
-                        marginLeft: 'auto',
-                    }}>
-                        <AnonAvatarList author_names={
-                            Array.from(
-                                props.comments.reduce((set: Set<any>, c: any) => set.add(c.author_name), new Set<string>())
-                            )
-                        } />
-                    </View>
-                </TouchableOpacity>
-            </View>
-            {
-                // props.scrolledOn ?
-
-                //  : <Animated.View style={{
-                //     borderBottomColor: '#3C3D3F',
-                //     borderBottomWidth: StyleSheet.hairlineWidth,
-                //     marginHorizontal: 16,
-                //     height: 2,
-                //     // backgroundColor: 'red'
-                // }}
-                //     entering={FadeIn}
-                //     exiting={FadeOut}
-                // />
-            }
+                {/* <AnonAvatarList author_names={
+                    Array.from(
+                        props.comments.reduce((set: Set<any>, c: any) => set.add(c.author_name), new Set<string>())
+                    )
+                } /> */}
+                <Ionicons name="chatbox-outline" size={20} color={activeSlideIndex > 0 ? 'white' : '#5c5c5c'} />
+                <Text style={{ color: activeSlideIndex > 0 ? 'white' : '#5c5c5c', marginLeft: 4, fontWeight: '500' }}>{sharedAsyncState[`count/${props.post.id}`] ?? 0}</Text>
+            </TouchableOpacity>
         </View>
+
+        {
+            data.length > 1 && <View style={{
+                position: 'absolute',
+                bottom: 24,
+                right: 16,
+                flexDirection: 'row',
+            }}
+                pointerEvents='none'
+            // entering={FadeIn}
+            // exiting={FadeOut}
+            >
+                {
+                    data.map((item: any, index: any) => {
+                        // console.log('debug index', index, activePostIndex)
+                        return <View key={index} style={{
+                            height: 8,
+                            width: 8,
+                            borderRadius: 4,
+                            backgroundColor: activeSlideIndex == index ? '#f1f1f1' : '#6E6E6E',
+                            marginHorizontal: 4
+                        }} />
+                    })
+                }
+            </View>
+        }
+
+
     </View>
+        <ImageView
+            images={imageSources}
+            imageIndex={imageViewerIndex}
+            visible={imageViewerVisible}
+            onRequestClose={() => setImageViewerIsVisible(false)}
+        />
+    </>
 }
 
 
@@ -334,7 +282,7 @@ function SmallPost(props: any) {
     const [__, update] = useState(false);
     // const topLevelSelfComment = comments.length > 0 && comments[0].author_id == 'self' ? comments[0] : null;
     const numTopLevelComments = comments.filter((c: any) => c.parent_id == null).length;
-    const timer = useRef<any>(null);
+    // const timer = useRef<any>(null);
     // const uiList = toUIList(comments, hiddenCommentIds)
     // uiList.unshift({
     //     type: 'post-header',
@@ -393,28 +341,28 @@ function SmallPost(props: any) {
     }, [])
 
 
-    const loadComments = async () => {
-        // console.log('L')
-        const key = `preloadStatus/${props.post.id}`;
-        if (sharedAsyncState[key] == 'running') return;
-        sharedAsyncState[key] = 'running';
-        timer.current = setTimeout(async () => {
-            await requestComments(sharedAsyncState, props.post.id, null);
-            sharedAsyncState[key] = 'done';
-        }, 1000);
-    }
+    // const loadComments = async () => {
+    //     // console.log('L')
+    //     const key = `preloadStatus/${props.post.id}`;
+    //     if (sharedAsyncState[key] == 'running') return;
+    //     sharedAsyncState[key] = 'running';
+    //     timer.current = setTimeout(async () => {
+    //         await requestComments(sharedAsyncState, props.post.id, null);
+    //         sharedAsyncState[key] = 'done';
+    //     }, 1000);
+    // }
 
-    useEffect(() => {
-        if (props.shouldActive) {
-            if (sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 && props.mode == 'normal') return;
-            loadComments();
-            return;
-        }
+    // useEffect(() => {
+    //     if (props.shouldActive) {
+    //         if (sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 && props.mode == 'normal') return;
+    //         loadComments();
+    //         return;
+    //     }
 
-        clearTimeout(timer.current);
-        const key = `preloadStatus/${props.post.id}`;
-        sharedAsyncState[key] = 'done';
-    }, [props.shouldActive])
+    //     clearTimeout(timer.current);
+    //     const key = `preloadStatus/${props.post.id}`;
+    //     sharedAsyncState[key] = 'done';
+    // }, [props.shouldActive])
 
 
     return <ListHeader
@@ -438,15 +386,15 @@ function SmallPost(props: any) {
 }
 
 export default SmallPost;
-// const shouldRerenderTheSame = (p: any, c: any) => {
-//     return p.mode == c.mode
-//         && p.height == c.height
-//         && p.shouldActive == c.shouldActive
-//         && p.scrolledOn == c.scrolledOn
-//         && p.user == c.user
-// }
+const shouldRerenderTheSame = (p: any, c: any) => {
+    return p.mode == c.mode
+        && p.height == c.height
+        && p.shouldActive == c.shouldActive
+        && p.scrolledOn == c.scrolledOn
+        && p.user == c.user
+}
 export const MemoSmallPost = memo(SmallPost
-    // , shouldRerenderTheSame
+    , shouldRerenderTheSame
 );
 const styles = StyleSheet.create({
     loading_indicator: {

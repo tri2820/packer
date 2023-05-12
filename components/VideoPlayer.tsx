@@ -1,9 +1,13 @@
 import * as React from 'react';
-import { useEffect, useRef, useState } from 'react';
-import { AppState, View } from 'react-native';
-import Animated, { FadeOut } from 'react-native-reanimated';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { memo, useEffect, useRef, useState } from 'react';
+import { AppState, ImageBackground, Pressable, Touchable, View } from 'react-native';
+import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import YoutubePlayer from "react-native-youtube-iframe";
 import { constants, loadingView, normalizedHostname, sharedAsyncState } from '../utils';
+import { getYoutubeMeta } from 'react-native-youtube-iframe';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+
 
 function VideoPlayer(props: any) {
     const [youtubeVideoId, setYoutubeVideoId] = useState('');
@@ -15,6 +19,8 @@ function VideoPlayer(props: any) {
     const [_, setStepper] = useState(false);
     const ref = useRef<any>(null);
     const [intervalObj, setIntervalObj] = useState<any>(null);
+    const [buttonPressed, setButtonPressed] = useState(props.isSinglePost);
+    const [metadata, setMetadata] = useState<any>({});
 
     const startSyncTime = () => {
         const id = setInterval(async () => {
@@ -26,7 +32,8 @@ function VideoPlayer(props: any) {
     };
 
     useEffect(() => {
-        // console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
+        if (!videoShouldPlaying) return;
+        console.log('debug appStateCurrent', appStateCurrent, props.scrolledOn, youtubeVideoId)
         let needToPause = !props.scrolledOn
             || appStateCurrent != 'active'
             || youtubeVideoId == '';
@@ -34,8 +41,21 @@ function VideoPlayer(props: any) {
         if (needToPause) {
             // console.log('debug need to pause');
             setVideoShouldPlaying(false);
+            setButtonPressed(false);
         }
     }, [props.scrolledOn, appStateCurrent, youtubeVideoId]);
+
+    useEffect(() => {
+        if (youtubeVideoId == '') return;
+        (async () => {
+            try {
+                const metadata = await getYoutubeMeta(youtubeVideoId);
+                setMetadata(metadata)
+            } catch (e) {
+                console.log('debug error', e)
+            }
+        })()
+    }, [youtubeVideoId])
 
     useEffect(() => {
         // console.log("debug videoShouldPlaying", videoShouldPlaying)
@@ -99,14 +119,63 @@ function VideoPlayer(props: any) {
         startSyncTime();
     }, [videoShouldPlaying])
 
-    // const onReady = () => {
-    //     setReady(true);
-    // }
-
     if (youtubeVideoId == '') return <></>
+    if (buttonPressed == false) return <Pressable style={{
+        width: constants.width,
+        height: Math.floor(constants.width / 16 * 9),
+        backgroundColor: 'black',
+        justifyContent: 'center'
+    }}
+        onPress={() => {
+            setButtonPressed(true)
+        }}
+    >
+        {
+            metadata?.thumbnail_url &&
+            <View style={{
+                position: 'absolute'
+            }}>
+                <Animated.Image
+                    style={{
+                        width: constants.width,
+                        height: Math.floor(constants.width / 16 * 9),
+                    }}
+                    source={{
+                        uri: metadata.thumbnail_url
+                    }}
+                    entering={FadeIn}
+                />
+
+                {/* {
+                    !buttonPressed && <View style={{
+                        position: 'absolute',
+                        width: '100%',
+                        height: '100%',
+                        // backgroundColor: 'rgba(0, 0, 0, 0.6)'
+                    }} />
+                } */}
+            </View>
+        }
+
+        <View
+            style={{
+                alignSelf: 'center',
+                backgroundColor: 'rgba(28, 28, 28, 0.7)',
+                padding: 16,
+                borderRadius: 32
+            }}>
+            <Ionicons name="play-sharp" size={32} color="white" />
+        </View>
+    </Pressable>
+
     // 560x315
     // console.log(constants.width, Math.floor(constants.width / 16 * 9))
-    return (error || reloadN > 1) ? <></> : <View style={{
+    return (error || reloadN > 1) ? <View style={{
+        width: constants.width,
+        height: Math.floor(constants.width / 16 * 9),
+        backgroundColor: '#a3a3a3'
+    }}>
+    </View> : <View style={{
         // paddingBottom: 4,
     }}
     // pointerEvents={props.scrolling ? 'none' : 'auto'}
@@ -125,7 +194,7 @@ function VideoPlayer(props: any) {
                 showClosedCaptions: true
             }}
             onReady={() => {
-                if (!props.isSinglePost) return;
+                // if (!props.isSinglePost) return;
                 const second = sharedAsyncState[`player/${props.id}/second`] ?? 0;
                 ref.current?.seekTo(second, true)
                 // console.log('debug need to play');
@@ -153,3 +222,4 @@ function VideoPlayer(props: any) {
 }
 
 export default VideoPlayer;
+export const MemoVideoPlayer = memo(VideoPlayer)

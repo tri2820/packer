@@ -42,7 +42,11 @@ function ListHeader(props: any) {
             imageLoaded={props.imageLoaded}
             mode={props.mode}
         />
-        <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+        <View style={{
+            marginHorizontal: 16
+        }}>
+            <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+        </View>
         {
             sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
             props.numTopLevelComments == 0 &&

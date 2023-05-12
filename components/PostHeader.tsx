@@ -64,27 +64,11 @@ function PostHeader(props: any) {
                 onLongPress={openMenu}
             >
 
-                {props.imageLoaded &&
-
-                    <Animated.Image
-                        style={[styles.image, {
-                            // marginTop: props.isSinglePost ? 16 : 0
-                            // marginTop: 16
-                        }]}
-                        source={{
-                            uri: props.post.image
-                        }}
-                        entering={FadeIn}
-                    />
-                }
-
-
                 <View style={{
                     paddingTop: 8,
                     marginHorizontal: 16
                     // paddingBottom: 4
                 }}>
-
 
                     <View style={styles.contentmenu}>
                         <MemoContentMenu
@@ -105,10 +89,7 @@ function PostHeader(props: any) {
                     </Text>
 
                     <View style={{
-                        marginTop: 4,
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        // backgroundColor: 'red'
+                        marginTop: 4
                     }}>
                         {/* <Ionicons name='link' color='#A3A3A3' size={12} style={{
                             marginTop: 2,
@@ -117,21 +98,24 @@ function PostHeader(props: any) {
                         <Text style={{
                             color: '#a3a3a3',
                             // marginLeft: 4,
-                            fontWeight: '300'
-                            // backgroundColor: 'black',
+                            fontWeight: '300',
+                            // backgroundColor: 'blue',
                             // borderRadius: 4,
                             // paddingVertical: 4,
                             // paddingHorizontal: 8,
                         }}>
                             {
-                                getSourceName(props.post.source_url, true)
+                                isVideoPost(props.post.source_url) ?
+                                    props.post.author_name
+                                    :
+                                    getSourceName(props.post.source_url, true)
                             }
+                            <Text style={styles.created_at}> • {
+                                moment.utc(props.post.created_at).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                            }</Text>
                         </Text>
-                        <Text style={styles.created_at}> • {
-                            moment.utc(props.post.created_at).local().startOf('seconds').fromNow()
-                        }</Text>
-
                     </View>
+
 
                     {
                         props.isSinglePost && <View>
@@ -202,11 +186,6 @@ function PostHeader(props: any) {
 
 export default PostHeader;
 const styles = StyleSheet.create({
-    image: {
-        width: constants.width,
-        height: constants.width / 4 * 2,
-        // borderRadius: 8
-    },
     touch: {
         // paddingTop: 8,
         // marginBottom: 0,

@@ -38,7 +38,7 @@ import { MenuProvider } from 'react-native-popup-menu';
 
 import { useHeaderHeight } from '@react-navigation/elements';
 import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { createStackNavigator } from '@react-navigation/stack';
 import { MemoPost } from './components/Post';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Settings from './components/Settings';
@@ -223,9 +223,9 @@ function Main(props: any) {
 const rp = async (sharedAsyncState: any, setData: any) => {
   console.log('debug post get requested');
   const offset = sharedAsyncState['offset/main'] ?? 0;
-  sharedAsyncState['offset/main'] = offset + 5;
+  sharedAsyncState['offset/main'] = offset + 20;
 
-  const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 5 })
+  const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 20 })
   if (error) {
     console.error('error get post', error)
     return;
@@ -237,7 +237,7 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   })
 }
 
-const Stack = createNativeStackNavigator();
+const Stack = createStackNavigator();
 
 function MyStack(props: any) {
   const TheMain = (navProps: any) => {
@@ -290,14 +290,20 @@ function MyStack(props: any) {
       <Stack.Screen
         name="SinglePost"
         options={{
-          title: 'Bookmark',
+          title: 'Post',
           headerStyle: {
             backgroundColor: '#272727',
+            elevation: 0,
+            shadowOpacity: 0,
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            borderBottomColor: '#3C3D3F'
           },
+          headerBackTitle: 'Back',
           headerTintColor: '#fff',
           headerTitleStyle: {
             fontFamily: 'Rubik_600SemiBold'
           },
+          gestureResponseDistance: constants.width
           // headerRight: headerRight
         }}
         children={TheMain}

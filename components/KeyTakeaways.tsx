@@ -33,28 +33,17 @@ function KeyTakeaways(props: any) {
     }
     {/* <Text style={{ color: 'white' }}>{props.content}</Text>
     console.log("@", props.content, "@") */}
-    const content = replaceSubstringsWithStars(ners, props.content)
-        // props.content
-        .split('\n')
-        .map((l: string) => {
-            // let l = line?.trim();
-            if (!l || l == '') return undefined;
-            // Zero-width character ahead to avoid newline bug
-            l = '​{SQUARE}' + l
-            // const md = replaceSubstringsWithStars(ners, l, offset=)
-            return <MarkdownView
-                key={l}
-                rules={markdownNERRules}
-                onLinkPress={() => { }}
-                styles={mdstyles}
-            >
-                {l as any}
-            </MarkdownView>
-        })
+    const content = <MarkdownView
+        rules={markdownNERRules}
+        styles={mdstyles}
+    >
+        {'​' + replaceSubstringsWithStars(ners, props.content.slice(0, 150)).trim() as any}
+    </MarkdownView>
+
 
     return <View style={{
-        width: constants.width,
-        paddingHorizontal: 16,
+        // width: constants.width,
+        // paddingHorizontal: 16,
         paddingVertical: 4
     }}>
         {content}
