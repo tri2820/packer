@@ -28,7 +28,7 @@ function PostHeader(props: any) {
 
     const _toggleBookmark = () => {
         if (!props.user) {
-            props.navProps.navigation.navigate('TheTab', { screen: 'Settings' })
+            props.navProps.navigation.navigate('TheTab', { screen: 'Profile' })
             return;
         }
         toggleBookmark(props.post, props.user)

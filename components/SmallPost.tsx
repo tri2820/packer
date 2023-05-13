@@ -69,7 +69,7 @@ function ListHeader(props: any) {
 
     const _toggleBookmark = () => {
         if (!props.user) {
-            props.navProps.navigation.navigate('Settings')
+            props.navProps.navigation.navigate('Profile')
             return;
         }
         toggleBookmark(props.post, props.user)

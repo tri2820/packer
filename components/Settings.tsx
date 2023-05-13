@@ -23,7 +23,8 @@ function Settings(props: any) {
     const insets = useSafeAreaInsets();
     const isFocused = useIsFocused();
     console.log('debug UserList isFocused', isFocused);
-    const bookmarked_posts = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.bookmark_datetime)).getTime() - (new Date(a.bookmark_datetime)).getTime());
+    const bookmarked_posts: any[] = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.bookmark_datetime)).getTime() - (new Date(a.bookmark_datetime)).getTime())
+    // .slice(0, 3);
     bookmarked_posts.length = Math.max(bookmarked_posts.length, 15);
     const data = bookmarked_posts;
     // console.log('debug data', data)
@@ -222,8 +223,8 @@ function Settings(props: any) {
                                                     <Image
                                                         style={{
                                                             alignSelf: 'center',
-                                                            width: 50,
-                                                            height: 50,
+                                                            width: 60,
+                                                            height: 60,
                                                             // borderRadius: 2
                                                         }}
                                                         source={{
@@ -263,7 +264,26 @@ function Settings(props: any) {
                                                     </View>
                                                 </View>
                                                 :
-                                                <View style={styles.emptyBookmark} />
+                                                <View style={{
+                                                    height: 60,
+                                                    flexDirection: 'row'
+                                                }} >
+                                                    <View style={{
+                                                        height: 60,
+                                                        width: 60,
+                                                        borderStyle: 'dashed',
+                                                        borderWidth: 1,
+                                                        borderColor: '#5D5F64'
+                                                    }} />
+                                                    <View style={{
+                                                        marginLeft: 12,
+                                                        height: 60,
+                                                        flex: 1,
+                                                        borderStyle: 'dashed',
+                                                        borderWidth: 1,
+                                                        borderColor: '#5D5F64'
+                                                    }} />
+                                                </View>
                                         }
                                     </TouchableOpacity>
                                 }
@@ -382,7 +402,10 @@ function Settings(props: any) {
             }}
                 entering={FadeIn}
             >
-                <SignInSection setUser={props.setUser} />
+                <SignInSection
+                    navProps={props.navProps}
+                    setUser={props.setUser}
+                />
             </Animated.View>}
     </View>
 
@@ -407,16 +430,6 @@ const styles = StyleSheet.create({
         color: '#F1F1F1',
         fontSize: 24,
         fontWeight: '800'
-    },
-    emptyBookmark: {
-        height: 60,
-        width: '100%',
-        // backgroundColor: 'blue',
-        borderRadius: 8,
-        // marginVertical: 8,
-        borderStyle: 'dashed',
-        borderWidth: 2,
-        borderColor: '#5D5F64'
     },
     heading: {
         paddingTop: 8,

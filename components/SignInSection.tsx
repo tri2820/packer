@@ -20,7 +20,7 @@ function SignInSection(props: any) {
         // props.changeState('minimize')
         console.log('debug user', JSON.stringify(user));
         props.setUser(user);
-
+        props.navProps.navigation.navigate('TheTab', { screen: 'Packs' })
         // // Round trip
         // await upsertProfile(user);
         // await syncProfile();
