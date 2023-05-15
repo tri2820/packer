@@ -62,28 +62,29 @@ export default function Slide(props: any) {
 
     const image = 'https://imgur.com/QpDXQe5.png';
     if (props.activeSlideIndex == 0) return <View style={{ width: constants.width }} />
-    return <Pressable style={{
+    return <View style={{
         width: constants.width,
         // backgroundColor: randomColor(),
         flex: 1,
         // height: '100%',
         // paddingBottom: 54
-    }}
-        onPress={() => {
-            props.showImageViewer(image)
-        }}
-    >
-        <Animated.Image
-            style={{
-                // backgroundColor: 'red',
-                width: constants.width,
-                height: props.height
-            }}
-            source={{
-                uri: image
-            }}
-            resizeMode={props.height < constants.width ? 'contain' : 'cover'}
-        />
+    }}>
+        <Pressable
+            onPress={() => {
+                props.showImageViewer(image)
+            }}>
+            <Animated.Image
+                style={{
+                    // backgroundColor: 'red',
+                    width: constants.width,
+                    height: props.height
+                }}
+                source={{
+                    uri: image
+                }}
+                resizeMode={props.height < constants.width ? 'contain' : 'cover'}
+            />
+        </Pressable>
 
         <View style={{
             position: 'absolute',
@@ -102,6 +103,6 @@ export default function Slide(props: any) {
             </Text>
         </View>
 
-    </Pressable>
+    </View>
 
 }

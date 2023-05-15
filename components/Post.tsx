@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, hookListener, noComment, openLink, requestComments, sharedAsyncState, toUIList, unhookListener } from '../utils';
+import { constants, hookListener, noComment, openLink, requestComments, sharedAsyncState, sourceName, toUIList, unhookListener } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -18,6 +18,7 @@ import * as WebBrowser from 'expo-web-browser';
 import { WebBrowserPresentationStyle } from 'expo-web-browser';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import moment from 'moment';
 
 
 
@@ -33,19 +34,67 @@ function ListHeader(props: any) {
             source_url={props.post.source_url}
             isSinglePost={true}
         />
-        <PostHeader
-            navProps={props.navProps}
-            user={props.user}
-            isSinglePost={props.isSinglePost}
-            openLink={props.openLink}
-            post={props.post}
-            imageLoaded={props.imageLoaded}
-            mode={props.mode}
-        />
+
         <View style={{
-            marginHorizontal: 16
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 8
         }}>
-            <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+            <Image
+                style={{
+                    // flex: 1,
+                    width: 18,
+                    height: 18,
+                    marginRight: 8,
+                    // backgroundColor: '#3C3D3F',
+                    // borderRadius: 4,
+                    borderWidth: StyleSheet.hairlineWidth,
+                    // borderColor: '#3C3D3F'
+                }}
+                source={{
+                    uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.source_url}`
+                }}
+            />
+
+
+            <Text style={{
+                color: '#a3a3a3',
+                fontWeight: '300'
+                // backgroundColor: 'green'
+            }}>
+                {
+                    sourceName(props.post)
+                }
+                <Text style={{
+                    color: '#A3A3A3',
+                    fontWeight: '300'
+                }}> • {
+                        moment.utc(props.post.created_at).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                    }</Text>
+            </Text>
+        </View>
+
+
+
+        <View style={{
+            paddingHorizontal: 16
+        }}>
+            <PostHeader
+                navProps={props.navProps}
+                user={props.user}
+                isSinglePost={props.isSinglePost}
+                openLink={props.openLink}
+                post={props.post}
+                imageLoaded={props.imageLoaded}
+                mode={props.mode}
+            />
+            <View style={{
+                paddingVertical: 8
+            }}>
+                <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+            </View>
         </View>
         {
             sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&

@@ -2,10 +2,10 @@ import * as React from 'react';
 
 import { Octicons } from '@expo/vector-icons';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Image, ImageBackground, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getPastelColor, isVideoPost, openLink, requestComments, sharedAsyncState, toUIList, toggleBookmark } from '../utils';
+import { constants, getPastelColor, isVideoPost, openLink, requestComments, sharedAsyncState, sourceName, toUIList, toggleBookmark } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -25,6 +25,7 @@ import WebView from 'react-native-webview';
 import Slide from './Slide';
 import ImageView from "react-native-image-viewing";
 import { ImageSVG } from '@shopify/react-native-skia';
+import moment from 'moment';
 
 
 function AnonAvatarList(props: any) {
@@ -92,47 +93,103 @@ function ListHeader(props: any) {
                 source_url={props.post.source_url}
                 isSinglePost={false}
             />
-            <PostHeader
-                // scrolling={props.scrolling}
-                user={props.user}
-                isSinglePost={props.isSinglePost}
-                openLink={props.openLink}
-                post={props.post}
-                imageLoaded={props.imageLoaded}
-                mode={props.mode}
-                navProps={props.navProps}
-            />
 
             <View style={{
                 flexDirection: 'row',
-                marginHorizontal: 16
+                alignItems: 'center',
+                paddingHorizontal: 16,
+                paddingTop: 16,
+                paddingBottom: 8
             }}>
+                <Image
+                    style={{
+                        // flex: 1,
+                        width: 18,
+                        height: 18,
+                        marginRight: 8,
+                        // backgroundColor: 'white',
+                        // borderRadius: 4,
+                        // borderWidth: StyleSheet.hairlineWidth,
+                        // borderColor: '#3C3D3F'
+                    }}
+                    source={{
+                        uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.source_url}`
+                    }}
+                />
 
-                {props.imageLoaded &&
 
-                    <Animated.Image
-                        style={{
-                            width: 80,
-                            height: 80,
-                            marginRight: 16,
-                            marginTop: 8,
-                            // borderRadius: 0,
-                            // borderWidth: StyleSheet.hairlineWidth,
-                            // borderColor: '#3C3D3F'
-                        }}
-                        source={{
-                            uri: props.post.image
-                        }}
-                        entering={FadeIn}
-                    />
-                }
+                <Text style={{
+                    color: '#a3a3a3',
+                    fontWeight: '300'
+                    // backgroundColor: 'green'
+                }}>
+                    {
+                        sourceName(props.post)
+                    }
+                    <Text style={{
+                        color: '#A3A3A3',
+                        fontWeight: '300'
+                    }}> • {
+                            moment.utc(props.post.created_at).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                        }</Text>
+                </Text>
+            </View>
+
+            <View style={{
+                flexDirection: 'row',
+                paddingHorizontal: 16,
+
+            }}>
                 <View style={{
                     flex: 1,
-                    marginTop: -4
-                    // backgroundColor: 'red'
+                    // backgroundColor: 'blue'
+                    // flexDirection: 'row'
                 }}>
+
+                    <PostHeader
+                        // scrolling={props.scrolling}
+                        user={props.user}
+                        isSinglePost={props.isSinglePost}
+                        openLink={props.openLink}
+                        post={props.post}
+                        imageLoaded={props.imageLoaded}
+                        mode={props.mode}
+                        navProps={props.navProps}
+                    />
+
                     <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
                 </View>
+
+
+
+                {props.imageLoaded &&
+                    <View
+                        style={{
+                            // flex: 1,
+                            // backgroundColor: 'red',
+                            paddingLeft: 8
+                        }}>
+                        <Pressable onPress={() => {
+                            setImageViewerIndex(0);
+                            setImageViewerIsVisible(true);
+                        }}>
+                            <Animated.Image
+                                style={{
+                                    // flex: 1,
+                                    width: constants.width / 4,
+                                    height: constants.width / 4,
+                                    // borderRadius: 0,
+                                    // borderWidth: StyleSheet.hairlineWidth,
+                                    // borderColor: '#3C3D3F'
+                                }}
+                                source={{
+                                    uri: props.post.image
+                                }}
+                                entering={FadeIn}
+                            />
+                        </Pressable>
+                    </View>
+                }
             </View>
 
 
@@ -182,6 +239,69 @@ function ListHeader(props: any) {
         setHeight(event.nativeEvent.layout.height);
     }
 
+    const header = ({ imageIndex }: any) => {
+        return <Text style={{
+            color: '#a3a3a3',
+            // fontSize: 18,
+            // fontFamily: 'Rubik_500Medium',
+            paddingTop: insets.top,
+            paddingBottom: 16,
+            paddingHorizontal: 16,
+            backgroundColor: 'rgba(28,28,28,0.8)'
+        }}>
+            {props.post.title}
+        </Text>
+    }
+
+    const footer = ({ imageIndex }: any) => {
+        const content = imageIndex == 0 ?
+            <Text>
+                {props.post.keytakeaways.slice(0, 150).replace('\n', '')}
+            </Text>
+            :
+            <Text>Since layoffs, Vox might have been focusing on its core business.</Text>
+        return <View style={{
+            paddingTop: 16,
+            paddingBottom: insets.bottom,
+            paddingHorizontal: 16,
+            backgroundColor: 'rgba(28,28,28,0.8)'
+        }}>
+            {
+                imageIndex == 0 &&
+                <Text style={{
+                    color: 'white',
+                    fontSize: 18,
+                    fontFamily: 'Rubik_500Medium',
+                    marginBottom: 8
+                }}>{props.post.title}</Text>}
+
+            <Text style={{
+                color: 'white'
+            }}>
+                {content}
+            </Text>
+
+            {imageSources.length > 1 && <View style={{
+                flexDirection: 'row',
+                alignSelf: 'center',
+                marginTop: 16
+            }}>
+                {imageSources.map((item: any, index: any) => {
+                    // console.log('debug index', index, activePostIndex)
+                    return <View key={index} style={{
+                        height: 8,
+                        width: 8,
+                        borderRadius: 4,
+                        backgroundColor: imageIndex == index ? '#f1f1f1' : '#6E6E6E',
+                        marginHorizontal: 4
+                    }} />
+                })}
+            </View>
+            }
+        </View>
+
+    }
+
     return <><View style={{
         // paddingTop: 8
         backgroundColor: '#151316'
@@ -206,6 +326,7 @@ function ListHeader(props: any) {
             position: 'absolute',
             bottom: 16,
             left: 12,
+            // alignSelf: 'center'
         }}>
             <TouchableOpacity
                 onPress={_toggleBookmark}
@@ -241,6 +362,7 @@ function ListHeader(props: any) {
                 position: 'absolute',
                 bottom: 24,
                 right: 16,
+                // alignSelf: 'center',
                 flexDirection: 'row',
             }}
                 pointerEvents='none'
@@ -265,6 +387,12 @@ function ListHeader(props: any) {
 
     </View>
         <ImageView
+            keyExtractor={(s: any) => {
+                return s.uri
+            }}
+            // HeaderComponent={header}
+            FooterComponent={footer}
+            doubleTapToZoomEnabled={true}
             images={imageSources}
             imageIndex={imageViewerIndex}
             visible={imageViewerVisible}

@@ -1,9 +1,9 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getSourceName, hookListener, isVideoPost, normalizedHostname, sharedAsyncState, toggleBookmark, unhookListener } from '../utils';
+import { constants, getSourceName, hookListener, isVideoPost, normalizedHostname, sharedAsyncState, sourceName, title, toggleBookmark, unhookListener } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -65,8 +65,8 @@ function PostHeader(props: any) {
             >
 
                 <View style={{
-                    paddingTop: 8,
-                    marginHorizontal: 16
+                    // paddingTop: 8,
+                    // marginHorizontal: 16
                     // paddingBottom: 4
                 }}>
 
@@ -82,39 +82,10 @@ function PostHeader(props: any) {
 
                     <Text style={styles.title}>
                         {
-                            isVideoPost(props.post.source_url)
-                                ? props.post.title.replace(/#[^\s]+/g, '')
-                                : props.post.title
+                            title(props.post)
                         }
                     </Text>
 
-                    <View style={{
-                        marginTop: 4
-                    }}>
-                        {/* <Ionicons name='link' color='#A3A3A3' size={12} style={{
-                            marginTop: 2,
-                            // backgroundColor: 'blue'
-                        }} /> */}
-                        <Text style={{
-                            color: '#a3a3a3',
-                            // marginLeft: 4,
-                            fontWeight: '300',
-                            // backgroundColor: 'blue',
-                            // borderRadius: 4,
-                            // paddingVertical: 4,
-                            // paddingHorizontal: 8,
-                        }}>
-                            {
-                                isVideoPost(props.post.source_url) ?
-                                    props.post.author_name
-                                    :
-                                    getSourceName(props.post.source_url, true)
-                            }
-                            <Text style={styles.created_at}> • {
-                                moment.utc(props.post.created_at).local().startOf('seconds').fromNow().replace(' days ago', 'd')
-                            }</Text>
-                        </Text>
-                    </View>
 
 
                     {

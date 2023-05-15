@@ -31,23 +31,15 @@ function KeyTakeaways(props: any) {
 
         return result;
     }
-    {/* <Text style={{ color: 'white' }}>{props.content}</Text>
-    console.log("@", props.content, "@") */}
-    const content = <MarkdownView
+
+
+
+    return <MarkdownView
         rules={markdownNERRules}
         styles={mdstyles}
     >
-        {'​' + replaceSubstringsWithStars(ners, props.content.slice(0, 150)).trim() as any}
+        {'​' + replaceSubstringsWithStars(ners, props.content.slice(0, 150)).replace('\n', '') + '...' as any}
     </MarkdownView>
-
-
-    return <View style={{
-        // width: constants.width,
-        // paddingHorizontal: 16,
-        paddingVertical: 4
-    }}>
-        {content}
-    </View>
 
 }
 

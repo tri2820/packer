@@ -203,7 +203,7 @@ function VideoPlayer(props: any) {
             onError={onError}
             // onReady={onReady}
             webViewProps={{
-                // startInLoadingState: true,
+                startInLoadingState: true,
                 renderLoading: loadingView
             }}
         // baseUrlOverride={"https://lonelycpp.github.io/react-native-youtube-iframe/iframe.html"}

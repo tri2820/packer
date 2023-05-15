@@ -812,6 +812,19 @@ export const fixText = (text: string, author_name: string) => {
     return text.startsWith('Packer: ') ? text.slice(8) : text.slice(7)
 }
 
+export const title = (item: any) => {
+    return isVideoPost(item.source_url)
+        ? item.title.replace(/#[^\s]+/g, '')
+        : item.title
+}
+
+export const sourceName = (item: any) => {
+    return isVideoPost(item.source_url) ?
+        item.author_name.toLowerCase()
+        :
+        getSourceName(item.source_url, true)
+}
+
 export const theEmptyFunction = () => { };
 export const getSourceName = (source_url: string, lower?: boolean) => {
     const url = new URL(source_url);
@@ -1085,25 +1098,22 @@ const nerHighLight: MarkdownRule = {
         return { children: parse(capture[2], stateNested), key: capture[0], nerType: capture[1], term: capture[2] }
     },
     render: (node: any, output: any, state: any, styles: any) => {
-        const tag = <TouchableOpacity
+        const tag = <Text
             key={state.key}
             onPress={() => {
                 openGoogle(node.term);
             }}
+            style={{
+                color: '#FFC542',
+                fontWeight: '500',
+                // marginBottom: -2.5,
+                // marginTop: -2,
+            }}
         >
-            <Text
-                style={{
-                    color: '#FFC542',
-                    fontWeight: '500',
-                    marginBottom: -2.5,
-                    marginTop: -2,
-                }}
-            >
-                {
-                    output(node.children, state)
-                }
-            </ Text>
-        </TouchableOpacity>
+            {
+                output(node.children, state)
+            }
+        </ Text>
         return tag
     }
 }

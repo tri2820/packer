@@ -6,7 +6,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
 import { supabaseClient } from '../supabaseClient';
-import { getSourceName, hookListener, randomNickName, sharedAsyncState, unhookListener } from '../utils';
+import { getSourceName, hookListener, isVideoPost, randomNickName, sharedAsyncState, sourceName, title, unhookListener } from '../utils';
 import * as Haptics from 'expo-haptics';
 import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
@@ -68,6 +68,103 @@ function Settings(props: any) {
                 style: 'destructive'
             },
         ]);
+
+    const renderItem = ({ item }: any) =>
+        <TouchableOpacity onPress={item ? () => {
+            props.navProps.navigation.push('SinglePost', {
+                singlePost: item
+            })
+        } : undefined}
+            style={{
+                marginVertical: 4
+            }}
+        >
+            {
+                item ?
+                    <View style={{
+                        height: 60,
+                        width: '100%',
+                        // backgroundColor: '#323233',
+                        borderRadius: 8,
+                        // marginVertical: 8,
+                        // borderStyle: 'dashed',
+                        // borderWidth: 2,
+                        borderColor: '#5D5F64',
+                        flexDirection: 'row',
+                        // paddingHorizontal: 8,
+                    }}>
+                        <Image
+                            style={{
+                                alignSelf: 'center',
+                                width: 60,
+                                height: 60,
+                                // borderRadius: 2
+                            }}
+                            source={{
+                                uri: item.image
+                            }}
+                            placeholder={require('../assets/empty.jpg')}
+                            placeholderContentFit='cover'
+                        />
+                        <View style={{
+                            flex: 1,
+                            flexDirection: 'row',
+                            alignItems: 'center',
+                            // backgroundColor: 'red'
+                        }}>
+                            <View style={{
+                                marginLeft: 12,
+                                flex: 1
+                            }}>
+                                <Text style={{
+                                    color: '#a3a3a3',
+                                    // marginLeft: 4,
+                                    fontWeight: '300',
+                                }}
+                                    numberOfLines={1}
+                                >
+                                    {
+                                        sourceName(item)
+                                    }
+                                </Text>
+                                <Text style={{
+                                    color: '#f1f1f1',
+                                    fontSize: 15,
+                                    fontFamily: 'Rubik_500Medium'
+                                }}
+                                    numberOfLines={1}
+                                >
+                                    {
+                                        title(item)
+                                    }
+                                </Text>
+                            </View>
+                        </View>
+                    </View>
+                    :
+                    <View style={{
+                        height: 60,
+                        flexDirection: 'row'
+                    }} >
+                        <View style={{
+                            height: 60,
+                            width: 60,
+                            borderStyle: 'dashed',
+                            borderWidth: 1,
+                            borderColor: '#5D5F64'
+                        }} />
+                        <View style={{
+                            marginLeft: 12,
+                            height: 60,
+                            flex: 1,
+                            borderStyle: 'dashed',
+                            borderWidth: 1,
+                            borderColor: '#5D5F64'
+                        }} />
+                    </View>
+            }
+        </TouchableOpacity>
+
 
 
     return <View style={{
@@ -196,97 +293,7 @@ function Settings(props: any) {
                                 }}
                                 data={data}
                                 // keyExtractor={keyExtractor}
-                                renderItem={({ item }: any) =>
-                                    <TouchableOpacity onPress={item ? () => {
-                                        props.navProps.navigation.push('SinglePost', {
-                                            singlePost: item
-                                        })
-                                    } : undefined}
-                                        style={{
-                                            marginVertical: 4
-                                        }}
-                                    >
-                                        {
-                                            item ?
-                                                <View style={{
-                                                    height: 60,
-                                                    width: '100%',
-                                                    // backgroundColor: '#323233',
-                                                    borderRadius: 8,
-                                                    // marginVertical: 8,
-                                                    // borderStyle: 'dashed',
-                                                    // borderWidth: 2,
-                                                    borderColor: '#5D5F64',
-                                                    flexDirection: 'row',
-                                                    // paddingHorizontal: 8,
-                                                }}>
-                                                    <Image
-                                                        style={{
-                                                            alignSelf: 'center',
-                                                            width: 60,
-                                                            height: 60,
-                                                            // borderRadius: 2
-                                                        }}
-                                                        source={{
-                                                            uri: item.image
-                                                        }}
-                                                        placeholder={require('../assets/empty.jpg')}
-                                                        placeholderContentFit='cover'
-                                                    />
-                                                    <View style={{
-                                                        flex: 1,
-                                                        flexDirection: 'row',
-                                                        alignItems: 'center',
-                                                        // backgroundColor: 'red'
-                                                    }}>
-                                                        <View style={{
-                                                            marginLeft: 12,
-                                                            flex: 1
-                                                        }}>
-                                                            <Text style={{
-                                                                color: '#f1f1f1',
-                                                                fontSize: 15,
-                                                                fontFamily: 'Rubik_500Medium'
-                                                            }}
-                                                                numberOfLines={1}
-                                                            >
-                                                                {item.title}
-                                                            </Text>
-                                                            <Text style={{
-                                                                color: '#A3A3A3',
-                                                                fontSize: 12
-                                                            }}
-                                                                numberOfLines={1}
-                                                            >
-                                                                {getSourceName(item.source_url, true)}
-                                                            </Text>
-                                                        </View>
-                                                    </View>
-                                                </View>
-                                                :
-                                                <View style={{
-                                                    height: 60,
-                                                    flexDirection: 'row'
-                                                }} >
-                                                    <View style={{
-                                                        height: 60,
-                                                        width: 60,
-                                                        borderStyle: 'dashed',
-                                                        borderWidth: 1,
-                                                        borderColor: '#5D5F64'
-                                                    }} />
-                                                    <View style={{
-                                                        marginLeft: 12,
-                                                        height: 60,
-                                                        flex: 1,
-                                                        borderStyle: 'dashed',
-                                                        borderWidth: 1,
-                                                        borderColor: '#5D5F64'
-                                                    }} />
-                                                </View>
-                                        }
-                                    </TouchableOpacity>
-                                }
+                                renderItem={renderItem}
                             />
 
                         </View> :
