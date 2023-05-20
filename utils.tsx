@@ -816,8 +816,8 @@ export const title = (item: any) => {
     return item.title
 }
 
-export const sourceName = (item: any) => {
-    return getSourceName(item.url, true)
+export const sourceName = (item: any, lower = true) => {
+    return getSourceName(item.url, lower)
 }
 
 export const theEmptyFunction = () => { };

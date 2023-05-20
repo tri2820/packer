@@ -28,6 +28,13 @@ import { polyfill as polyfillFetch } from 'react-native-polyfill-globals/src/fet
 import {
   Rubik_300Light, Rubik_300Light_Italic, Rubik_400Regular, Rubik_400Regular_Italic, Rubik_500Medium, Rubik_500Medium_Italic, Rubik_600SemiBold, Rubik_600SemiBold_Italic, Rubik_700Bold, Rubik_700Bold_Italic, Rubik_800ExtraBold, Rubik_800ExtraBold_Italic, Rubik_900Black, Rubik_900Black_Italic, useFonts
 } from '@expo-google-fonts/rubik';
+import {
+  Domine_400Regular,
+  Domine_500Medium,
+  Domine_600SemiBold,
+  Domine_700Bold,
+} from '@expo-google-fonts/domine';
+
 import * as NavigationBar from 'expo-navigation-bar';
 import * as SplashScreen from 'expo-splash-screen';
 // @ts-ignore
@@ -328,6 +335,10 @@ function App() {
     Rubik_700Bold_Italic,
     Rubik_800ExtraBold_Italic,
     Rubik_900Black_Italic,
+    Domine_400Regular,
+    Domine_500Medium,
+    Domine_600SemiBold,
+    Domine_700Bold,
   });
   const [posts, setPosts] = useState<any[]>([
     // { type: 'welcomePost', id: 'welcome' }

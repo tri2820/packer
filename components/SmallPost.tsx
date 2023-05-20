@@ -100,38 +100,44 @@ function ListHeader(props: any) {
                 alignItems: 'center',
                 paddingHorizontal: 16,
                 paddingTop: 16,
-                paddingBottom: 8
+                paddingBottom: 8,
             }}>
-                <Image
+
+                {/* <Image
                     style={{
                         // flex: 1,
-                        width: 18,
-                        height: 18,
                         marginRight: 8,
-                        // backgroundColor: 'white',
-                        // borderRadius: 4,
-                        // borderWidth: StyleSheet.hairlineWidth,
-                        // borderColor: '#3C3D3F'
+                        width: 16,
+                        height: 16,
+
+                        backgroundColor: 'white',
+                        borderRadius: 1,
+                        // borderWidth: 2,
+                        // borderColor: 'white',
+                        // borderStyle: 'dashed'
                     }}
                     source={{
                         uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.url}`
                     }}
-                />
+                /> */}
 
 
                 <Text style={{
                     color: '#a3a3a3',
-                    fontWeight: '300'
+                    fontWeight: '700',
+                    fontSize: 10
                     // backgroundColor: 'green'
+
                 }}>
                     {
-                        sourceName(props.post)
+                        sourceName(props.post, false)
                     }
                     <Text style={{
                         color: '#A3A3A3',
-                        fontWeight: '300'
+                        fontWeight: '300',
+                        letterSpacing: 2
                     }}> • {
-                            moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                            moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd').toUpperCase()
                         }</Text>
                 </Text>
             </View>
@@ -170,7 +176,6 @@ function ListHeader(props: any) {
                     <View
                         style={{
                             // flex: 1,
-                            // backgroundColor: 'red',
                             paddingLeft: 12
                         }}>
                         <Pressable onPress={() => {
@@ -184,7 +189,8 @@ function ListHeader(props: any) {
                                     height: constants.width / 4,
                                     borderRadius: 2,
                                     borderWidth: StyleSheet.hairlineWidth,
-                                    borderColor: '#222324'
+                                    borderColor: '#222324',
+                                    backgroundColor: 'white',
                                 }}
                                 source={{
                                     uri: props.post.image_url
@@ -357,7 +363,7 @@ function ListHeader(props: any) {
                     )
                 } /> */}
                 <Ionicons name="chatbox-outline" size={20} color={activeSlideIndex > 0 ? 'white' : '#5c5c5c'} />
-                <Text style={{ color: activeSlideIndex > 0 ? 'white' : '#5c5c5c', marginLeft: 4, fontWeight: '500' }}>{sharedAsyncState[`count/${props.post.id}`] ?? 0}</Text>
+                <Text style={{ color: activeSlideIndex > 0 ? 'white' : '#5c5c5c', marginLeft: 4, fontWeight: '300' }}>{sharedAsyncState[`count/${props.post.id}`] ?? 0}</Text>
             </TouchableOpacity>
         </View>
 
@@ -380,8 +386,10 @@ function ListHeader(props: any) {
                             height: 8,
                             width: 8,
                             borderRadius: 4,
-                            backgroundColor: activeSlideIndex == index ? '#f1f1f1' : '#6E6E6E',
-                            marginHorizontal: 4
+                            backgroundColor: activeSlideIndex == index ? '#6e6e6e' : 'transparent',
+                            borderWidth: 1,
+                            borderColor: '#6e6e6e',
+                            marginHorizontal: 3
                         }} />
                     })
                 }

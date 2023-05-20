@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
         // marginTop: 16
         // StyleSheet.hairlineWidth
         // ,
-        // marginHorizontal: 16
+        marginHorizontal: 16
     }
 });
 

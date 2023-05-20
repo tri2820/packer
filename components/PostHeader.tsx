@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
         // fontWeight: 'bold',
         fontSize: 16,
         // marginBottom: 4,
-        fontFamily: 'Rubik_500Medium'
+        fontFamily: 'Domine_700Bold'
     },
     triggerOuterWrapper: {
         // backgroundColor: 'red',
