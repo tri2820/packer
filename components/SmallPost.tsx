@@ -24,8 +24,18 @@ import AnonAvatar from './AnonAvatar';
 import WebView from 'react-native-webview';
 import Slide from './Slide';
 import ImageView from "react-native-image-viewing";
-import { ImageSVG } from '@shopify/react-native-skia';
+import {
+    Canvas,
+    Rect,
+    LinearGradient,
+    Skia,
+    Shader,
+    vec
+} from "@shopify/react-native-skia";
+
+
 import moment from 'moment';
+import FirstSlide from './FirstSlide';
 
 
 function AnonAvatarList(props: any) {
@@ -83,128 +93,18 @@ function ListHeader(props: any) {
     const renderItem = ({ item, index }: any) => {
         // return <></>
         // console.log('debug props.post.ners', props.post)
-        if (item.type == 'post_with_attachment') return <View style={{
-            width: constants.width,
-            paddingBottom: 54,
-        }}>
-            <MemoVideoPlayer
-                // scrolling={props.scrolling}
-                id={props.post.id}
+        if (item.type == 'post_with_attachment')
+            return <FirstSlide
+                setImageViewerIndex={setImageViewerIndex}
+                setImageViewerIsVisible={setImageViewerIsVisible}
                 scrolledOn={props.scrolledOn}
-                url={props.post.url}
-                isSinglePost={false}
+                post={props.post}
+                user={props.user}
+                isSinglePost={props.isSinglePost}
+                openLink={props.openLink}
+                mode={props.mode}
+                navProps={props.navProps}
             />
-
-            <View style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                paddingHorizontal: 16,
-                paddingTop: 16,
-                paddingBottom: 8,
-            }}>
-
-                {/* <Image
-                    style={{
-                        // flex: 1,
-                        marginRight: 8,
-                        width: 16,
-                        height: 16,
-
-                        backgroundColor: 'white',
-                        borderRadius: 1,
-                        // borderWidth: 2,
-                        // borderColor: 'white',
-                        // borderStyle: 'dashed'
-                    }}
-                    source={{
-                        uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.url}`
-                    }}
-                /> */}
-
-
-                <Text style={{
-                    color: '#a3a3a3',
-                    fontWeight: '700',
-                    fontSize: 10
-                    // backgroundColor: 'green'
-
-                }}>
-                    {
-                        sourceName(props.post, false)
-                    }
-                    <Text style={{
-                        color: '#A3A3A3',
-                        fontWeight: '300',
-                        letterSpacing: 2
-                    }}> • {
-                            moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd').toUpperCase()
-                        }</Text>
-                </Text>
-            </View>
-
-            <View style={{
-                flexDirection: 'row',
-                paddingHorizontal: 16,
-
-            }}>
-                <View style={{
-                    flex: 1,
-                    // backgroundColor: 'blue'
-                    // flexDirection: 'row'
-                }}>
-                    <View style={{
-                        paddingBottom: 8
-                    }}>
-                        <PostHeader
-                            // scrolling={props.scrolling}
-                            user={props.user}
-                            isSinglePost={props.isSinglePost}
-                            openLink={props.openLink}
-                            post={props.post}
-                            imageLoaded={props.imageLoaded}
-                            mode={props.mode}
-                            navProps={props.navProps}
-                        />
-                    </View>
-
-                    <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
-                </View>
-
-
-
-                {props.imageLoaded &&
-                    <View
-                        style={{
-                            // flex: 1,
-                            paddingLeft: 12
-                        }}>
-                        <Pressable onPress={() => {
-                            setImageViewerIndex(0);
-                            setImageViewerIsVisible(true);
-                        }}>
-                            <Animated.Image
-                                style={{
-                                    // flex: 1,
-                                    width: constants.width / 4,
-                                    height: constants.width / 4,
-                                    borderRadius: 2,
-                                    borderWidth: StyleSheet.hairlineWidth,
-                                    borderColor: '#222324',
-                                    backgroundColor: 'white',
-                                }}
-                                source={{
-                                    uri: props.post.image_url
-                                }}
-                                entering={FadeIn}
-                            />
-                        </Pressable>
-                    </View>
-                }
-            </View>
-
-
-
-        </View>
 
         return <Slide
             height={height}
@@ -281,7 +181,7 @@ function ListHeader(props: any) {
                 <Text style={{
                     color: 'white',
                     fontSize: 18,
-                    fontFamily: 'Rubik_500Medium',
+                    fontFamily: 'Domine_700Bold',
                     marginBottom: 8
                 }}>{props.post.title}</Text>}
 
@@ -302,8 +202,10 @@ function ListHeader(props: any) {
                         height: 8,
                         width: 8,
                         borderRadius: 4,
-                        backgroundColor: imageIndex == index ? '#f1f1f1' : '#6E6E6E',
-                        marginHorizontal: 4
+                        backgroundColor: imageIndex == index ? (activeSlideIndex > 0 ? 'white' : '#6e6e6e') : 'transparent',
+                        borderWidth: 1,
+                        borderColor: imageIndex == index && activeSlideIndex > 0 ? 'white' : '#6e6e6e',
+                        marginHorizontal: 3
                     }} />
                 })}
             </View>
@@ -314,7 +216,6 @@ function ListHeader(props: any) {
 
     return <><View style={{
         // paddingTop: 8
-        backgroundColor: '#151316'
     }}>
         <Animated.FlatList
             onLayout={onLayout}
@@ -386,9 +287,9 @@ function ListHeader(props: any) {
                             height: 8,
                             width: 8,
                             borderRadius: 4,
-                            backgroundColor: activeSlideIndex == index ? '#6e6e6e' : 'transparent',
+                            backgroundColor: activeSlideIndex == index ? (activeSlideIndex > 0 ? 'white' : '#6e6e6e') : 'transparent',
                             borderWidth: 1,
-                            borderColor: '#6e6e6e',
+                            borderColor: activeSlideIndex == index && activeSlideIndex > 0 ? 'white' : '#6e6e6e',
                             marginHorizontal: 3
                         }} />
                     })
@@ -430,44 +331,44 @@ function SmallPost(props: any) {
     // })
     // const isFocused = useIsFocused();
     // console.log('debug isFocused', isFocused)
-    const [imageLoaded, setImageLoaded] = useState(
-        (!props.post.image_url || props.post.image_url == '') ? false :
-            (
-                sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
-            )
-    );
+    // const [imageLoaded, setImageLoaded] = useState(
+    //     (!props.post.image_url || props.post.image_url == '') ? false :
+    //         (
+    //             sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
+    //         )
+    // );
     const imageTimer = useRef<any>(null);
 
-    useEffect(() => {
-        if (imageLoaded) return;
-        if (!props.post.image_url || props.post.image_url == '') return;
-        if (sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'error') return;
-        const imageURI = props.post.image_url;
-        const key = `preloadImage/${imageURI}`;
-        if (props.shouldActive) {
-            if (sharedAsyncState[key] == 'running') return;
-            sharedAsyncState[key] = 'running';
-            imageTimer.current = setTimeout(async () => {
-                try {
-                    console.log('loading image');
-                    await Image.prefetch(imageURI);
-                } catch (e) {
-                    console.log('ERROR loading image');
-                    sharedAsyncState[`imageLoaded/${imageURI}`] = 'error';
-                    console.log('cannot load image', e, imageURI)
-                    return;
-                }
-                console.log('OK loading image');
-                setImageLoaded(true);
-                sharedAsyncState[`imageLoaded/${imageURI}`] = 'ok';
-                sharedAsyncState[key] = 'done';
-            }, 1000);
-            return;
-        }
+    // useEffect(() => {
+    //     if (imageLoaded) return;
+    //     if (!props.post.image_url || props.post.image_url == '') return;
+    //     if (sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'error') return;
+    //     const imageURI = props.post.image_url;
+    //     const key = `preloadImage/${imageURI}`;
+    //     if (props.shouldActive) {
+    //         if (sharedAsyncState[key] == 'running') return;
+    //         sharedAsyncState[key] = 'running';
+    //         imageTimer.current = setTimeout(async () => {
+    //             try {
+    //                 console.log('loading image');
+    //                 await Image.prefetch(imageURI);
+    //             } catch (e) {
+    //                 console.log('ERROR loading image');
+    //                 sharedAsyncState[`imageLoaded/${imageURI}`] = 'error';
+    //                 console.log('cannot load image', e, imageURI)
+    //                 return;
+    //             }
+    //             console.log('OK loading image');
+    //             setImageLoaded(true);
+    //             sharedAsyncState[`imageLoaded/${imageURI}`] = 'ok';
+    //             sharedAsyncState[key] = 'done';
+    //         }, 1000);
+    //         return;
+    //     }
 
-        clearTimeout(imageTimer.current)
-        sharedAsyncState[key] = 'done';
-    }, [props.shouldActive])
+    //     clearTimeout(imageTimer.current)
+    //     sharedAsyncState[key] = 'done';
+    // }, [props.shouldActive])
 
 
 
@@ -505,24 +406,44 @@ function SmallPost(props: any) {
     // }, [props.shouldActive])
 
 
-    return <ListHeader
-        // scrolling={props.scrolling}
-        comments={comments}
-        navProps={props.navProps}
-        user={props.user}
-        key={props.post.id}
-        isSinglePost={props.isSinglePost}
-        index={props.index}
-        imageLoaded={imageLoaded}
-        openLink={openLink}
-        scrolledOn={props.scrolledOn}
-        shouldActive={props.shouldActive}
-        post={props.post}
-        numTopLevelComments={numTopLevelComments}
-        setMode={props.setMode}
-        mode={props.mode}
-    // timesLoaded={timesLoaded}
-    />
+    return <View style={{
+        backgroundColor: '#151316'
+    }}>
+        {/* <Text style={{ color: 'white' }}>asdnkjasndjaksndk</Text> */}
+        {/* <View style={{
+            position: 'absolute',
+        }}>
+            <Canvas style={{ flex: 1 }}>
+                <Rect x={0} y={0} width={constants.width} height={500}>
+                    <LinearGradient
+                        start={vec(0, 0)}
+                        end={vec(0, 256)}
+                        colors={["red", '#151316']}
+                    />
+                </Rect>
+            </Canvas>
+        </View> */}
+
+
+        <ListHeader
+            // scrolling={props.scrolling}
+            comments={comments}
+            navProps={props.navProps}
+            user={props.user}
+            key={props.post.id}
+            isSinglePost={props.isSinglePost}
+            index={props.index}
+            // imageLoaded={imageLoaded}
+            openLink={openLink}
+            scrolledOn={props.scrolledOn}
+            shouldActive={props.shouldActive}
+            post={props.post}
+            numTopLevelComments={numTopLevelComments}
+            setMode={props.setMode}
+            mode={props.mode}
+        // timesLoaded={timesLoaded}
+        />
+    </View>
 }
 
 export default SmallPost;

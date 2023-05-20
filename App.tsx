@@ -49,6 +49,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { MemoPost } from './components/Post';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Settings from './components/Settings';
+import { useFont } from '@shopify/react-native-skia';
 
 const Tab = createBottomTabNavigator();
 
@@ -273,10 +274,10 @@ function MyStack(props: any) {
       ),
     }}
     >
-      <Tab.Screen name="Packs" children={TheMain} options={{
+      <Tab.Screen name="Discover" children={TheMain} options={{
         headerShown: false,
         // briefcase, layers, albums
-        tabBarIcon: ({ focused }) => <Ionicons name="reader" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />,
+        tabBarIcon: ({ focused }) => <Ionicons name="compass" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />,
       }} />
       <Tab.Screen name="Profile" component={TheSettings}
         options={{
@@ -564,6 +565,7 @@ function App() {
   const memoSubmitComment = React.useCallback(submitComment, [user, posts, selectedComment])
 
   console.log('debug big re-render');
+
   return (
     <SafeAreaProvider>
       <MenuProvider>

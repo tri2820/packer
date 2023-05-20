@@ -1,7 +1,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { constants, hookListener, noComment, openLink, requestComments, sharedAsyncState, sourceName, toUIList, unhookListener } from '../utils';
@@ -19,10 +19,13 @@ import { WebBrowserPresentationStyle } from 'expo-web-browser';
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import moment from 'moment';
+import { Canvas, useImage, Image } from '@shopify/react-native-skia';
 
 
 
 function ListHeader(props: any) {
+    const image = useImage(props.post.image_url);
+
     const insets = useSafeAreaInsets();
     return <View style={{
         paddingTop: props.mode == 'normal' ? insets.top : 0
@@ -35,47 +38,67 @@ function ListHeader(props: any) {
             isSinglePost={true}
         />
 
+        {image &&
+            <View
+                style={{
+                    // flex: 1,
+                    // paddingLeft: 12
+                }}>
+                <Pressable onPress={() => {
+                    props.setImageViewerIndex(0);
+                    props.setImageViewerIsVisible(true);
+                }}>
+
+                    <Canvas style={{
+                        width: constants.width,
+                        height: constants.width / 4 * 2,
+                        // backgroundColor: 'white',
+                    }}>
+                        <Image image={image} fit='cover' x={0} y={0} width={constants.width} height={constants.width / 4 * 2} >
+
+                            {/* <ColorMatrix
+                                    matrix={[
+                                        -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015, 1.69,
+                                        -0.703, 0, 0, 0, 0, 0, 1, 0,
+                                    ]}
+                                /> */}
+                        </Image>
+
+                    </Canvas>
+
+                </Pressable>
+            </View>
+        }
+
         <View style={{
             flexDirection: 'row',
             alignItems: 'center',
             paddingHorizontal: 16,
             paddingTop: 16,
-            paddingBottom: 8
+            paddingBottom: 8,
         }}>
-            <Image
-                style={{
-                    // flex: 1,
-                    width: 18,
-                    height: 18,
-                    marginRight: 8,
-                    // backgroundColor: '#3C3D3F',
-                    // borderRadius: 4,
-                    borderWidth: StyleSheet.hairlineWidth,
-                    // borderColor: '#3C3D3F'
-                }}
-                source={{
-                    uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.url}`
-                }}
-            />
+
 
 
             <Text style={{
                 color: '#a3a3a3',
-                fontWeight: '300'
+                fontWeight: '700',
+                fontSize: 10
                 // backgroundColor: 'green'
+
             }}>
                 {
-                    sourceName(props.post)
+                    sourceName(props.post, false)
                 }
                 <Text style={{
                     color: '#A3A3A3',
-                    fontWeight: '300'
+                    fontWeight: '300',
+                    letterSpacing: 2
                 }}> • {
-                        moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                        moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd').toUpperCase()
                     }</Text>
             </Text>
         </View>
-
 
 
         <View style={{
@@ -87,7 +110,6 @@ function ListHeader(props: any) {
                 isSinglePost={props.isSinglePost}
                 openLink={props.openLink}
                 post={props.post}
-                imageLoaded={props.imageLoaded}
                 mode={props.mode}
             />
             <View style={{
@@ -122,44 +144,44 @@ function Post(props: any) {
     })
     // const isFocused = useIsFocused();
     // console.log('debug isFocused', isFocused)
-    const [imageLoaded, setImageLoaded] = useState(
-        (!props.post.image_url || props.post.image_url == '') ? false :
-            (
-                sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
-            )
-    );
-    const imageTimer = useRef<any>(null);
+    // const [imageLoaded, setImageLoaded] = useState(
+    //     (!props.post.image_url || props.post.image_url == '') ? false :
+    //         (
+    //             sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
+    //         )
+    // );
+    // const imageTimer = useRef<any>(null);
 
-    useEffect(() => {
-        if (imageLoaded) return;
-        if (!props.post.image_url || props.post.image_url == '') return;
-        if (sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'error') return;
-        const imageURI = props.post.image_url;
-        const key = `preloadImage/${imageURI}`;
-        if (props.shouldActive) {
-            if (sharedAsyncState[key] == 'running') return;
-            sharedAsyncState[key] = 'running';
-            imageTimer.current = setTimeout(async () => {
-                try {
-                    console.log('loading image');
-                    await Image.prefetch(imageURI);
-                } catch (e) {
-                    console.log('ERROR loading image');
-                    sharedAsyncState[`imageLoaded/${imageURI}`] = 'error';
-                    console.log('cannot load image', e, imageURI)
-                    return;
-                }
-                console.log('OK loading image');
-                setImageLoaded(true);
-                sharedAsyncState[`imageLoaded/${imageURI}`] = 'ok';
-                sharedAsyncState[key] = 'done';
-            }, 1000);
-            return;
-        }
+    // useEffect(() => {
+    //     if (imageLoaded) return;
+    //     if (!props.post.image_url || props.post.image_url == '') return;
+    //     if (sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'error') return;
+    //     const imageURI = props.post.image_url;
+    //     const key = `preloadImage/${imageURI}`;
+    //     if (props.shouldActive) {
+    //         if (sharedAsyncState[key] == 'running') return;
+    //         sharedAsyncState[key] = 'running';
+    //         imageTimer.current = setTimeout(async () => {
+    //             try {
+    //                 console.log('loading image');
+    //                 await Image.prefetch(imageURI);
+    //             } catch (e) {
+    //                 console.log('ERROR loading image');
+    //                 sharedAsyncState[`imageLoaded/${imageURI}`] = 'error';
+    //                 console.log('cannot load image', e, imageURI)
+    //                 return;
+    //             }
+    //             console.log('OK loading image');
+    //             setImageLoaded(true);
+    //             sharedAsyncState[`imageLoaded/${imageURI}`] = 'ok';
+    //             sharedAsyncState[key] = 'done';
+    //         }, 1000);
+    //         return;
+    //     }
 
-        clearTimeout(imageTimer.current)
-        sharedAsyncState[key] = 'done';
-    }, [props.shouldActive])
+    //     clearTimeout(imageTimer.current)
+    //     sharedAsyncState[key] = 'done';
+    // }, [props.shouldActive])
 
 
     useEffect(() => {
@@ -269,7 +291,6 @@ function Post(props: any) {
                     key={item.id}
                     isSinglePost={props.isSinglePost}
                     index={props.index}
-                    imageLoaded={imageLoaded}
                     openLink={openLink}
                     scrolledOn={props.scrolledOn}
                     shouldActive={props.shouldActive}
