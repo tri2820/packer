@@ -225,15 +225,15 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   const offset = sharedAsyncState['offset/main'] ?? 0;
   sharedAsyncState['offset/main'] = offset + 20;
 
-  const { data, error } = await supabaseClient.rpc('get_posts', { o: offset, n: 20 })
+  const { data, error } = await supabaseClient.rpc('get_articles')
   if (error) {
     console.error('error get post', error)
     return;
   }
-  // console.log('debug posts', data);
-  if (data.length > 0) setData((posts: any) => posts.concat(data))
+  console.log('debug posts', data);
+  if (data.length > 0) setData((posts: any) => [...new Map([...posts, ...data].map(item => [item.id, item])).values()])
   data.forEach((p: any) => {
-    sharedAsyncState[`count/${p.id}`] = p.comment_count;
+    sharedAsyncState[`count/${p.id}`] = 0;
   })
 }
 
@@ -359,7 +359,7 @@ function App() {
     })();
 
     (async () => {
-      const { data, error } = await supabaseClient.rpc('get_bookmarked_posts');
+      const { data, error } = await supabaseClient.rpc('get_bookmarked_articles');
       console.log('debug bookmarks', data.map((r: any) => r.author_name), error);
       if (error) {
         console.warn('Cannot load bookmarks', error);

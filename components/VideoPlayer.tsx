@@ -85,14 +85,14 @@ function VideoPlayer(props: any) {
     // const [ready, setReady] = useState(false);
     // const [error, setError] = useState(false);
     useEffect(() => {
-        const url = new URL(props.source_url);
+        const url = new URL(props.url);
         if (!(normalizedHostname(url.hostname) == 'youtube.com')) {
             setYoutubeVideoId('')
             return;
         }
         const youtubeVideoId = url.searchParams.get('v') || ''
         setYoutubeVideoId(youtubeVideoId)
-    }, [props.source_url])
+    }, [props.url])
 
 
 

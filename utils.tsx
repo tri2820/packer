@@ -29,9 +29,9 @@ export function scaleup(size: number) {
     return newSize
 }
 
-export function isVideoPost(source_url: string) {
-    const url = new URL(source_url);
-    return normalizedHostname(url.hostname) == 'youtube.com'
+export function isVideoPost(url: string) {
+    const _url = new URL(url);
+    return normalizedHostname(_url.hostname) == 'youtube.com'
 }
 
 export function getPastelColor(seed: string) {
@@ -813,22 +813,17 @@ export const fixText = (text: string, author_name: string) => {
 }
 
 export const title = (item: any) => {
-    return isVideoPost(item.source_url)
-        ? item.title.replace(/#[^\s]+/g, '')
-        : item.title
+    return item.title
 }
 
 export const sourceName = (item: any) => {
-    return isVideoPost(item.source_url) ?
-        item.author_name.toLowerCase()
-        :
-        getSourceName(item.source_url, true)
+    return getSourceName(item.url, true)
 }
 
 export const theEmptyFunction = () => { };
-export const getSourceName = (source_url: string, lower?: boolean) => {
-    const url = new URL(source_url);
-    const normed = normalizedHostname(url.hostname)
+export const getSourceName = (url: string, lower?: boolean) => {
+    const _url = new URL(url);
+    const normed = normalizedHostname(_url.hostname)
     return lower ? normed.toLowerCase() : normed.toUpperCase();
 }
 
@@ -840,9 +835,9 @@ export const toggleBookmark = async (post: any, user: any) => {
         //     return;
         // }
 
-        const insertResult = await supabaseClient.from('bookmarks').insert({
+        const insertResult = await supabaseClient.from('read_bookmarks').insert({
             user_id: user.id,
-            post_id: post.id
+            article_id: post.id
         });
 
         console.log('debug toggle bookmark insertResult', insertResult)
@@ -855,9 +850,9 @@ export const toggleBookmark = async (post: any, user: any) => {
         //     return;
         // }
 
-        const deleteResult = await supabaseClient.from('bookmarks').delete().match({
+        const deleteResult = await supabaseClient.from('read_bookmarks').delete().match({
             user_id: user.id,
-            post_id: post.id
+            article_id: post.id
         });
 
         console.log('debug toggle bookmark deleteResult', deleteResult)
@@ -868,7 +863,7 @@ export const toggleBookmark = async (post: any, user: any) => {
     const new_value = sharedAsyncState.bookmarks[post.id] ? undefined
         : {
             ...post,
-            bookmark_datetime: (new Date()).toISOString()
+            created_at: (new Date()).toISOString()
         };
     sharedAsyncState.bookmarks[post.id] = new_value;
 
@@ -1004,6 +999,120 @@ export const mdstyles: MarkdownStyles = {
     },
     paragraph: {
         color: '#e6e6e6',
+        lineHeight: 18,
+        marginTop: 4,
+        marginBottom: 4,
+        // backgroundColor: 'blue'
+    },
+    strong: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    u: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+}
+
+export const mdKeytakeawaysStyle: MarkdownStyles = {
+
+    blockQuote: {
+        color: '#A3A3A3',
+        opacity: 1,
+        marginTop: 8,
+        marginBottom: 8,
+    },
+    codeBlock: {
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
+        color: '#e6e6e6',
+        backgroundColor: '#212326',
+        paddingVertical: 8,
+        paddingHorizontal: 0,
+        borderRadius: 4,
+        borderColor: '#1E1F22',
+        borderWidth: StyleSheet.hairlineWidth,
+        overflow: 'hidden',
+        fontWeight: '400',
+        marginTop: 4,
+        marginBottom: 4,
+    },
+    del: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    em: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    heading: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+    heading1: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    heading2: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+    heading3: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    heading4: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    heading5: {
+        color: '#e6e6e6',
+        marginTop: 0,
+    },
+    heading6: {
+        color: '#e6e6e6',
+        marginTop: 0
+    },
+    hr: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    inlineCode: {
+        color: '#e6e6e6',
+        fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'Roboto',
+        marginTop: 0,
+    },
+    link: {
+        color: '#FFC542',
+        marginTop: 0,
+
+    },
+    listItemNumber: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    listItemBullet: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    listItemOrderedContent: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    listItemUnorderedContent: {
+        color: '#e6e6e6',
+        marginTop: 0,
+
+    },
+    paragraph: {
+        color: '#F5F5F5',
+        fontSize: 14,
         lineHeight: 18,
         marginTop: 4,
         marginBottom: 4,

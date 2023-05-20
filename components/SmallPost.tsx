@@ -5,7 +5,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ImageBackground, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getPastelColor, isVideoPost, openLink, requestComments, sharedAsyncState, sourceName, toUIList, toggleBookmark } from '../utils';
+import { constants, getPastelColor, isVideoPost, openLink, randomColor, requestComments, sharedAsyncState, sourceName, toUIList, toggleBookmark } from '../utils';
 import { MemoComment } from './Comment';
 import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
@@ -77,10 +77,11 @@ function ListHeader(props: any) {
     }
 
     const imageSources: any[] = [];
-    if (props.post.image) imageSources.push({ uri: props.post.image });
+    if (props.post.image_url) imageSources.push({ uri: props.post.image_url });
     imageSources.push({ uri: 'https://imgur.com/QpDXQe5.png' });
 
     const renderItem = ({ item, index }: any) => {
+        // return <></>
         // console.log('debug props.post.ners', props.post)
         if (item.type == 'post_with_attachment') return <View style={{
             width: constants.width,
@@ -90,7 +91,7 @@ function ListHeader(props: any) {
                 // scrolling={props.scrolling}
                 id={props.post.id}
                 scrolledOn={props.scrolledOn}
-                source_url={props.post.source_url}
+                url={props.post.url}
                 isSinglePost={false}
             />
 
@@ -113,7 +114,7 @@ function ListHeader(props: any) {
                         // borderColor: '#3C3D3F'
                     }}
                     source={{
-                        uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.source_url}`
+                        uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.url}`
                     }}
                 />
 
@@ -130,7 +131,7 @@ function ListHeader(props: any) {
                         color: '#A3A3A3',
                         fontWeight: '300'
                     }}> • {
-                            moment.utc(props.post.created_at).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                            moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd')
                         }</Text>
                 </Text>
             </View>
@@ -145,19 +146,22 @@ function ListHeader(props: any) {
                     // backgroundColor: 'blue'
                     // flexDirection: 'row'
                 }}>
+                    <View style={{
+                        paddingBottom: 8
+                    }}>
+                        <PostHeader
+                            // scrolling={props.scrolling}
+                            user={props.user}
+                            isSinglePost={props.isSinglePost}
+                            openLink={props.openLink}
+                            post={props.post}
+                            imageLoaded={props.imageLoaded}
+                            mode={props.mode}
+                            navProps={props.navProps}
+                        />
+                    </View>
 
-                    <PostHeader
-                        // scrolling={props.scrolling}
-                        user={props.user}
-                        isSinglePost={props.isSinglePost}
-                        openLink={props.openLink}
-                        post={props.post}
-                        imageLoaded={props.imageLoaded}
-                        mode={props.mode}
-                        navProps={props.navProps}
-                    />
-
-                    <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+                    <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
                 </View>
 
 
@@ -167,7 +171,7 @@ function ListHeader(props: any) {
                         style={{
                             // flex: 1,
                             // backgroundColor: 'red',
-                            paddingLeft: 8
+                            paddingLeft: 12
                         }}>
                         <Pressable onPress={() => {
                             setImageViewerIndex(0);
@@ -178,12 +182,12 @@ function ListHeader(props: any) {
                                     // flex: 1,
                                     width: constants.width / 4,
                                     height: constants.width / 4,
-                                    // borderRadius: 0,
-                                    // borderWidth: StyleSheet.hairlineWidth,
-                                    // borderColor: '#3C3D3F'
+                                    borderRadius: 2,
+                                    borderWidth: StyleSheet.hairlineWidth,
+                                    borderColor: '#222324'
                                 }}
                                 source={{
-                                    uri: props.post.image
+                                    uri: props.post.image_url
                                 }}
                                 entering={FadeIn}
                             />
@@ -225,13 +229,13 @@ function ListHeader(props: any) {
     }
 
     const data = []
-    if (props.post.image != '' || isVideoPost(props.post.source_url)) {
+    if (props.post.image_url != '' || isVideoPost(props.post.url)) {
         data.push({ type: 'post_with_attachment' })
         data.push({ type: 'keytakeaways' })
     } else {
         data.push({ type: 'post' })
     }
-    if (props.post.outlook != '') data.push({ type: 'outlook' })
+    // if (props.post.outlook != '') data.push({ type: 'outlook' })
 
     const [height, setHeight] = useState(0);
 
@@ -256,7 +260,7 @@ function ListHeader(props: any) {
     const footer = ({ imageIndex }: any) => {
         const content = imageIndex == 0 ?
             <Text>
-                {props.post.keytakeaways.slice(0, 150).replace('\n', '')}
+                {props.post.maintext.slice(0, 80).replace('\n', '')}
             </Text>
             :
             <Text>Since layoffs, Vox might have been focusing on its core business.</Text>
@@ -419,18 +423,18 @@ function SmallPost(props: any) {
     // const isFocused = useIsFocused();
     // console.log('debug isFocused', isFocused)
     const [imageLoaded, setImageLoaded] = useState(
-        (!props.post.image || props.post.image == '') ? false :
+        (!props.post.image_url || props.post.image_url == '') ? false :
             (
-                sharedAsyncState[`imageLoaded/${props.post.image}`] == 'ok' ? true : false
+                sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
             )
     );
     const imageTimer = useRef<any>(null);
 
     useEffect(() => {
         if (imageLoaded) return;
-        if (!props.post.image || props.post.image == '') return;
-        if (sharedAsyncState[`imageLoaded/${props.post.image}`] == 'error') return;
-        const imageURI = props.post.image;
+        if (!props.post.image_url || props.post.image_url == '') return;
+        if (sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'error') return;
+        const imageURI = props.post.image_url;
         const key = `preloadImage/${imageURI}`;
         if (props.shouldActive) {
             if (sharedAsyncState[key] == 'running') return;

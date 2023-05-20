@@ -19,7 +19,7 @@ function UserList(props: any) {
     const insets = useSafeAreaInsets();
     const isFocused = useIsFocused();
     console.log('debug UserList isFocused', isFocused);
-    const bookmarked_posts = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.bookmark_datetime)).getTime() - (new Date(a.bookmark_datetime)).getTime());
+    const bookmarked_posts = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.created_at)).getTime() - (new Date(a.created_at)).getTime());
     bookmarked_posts.length = Math.max(bookmarked_posts.length, 15);
     const data = bookmarked_posts;
     // console.log('debug data', data)
@@ -231,7 +231,7 @@ function UserList(props: any) {
                                                         }}
                                                             numberOfLines={1}
                                                         >
-                                                            {getSourceName(item.source_url, true)}
+                                                            {getSourceName(item.url, true)}
                                                         </Text>
                                                     </View>
                                                 </View>

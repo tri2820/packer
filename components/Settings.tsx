@@ -23,7 +23,7 @@ function Settings(props: any) {
     const insets = useSafeAreaInsets();
     const isFocused = useIsFocused();
     console.log('debug UserList isFocused', isFocused);
-    const bookmarked_posts: any[] = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.bookmark_datetime)).getTime() - (new Date(a.bookmark_datetime)).getTime())
+    const bookmarked_posts: any[] = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.created_at)).getTime() - (new Date(a.created_at)).getTime())
     // .slice(0, 3);
     bookmarked_posts.length = Math.max(bookmarked_posts.length, 15);
     const data = bookmarked_posts;
@@ -93,19 +93,22 @@ function Settings(props: any) {
                         flexDirection: 'row',
                         // paddingHorizontal: 8,
                     }}>
-                        <Image
+                        {item.image_url && <Image
                             style={{
                                 alignSelf: 'center',
                                 width: 60,
                                 height: 60,
-                                // borderRadius: 2
+                                borderRadius: 2,
+                                borderWidth: StyleSheet.hairlineWidth,
+                                borderColor: '#222324',
+                                marginRight: 12,
                             }}
                             source={{
-                                uri: item.image
+                                uri: item.image_url
                             }}
                             placeholder={require('../assets/empty.jpg')}
                             placeholderContentFit='cover'
-                        />
+                        />}
                         <View style={{
                             flex: 1,
                             flexDirection: 'row',
@@ -113,9 +116,9 @@ function Settings(props: any) {
                             // backgroundColor: 'red'
                         }}>
                             <View style={{
-                                marginLeft: 12,
                                 flex: 1
                             }}>
+
                                 <Text style={{
                                     color: '#a3a3a3',
                                     // marginLeft: 4,

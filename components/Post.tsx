@@ -31,7 +31,7 @@ function ListHeader(props: any) {
         <VideoPlayer
             id={props.post.id}
             scrolledOn={props.scrolledOn}
-            source_url={props.post.source_url}
+            url={props.post.url}
             isSinglePost={true}
         />
 
@@ -54,7 +54,7 @@ function ListHeader(props: any) {
                     // borderColor: '#3C3D3F'
                 }}
                 source={{
-                    uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.source_url}`
+                    uri: `https://www.google.com/s2/favicons?sz=256&domain_url=${props.post.url}`
                 }}
             />
 
@@ -71,7 +71,7 @@ function ListHeader(props: any) {
                     color: '#A3A3A3',
                     fontWeight: '300'
                 }}> • {
-                        moment.utc(props.post.created_at).local().startOf('seconds').fromNow().replace(' days ago', 'd')
+                        moment.utc(props.post.date_modify).local().startOf('seconds').fromNow().replace(' days ago', 'd')
                     }</Text>
             </Text>
         </View>
@@ -93,13 +93,13 @@ function ListHeader(props: any) {
             <View style={{
                 paddingVertical: 8
             }}>
-                <MemoKeyTakeaways ners={props.post.ners} content={props.post.keytakeaways} />
+                <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
             </View>
         </View>
         {
             sharedAsyncState[`loadedTimes/${props.post.id}`] >= 1 &&
             props.numTopLevelComments == 0 &&
-            props.post.keytakeaways == '' &&
+            props.post.maintext == '' &&
             noComment
         }
     </View>
@@ -123,18 +123,18 @@ function Post(props: any) {
     // const isFocused = useIsFocused();
     // console.log('debug isFocused', isFocused)
     const [imageLoaded, setImageLoaded] = useState(
-        (!props.post.image || props.post.image == '') ? false :
+        (!props.post.image_url || props.post.image_url == '') ? false :
             (
-                sharedAsyncState[`imageLoaded/${props.post.image}`] == 'ok' ? true : false
+                sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
             )
     );
     const imageTimer = useRef<any>(null);
 
     useEffect(() => {
         if (imageLoaded) return;
-        if (!props.post.image || props.post.image == '') return;
-        if (sharedAsyncState[`imageLoaded/${props.post.image}`] == 'error') return;
-        const imageURI = props.post.image;
+        if (!props.post.image_url || props.post.image_url == '') return;
+        if (sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'error') return;
+        const imageURI = props.post.image_url;
         const key = `preloadImage/${imageURI}`;
         if (props.shouldActive) {
             if (sharedAsyncState[key] == 'running') return;
@@ -442,7 +442,7 @@ function Post(props: any) {
                     flex: 1
                 }}>
                     {
-                        (comments.length > 0 || props.post.keytakeaways) && props.shouldActive &&
+                        (comments.length > 0 || props.post.maintext) && props.shouldActive &&
                         <MemoMoreDiscussionsButton onPress={changeModeToComment} />
                     }
                 </View>

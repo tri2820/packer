@@ -1,8 +1,8 @@
 import * as React from 'react';
 import { memo } from 'react';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { MarkdownView } from 'react-native-markdown-view';
-import { constants, markdownNERRules, mdstyles } from '../utils';
+import { constants, markdownNERRules, mdKeytakeawaysStyle, mdstyles } from '../utils';
 
 
 function KeyTakeaways(props: any) {
@@ -34,12 +34,22 @@ function KeyTakeaways(props: any) {
 
 
 
-    return <MarkdownView
-        rules={markdownNERRules}
-        styles={mdstyles}
-    >
-        {'​' + replaceSubstringsWithStars(ners, props.content.slice(0, 150)).replace('\n', '') + '...' as any}
-    </MarkdownView>
+    return <View style={{
+        // backgroundColor: 'red'
+    }}>
+        <Text style={{
+            color: 'white',
+            fontSize: 14,
+        }}>
+            {props.content.slice(0, 80).replace('\n', ' ')}
+        </Text>
+        {/* <MarkdownView
+            rules={markdownNERRules}
+            styles={mdKeytakeawaysStyle}
+        >
+            {'​' + replaceSubstringsWithStars(ners, props.content.slice(0, 80)).replace('\n', '') as any}
+        </MarkdownView> */}
+    </View>
 
 }
 

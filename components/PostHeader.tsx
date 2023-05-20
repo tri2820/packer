@@ -59,7 +59,7 @@ function PostHeader(props: any) {
             <Pressable
                 // style={styles.touch}
                 onPress={() => {
-                    props.openLink(props.post.source_url)
+                    props.openLink(props.post.url)
                 }}
                 onLongPress={openMenu}
             >
@@ -146,7 +146,7 @@ function PostHeader(props: any) {
             <Text style={{
                 color: '#a3a3a3'
             }}>
-                {getSourceName(props.post.source_url, true)}
+                {getSourceName(props.post.url, true)}
             </Text> */}
 
 
@@ -179,7 +179,7 @@ const styles = StyleSheet.create({
     title: {
         color: 'white',
         // fontWeight: 'bold',
-        fontSize: 18,
+        fontSize: 16,
         // marginBottom: 4,
         fontFamily: 'Rubik_500Medium'
     },

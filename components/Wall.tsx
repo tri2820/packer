@@ -164,11 +164,11 @@ function Wall(props: any) {
         const shouldActive = true;
         // props.activePostIndex == index || props.activePostIndex + 1 == index;
         // console.log('debug wall user', props.user, scrolledOn, sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`]);
-        if (scrolledOn && props.user && !sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`]) {
-            sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`] = true;
-            console.log('analyticsss')
-            analytics(props.user.id, item.id);
-        }
+        // if (scrolledOn && props.user && !sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`]) {
+        //     sharedAsyncState[`addHistoryRequested/${props.user.id}/${item.id}`] = true;
+        //     console.log('analyticsss')
+        //     analytics(props.user.id, item.id);
+        // }
         // console.log('debug render index', index);
         return <MemoSmallPost
             navProps={props.navProps}

@@ -97,10 +97,6 @@ function Bar(props: any) {
         console.log("debug focus", focus)
     }, [focus])
 
-    const getSourceName = (source_url: string) => {
-        const url = new URL(source_url);
-        return normalizedHostname(url.hostname);
-    }
 
     const [showUserList, setShowUserList] = useState(false);
     const barAnimationUpDown = useAnimatedStyle(() => {
