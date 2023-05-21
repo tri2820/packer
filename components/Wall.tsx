@@ -51,7 +51,7 @@ function WelcomePost(props: any) {
                     color: 'white',
                     fontSize: scaledown(48),
                     fontFamily: 'Rubik_900Black',
-                }}>PACKER</Text>
+                }}>CLUE</Text>
                 <Text style={{
                     color: '#c2c2c2',
                     fontSize: scaledown(26),

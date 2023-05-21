@@ -35,7 +35,7 @@ function ContentMenu(props: any) {
                 return;
             }
 
-            Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
+            Alert.alert('Report Submitted', 'Thanks for helping make Clue safer.')
             return;
         }
         if (!props.comment) {
@@ -54,7 +54,7 @@ function ContentMenu(props: any) {
             return;
         }
 
-        Alert.alert('Report Submitted', 'Thanks for helping make Packer safer.')
+        Alert.alert('Report Submitted', 'Thanks for helping make Clue safer.')
     }
 
     const block = async (blockee: string, user: any) => {
@@ -115,7 +115,7 @@ function ContentMenu(props: any) {
         const author_id = props.comment?.author_id ?? props.post?.author_id;
 
         if (!author_id) {
-            Alert.alert('Cannot block', 'Author is not a Packer user. Please consider reporting the content instead.')
+            Alert.alert('Cannot block', 'Author is not a Clue user. Please consider reporting the content instead.')
             return
         }
 

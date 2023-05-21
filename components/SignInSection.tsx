@@ -83,7 +83,7 @@ function SignInSection(props: any) {
             />
 
             <Text style={styles.text}>Intelligence made simple.</Text>
-            <Text style={styles.text}>Meet Packer.</Text>
+            <Text style={styles.text}>Meet Clue.</Text>
 
             <View style={styles.loginButtons}>
                 <View style={styles.loginButton}>
