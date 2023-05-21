@@ -267,8 +267,6 @@ function MyStack(props: any) {
         borderTopWidth: StyleSheet.hairlineWidth,
         backgroundColor: Platform.OS == 'android' ? '#151316' : undefined,
       },
-      tabBarActiveTintColor: '#FFC542',
-      tabBarInactiveTintColor: '#A3A3A3',
       tabBarBackground: () => (
         <BlurView tint="dark" intensity={100} style={StyleSheet.absoluteFill} />
       ),
@@ -277,12 +275,26 @@ function MyStack(props: any) {
       <Tab.Screen name="Discover" children={TheMain} options={{
         headerShown: false,
         // briefcase, layers, albums
-        tabBarIcon: ({ focused }) => <Ionicons name="compass" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />,
+        tabBarIcon: ({ focused }) => focused ?
+          <Ionicons name="compass" size={24} color={'white'} /> :
+          <Ionicons name="compass-outline" size={24} color={'#A3A3A3'} />,
+        tabBarLabel: ({ focused }) => <Text style={{
+          color: focused ? 'white' : '#a3a3a3',
+          fontWeight: focused ? '600' : '400',
+          fontSize: 10
+        }}>Discover</Text>,
       }} />
       <Tab.Screen name="Profile" component={TheSettings}
         options={{
           headerShown: false,
-          tabBarIcon: ({ focused }) => <Ionicons name="person" size={24} color={focused ? '#FFC542' : '#A3A3A3'} />
+          tabBarIcon: ({ focused }) => focused ?
+            <Ionicons name="person" size={24} color={'white'} /> :
+            <Ionicons name="person-outline" size={24} color={'#A3A3A3'} />,
+          tabBarLabel: ({ focused }) => <Text style={{
+            color: focused ? 'white' : '#a3a3a3',
+            fontWeight: focused ? '600' : '400',
+            fontSize: 10
+          }}>Profile</Text>,
         }}
       />
     </Tab.Navigator>
