@@ -1,51 +1,51 @@
 import * as React from 'react';
 
-import { Octicons } from '@expo/vector-icons';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, ImageBackground, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { memo } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getPastelColor, isVideoPost, openLink, randomColor, requestComments, sharedAsyncState, sourceName, toUIList, toggleBookmark } from '../utils';
-import { MemoComment } from './Comment';
-import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
-import { MemoLoadCommentButton } from './LoadCommentButton';
+import { constants, sourceName } from '../utils';
+import { MemoKeyTakeaways } from './KeyTakeaways';
 import PostHeader from './PostHeader';
-import VideoPlayer, { MemoVideoPlayer } from './VideoPlayer';
 // import { Image } from 'expo-image';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as Haptics from 'expo-haptics';
-import * as WebBrowser from 'expo-web-browser';
-import { WebBrowserPresentationStyle } from 'expo-web-browser';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { hookListener, unhookListener } from '../utils';
-import AnonAvatar from './AnonAvatar';
-import WebView from 'react-native-webview';
-import Slide from './Slide';
-import ImageView from "react-native-image-viewing";
 
 
+import { Canvas, Fill, ImageShader, Shader, Skia, useImage } from '@shopify/react-native-skia';
 import moment from 'moment';
-import CategoryText from './CategoryText';
-import { Canvas, useImage, Image, Shadow, Morphology, Shader, Skia, Fill, ColorMatrix } from '@shopify/react-native-skia';
-
 
 const source = Skia.RuntimeEffect.Make(`
-uniform shader image;
- 
-half4 main(float2 xy) {   
-  xy.x += sin(xy.y / 3) * 4;
-  return image.eval(xy).rbga;
-}`)!;
+    uniform shader image;
+    uniform float imageHeight;      // Viewport resolution (pixels)
+
+    half4 main(float2 xy) {  
+      // xy.x += sin(xy.y / 10) * 4;
+
+      // float4 shadowColor = float4(0, 0, 0, 1); // Black shadow color
+      float4 shadowColor = float4(21 / 255.0, 19 / 255.0, 22 / 255.0, 1);
+
+
+      // Evaluate the input image shader
+      half4 imageColor = image.eval(xy);
+
+
+      // Calculate the shadow intensity based on the vertical position
+      float shadowIntensity = saturate(1 - pow(xy.y / (imageHeight - 54 - 8), 2));
+
+      // Blend the shadow color with the image color
+      half4 outputColor = mix(shadowColor, imageColor, shadowIntensity);
+
+      return outputColor;
+    }`)!;
+
 
 export default function FirstSlide(props: any) {
     const image = useImage(props.post.image_url);
 
     return <View style={{
         width: constants.width,
-        paddingBottom: 54
-    }}>
+
+        paddingTop: 16,
+    }}
+    >
         {/* <MemoVideoPlayer
             // scrolling={props.scrolling}
             id={props.post.id}
@@ -58,17 +58,15 @@ export default function FirstSlide(props: any) {
         <View style={{
             flexDirection: 'row',
             paddingHorizontal: 16,
-
         }}>
             <View style={{
                 flex: 1,
-
+                paddingBottom: 54,
             }}>
                 <View style={{
                     flexDirection: 'row',
                     alignItems: 'center',
                     // paddingHorizontal: 16,
-                    paddingTop: 16,
                     // backgroundColor: 'red',
                     paddingBottom: 8,
                 }}>
@@ -118,47 +116,46 @@ export default function FirstSlide(props: any) {
 
             </View>
 
+            <Pressable onPress={() => {
+                props.setImageViewerIndex(0);
+                props.setImageViewerIsVisible(true);
+            }}
+                style={{
+                    marginLeft: 12,
+                    marginBottom: 16,
+                    width: constants.width / 3,
+                    // borderRadius: 2,
+                    // borderWidth: StyleSheet.hairlineWidth,
+                    // borderColor: '#222324',
+                    overflow: 'hidden'
+                }}>
 
+                {image && <Canvas style={{
+                    flex: 1
+                }}>
+                    <Fill>
+                        <Shader
+                            source={source}
+                            uniforms={{
+                                imageHeight: props.height
+                            }}
+                        >
+                            <ImageShader
+                                image={image}
+                                fit="cover"
+                                rect={{ x: 0, y: 0, width: constants.width / 3, height: props.height }}
+                            />
+                        </Shader>
+                    </Fill>
+                </Canvas>}
 
-            {image &&
-                <View
-                    style={{
-                        // flex: 1,
-                        marginTop: 16,
-                        paddingLeft: 12
-                    }}>
-                    <Pressable onPress={() => {
-                        props.setImageViewerIndex(0);
-                        props.setImageViewerIsVisible(true);
-                    }}>
+            </Pressable>
 
-                        <Canvas style={{
-                            width: constants.width / 4,
-                            height: constants.width / 3,
-                            borderRadius: 2,
-                            borderWidth: StyleSheet.hairlineWidth,
-                            borderColor: '#222324',
-                            backgroundColor: 'white',
-                            overflow: 'hidden'
-                        }}>
-                            <Image image={image} fit='cover' x={0} y={0} width={constants.width / 4} height={constants.width / 3} >
-
-                                {/* <ColorMatrix
-                                    matrix={[
-                                        -0.578, 0.99, 0.588, 0, 0, 0.469, 0.535, -0.003, 0, 0, 0.015, 1.69,
-                                        -0.703, 0, 0, 0, 0, 0, 1, 0,
-                                    ]}
-                                /> */}
-                            </Image>
-
-                        </Canvas>
-
-                    </Pressable>
-                </View>
-            }
         </View>
 
 
 
     </View>
 }
+
+export const MemoFirstSlide = memo(FirstSlide)

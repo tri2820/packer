@@ -178,7 +178,7 @@ function Wall(props: any) {
             mode={scrolledOn ? props.mode : 'normal'}
             height={props.height}
             post={item}
-            shouldActive={shouldActive}
+            shouldActive={true}
             scrolledOn={scrolledOn ? true : false}
             setSelectedComment={props.setSelectedComment}
             setMode={props.setMode}
@@ -249,7 +249,7 @@ function Wall(props: any) {
                     top: insets.top
                 }}
                 // windowSize={2}
-                initialNumToRender={1}
+                initialNumToRender={6}
                 // maxToRenderPerBatch={2}
                 // updateCellsBatchingPeriod={500}
                 showsVerticalScrollIndicator={false}
@@ -264,10 +264,10 @@ function Wall(props: any) {
                 ItemSeparatorComponent={separator}
                 // getItemLayout={getItemLayout}
                 // onScroll={onScroll}
-                scrollEventThrottle={6}
+                // scrollEventThrottle={6}
                 // DO NOT USE removeClippedSubviews: Making title not clickable
                 // removeClippedSubviews
-                windowSize={6}
+                windowSize={10}
             />
         </View>
     );

@@ -151,78 +151,78 @@ function Main(props: any) {
     }}
       onLayout={calculateHeights}
     >
-      <GestureHandlerRootView>
-        <GestureDetector gesture={gesture}>
-          <Animated.View style={[animatedStyles, {
-            // backgroundColor: 'red',
-            height: safeHeight
-          }]}>
-            <View style={{
-              height: isSinglePost ? safeHeight - minBarHeight : safeHeight,
-              // backgroundColor: 'pink'
-            }}>
-              {
-                isSinglePost ?
+      {/* <GestureHandlerRootView>
+        <GestureDetector gesture={gesture}> */}
+      <Animated.View style={[animatedStyles, {
+        // backgroundColor: 'red',
+        height: safeHeight
+      }]}>
+        <View style={{
+          height: isSinglePost ? safeHeight - minBarHeight : safeHeight,
+          // backgroundColor: 'pink'
+        }}>
+          {
+            isSinglePost ?
 
-                  <MemoPost
-                    navProps={props.navProps}
-                    isSinglePost
-                    mode={mode}
-                    height={isSinglePost ? safeHeight - minBarHeight : safeHeight}
-                    post={props.navProps.route.params?.singlePost}
-                    shouldActive={true}
-                    scrolledOn={true}
-                    setSelectedComment={props.setSelectedComment}
-                    setMode={setMode}
-                    user={props.user}
-                  />
-
-                  :
-                  <Wall
-                    navProps={props.navProps}
-                    offsetZoomStyles={offsetZoomStyles}
-                    user={props.user}
-                    // wallref={wallref}
-                    setSelectedComment={props.setSelectedComment}
-                    setMode={setMode}
-                    requestPost={props.requestPost}
-                    posts={props.posts}
-                    mode={mode}
-                    activePostIndex={activePostIndex}
-                    setActivePostIndex={setActivePostIndex}
-                    height={safeHeight}
-                  />
-              }
-            </View>
-            {
-              isSinglePost && <MemoBar
-                isSinglePost={isSinglePost}
+              <MemoPost
                 navProps={props.navProps}
-                activePostIndex={props.activePostIndex}
-                onSubmit={(text: string, selectedComment: any) => {
-                  const post_id = isSinglePost ?
-                    props.navProps.route.params.singlePost.id :
-                    props.posts[props.activePostIndex].id;
-                  console.log('debug submit >', text, selectedComment, post_id)
-                  props.submitContent(text, selectedComment, post_id)
-                }}
-                // wallref={wallref}
-                // navigationBarVisible={navigationBarVisible}
+                isSinglePost
                 mode={mode}
-                setMode={setMode}
+                height={isSinglePost ? safeHeight - minBarHeight : safeHeight}
+                post={props.navProps.route.params?.singlePost}
+                shouldActive={true}
+                scrolledOn={true}
                 setSelectedComment={props.setSelectedComment}
-                selectedComment={props.selectedComment}
+                setMode={setMode}
                 user={props.user}
-                setUser={props.setUser}
-                minBarHeight={minBarHeight}
-                offset={offset}
-                safeHeight={safeHeight}
-              // wallHeight={wallHeight}
               />
-            }
-          </Animated.View>
-        </GestureDetector>
-      </GestureHandlerRootView>
+
+              :
+              <Wall
+                navProps={props.navProps}
+                offsetZoomStyles={offsetZoomStyles}
+                user={props.user}
+                // wallref={wallref}
+                setSelectedComment={props.setSelectedComment}
+                setMode={setMode}
+                requestPost={props.requestPost}
+                posts={props.posts}
+                mode={mode}
+                activePostIndex={activePostIndex}
+                setActivePostIndex={setActivePostIndex}
+                height={safeHeight}
+              />
+          }
+        </View>
+        {
+          isSinglePost && <MemoBar
+            isSinglePost={isSinglePost}
+            navProps={props.navProps}
+            activePostIndex={props.activePostIndex}
+            onSubmit={(text: string, selectedComment: any) => {
+              const post_id = isSinglePost ?
+                props.navProps.route.params.singlePost.id :
+                props.posts[props.activePostIndex].id;
+              console.log('debug submit >', text, selectedComment, post_id)
+              props.submitContent(text, selectedComment, post_id)
+            }}
+            // wallref={wallref}
+            // navigationBarVisible={navigationBarVisible}
+            mode={mode}
+            setMode={setMode}
+            setSelectedComment={props.setSelectedComment}
+            selectedComment={props.selectedComment}
+            user={props.user}
+            setUser={props.setUser}
+            minBarHeight={minBarHeight}
+            offset={offset}
+            safeHeight={safeHeight}
+          // wallHeight={wallHeight}
+          />
+        }
+      </Animated.View>
+      {/* </GestureDetector>
+      </GestureHandlerRootView> */}
     </View>
   )
 }
@@ -238,7 +238,7 @@ const rp = async (sharedAsyncState: any, setData: any) => {
     console.error('error get post', error)
     return;
   }
-  console.log('debug posts', data);
+  // console.log('debug posts', data);
   if (data.length > 0) setData((posts: any) => [...new Map([...posts, ...data].map(item => [item.id, item])).values()])
   data.forEach((p: any) => {
     sharedAsyncState[`count/${p.id}`] = 0;

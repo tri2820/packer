@@ -35,7 +35,7 @@ import {
 
 
 import moment from 'moment';
-import FirstSlide from './FirstSlide';
+import FirstSlide, { MemoFirstSlide } from './FirstSlide';
 
 
 function AnonAvatarList(props: any) {
@@ -94,7 +94,8 @@ function ListHeader(props: any) {
         // return <></>
         // console.log('debug props.post.ners', props.post)
         if (item.type == 'post_with_attachment')
-            return <FirstSlide
+            return <MemoFirstSlide
+                height={height}
                 setImageViewerIndex={setImageViewerIndex}
                 setImageViewerIsVisible={setImageViewerIsVisible}
                 scrolledOn={props.scrolledOn}
@@ -104,6 +105,7 @@ function ListHeader(props: any) {
                 openLink={props.openLink}
                 mode={props.mode}
                 navProps={props.navProps}
+                shouldActive={props.shouldActive}
             />
 
         return <Slide
@@ -214,9 +216,12 @@ function ListHeader(props: any) {
 
     }
 
+
+
     return <><View style={{
         // paddingTop: 8
-    }}>
+    }}
+    >
         <Animated.FlatList
             onLayout={onLayout}
             horizontal
