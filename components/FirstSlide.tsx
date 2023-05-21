@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { memo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { memo, useEffect, useState } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, sourceName } from '../utils';
+import { constants, sharedAsyncState, sourceName } from '../utils';
 import { MemoKeyTakeaways } from './KeyTakeaways';
 import PostHeader from './PostHeader';
 // import { Image } from 'expo-image';
@@ -15,6 +15,7 @@ import moment from 'moment';
 const source = Skia.RuntimeEffect.Make(`
     uniform shader image;
     uniform float imageHeight;      // Viewport resolution (pixels)
+    uniform float imageWidth;
 
     half4 main(float2 xy) {  
       // xy.x += sin(xy.y / 10) * 4;
@@ -27,8 +28,21 @@ const source = Skia.RuntimeEffect.Make(`
       half4 imageColor = image.eval(xy);
 
 
+
       // Calculate the shadow intensity based on the vertical position
-      float shadowIntensity = saturate(1 - pow(xy.y / (imageHeight - 54 - 8), 2));
+      float shadowIntensity = saturate(1);
+
+      // float shadowIntensity = saturate(1 - pow(xy.y/imageHeight, 2));
+      if (imageHeight - xy.y > 32) {
+        shadowIntensity = saturate(1);
+      }
+    //   float shadowIntensity = saturate(1);
+    //   if (xy.y > imageHeight - 48) {
+    //     // -32 -> 48
+    //     float offset = imageHeight - xy.y - 20;
+    //     shadowIntensity = saturate(pow(offset / (48 - 16), 3));
+    //   }
+      
 
       // Blend the shadow color with the image color
       half4 outputColor = mix(shadowColor, imageColor, shadowIntensity);
@@ -38,7 +52,8 @@ const source = Skia.RuntimeEffect.Make(`
 
 
 export default function FirstSlide(props: any) {
-    const image = useImage(props.post.image_url);
+    const imageHeight = Math.ceil(props.height / 2);
+    const imageWidth = Math.ceil(constants.width / 3);
 
     return <View style={{
         width: constants.width,
@@ -116,40 +131,27 @@ export default function FirstSlide(props: any) {
 
             </View>
 
-            <Pressable onPress={() => {
+            {props.imageLoaded && <Pressable onPress={() => {
                 props.setImageViewerIndex(0);
                 props.setImageViewerIsVisible(true);
             }}
                 style={{
                     marginLeft: 12,
-                    marginBottom: 16,
-                    width: constants.width / 3,
-                    // borderRadius: 2,
-                    // borderWidth: StyleSheet.hairlineWidth,
-                    // borderColor: '#222324',
-                    overflow: 'hidden'
                 }}>
-
-                {image && <Canvas style={{
-                    flex: 1
-                }}>
-                    <Fill>
-                        <Shader
-                            source={source}
-                            uniforms={{
-                                imageHeight: props.height
-                            }}
-                        >
-                            <ImageShader
-                                image={image}
-                                fit="cover"
-                                rect={{ x: 0, y: 0, width: constants.width / 3, height: props.height }}
-                            />
-                        </Shader>
-                    </Fill>
-                </Canvas>}
-
-            </Pressable>
+                <Image
+                    style={{
+                        backgroundColor: 'white',
+                        borderRadius: 2,
+                        borderWidth: StyleSheet.hairlineWidth,
+                        borderColor: '#222324',
+                        width: imageWidth,
+                        height: imageHeight
+                    }}
+                    source={{
+                        uri: props.post.image_url
+                    }}
+                />
+            </Pressable>}
 
         </View>
 

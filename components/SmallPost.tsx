@@ -95,6 +95,7 @@ function ListHeader(props: any) {
         // console.log('debug props.post.ners', props.post)
         if (item.type == 'post_with_attachment')
             return <MemoFirstSlide
+                imageLoaded={props.imageLoaded}
                 height={height}
                 setImageViewerIndex={setImageViewerIndex}
                 setImageViewerIsVisible={setImageViewerIsVisible}
@@ -342,7 +343,7 @@ function SmallPost(props: any) {
     //             sharedAsyncState[`imageLoaded/${props.post.image_url}`] == 'ok' ? true : false
     //         )
     // );
-    const imageTimer = useRef<any>(null);
+    // const imageTimer = useRef<any>(null);
 
     // useEffect(() => {
     //     if (imageLoaded) return;
@@ -375,7 +376,33 @@ function SmallPost(props: any) {
     //     sharedAsyncState[key] = 'done';
     // }, [props.shouldActive])
 
+    const [imageLoaded, setImageLoaded] = useState(sharedAsyncState[`imageLoaded/${props.post.image_url}`]);
+    useEffect(() => {
+        if (sharedAsyncState[`imageLoaded/${props.post.image_url}`]) return;
+        if (!props.post.image_url || props.post.image_url == '') return;
+        (async () => {
+            try {
+                await Image.prefetch(props.post.image_url);
+            } catch (e) {
+                console.log('ERROR loading image');
+                console.log('cannot load image', e, props.post.image_url)
+                return;
+            }
 
+
+            Image.getSize(
+                props.post.image_url,
+                (width, height) => {
+                    if (width < 640 || height < 480) return;
+                    sharedAsyncState[`imageLoaded/${props.post.image_url}`] = true;
+                    setImageLoaded(true);
+                },
+                (error) => {
+                    console.log('Error getting image size:', error);
+                }
+            );
+        })()
+    }, [])
 
     useEffect(() => {
         const key = `commentsChangeListeners/${props.post.id}`;
@@ -431,6 +458,7 @@ function SmallPost(props: any) {
 
 
         <ListHeader
+            imageLoaded={imageLoaded}
             // scrolling={props.scrolling}
             comments={comments}
             navProps={props.navProps}
