@@ -146,8 +146,10 @@ const analytics = async (user_id: any, post_id: any) => {
         return;
     }
 }
+import { useHeaderHeight } from '@react-navigation/elements';
 
 function Wall(props: any) {
+    const headerHeight = useHeaderHeight();
     const [viewableMap, setViewableMap] = useState<any>({})
     // const [scrolling, setScrolling] = useState<boolean>(false)
     // console.log('debug props', props.posts)
@@ -224,7 +226,7 @@ function Wall(props: any) {
         setViewableMap(idObj)
     }, []);
 
-    const insets = useSafeAreaInsets()
+
     const separator = () => <View style={styles.hair} />
 
     return (
@@ -233,6 +235,8 @@ function Wall(props: any) {
             backgroundColor: '#151316'
         }}>
             <Animated.FlatList
+                contentOffset={{ x: 0, y: -headerHeight }}
+
                 // onScrollBeginDrag={() => {
                 //     console.log('debug true')
                 //     setScrolling(true)
@@ -246,7 +250,7 @@ function Wall(props: any) {
                 onViewableItemsChanged={handleViewableItemsChanged}
                 viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
                 contentInset={{
-                    top: insets.top
+                    top: headerHeight
                 }}
                 // windowSize={2}
                 initialNumToRender={6}

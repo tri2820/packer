@@ -260,6 +260,8 @@ function MyStack(props: any) {
 
 
   const TheTab = () => {
+    const insets = useSafeAreaInsets();
+
     return <Tab.Navigator screenOptions={{
       tabBarStyle: {
         position: 'absolute',
@@ -267,14 +269,39 @@ function MyStack(props: any) {
         borderTopWidth: StyleSheet.hairlineWidth,
         backgroundColor: Platform.OS == 'android' ? '#151316' : undefined,
       },
+      headerTransparent: true,
       tabBarBackground: () => (
-        <BlurView tint="dark" intensity={100} style={StyleSheet.absoluteFill} />
+        <BlurView tint="dark" intensity={100} style={
+          StyleSheet.absoluteFill
+        } />
       ),
     }}
     >
       <Tab.Screen name="Discover" children={TheMain} options={{
-        headerShown: false,
-        // briefcase, layers, albums
+        header: () => {
+          const currentDate = new Date();
+          const options: any = { day: 'numeric', month: 'short' };
+          const formattedDate = currentDate.toLocaleDateString('en-US', options);
+
+          return <BlurView tint="dark" intensity={100} style={{
+            paddingTop: insets.top,
+            paddingBottom: 8,
+            borderBottomColor: '#3C3D3F',
+            borderBottomWidth: StyleSheet.hairlineWidth,
+            backgroundColor: Platform.OS == 'android' ? '#151316' : undefined,
+            alignItems: 'center'
+          }} >
+            <Text style={{
+              color: 'white',
+              fontSize: 16,
+              fontWeight: '800'
+            }}>
+              Latest
+            </Text>
+          </BlurView>
+
+        },
+
         tabBarIcon: ({ focused }) => focused ?
           <Ionicons name="compass" size={24} color={'white'} /> :
           <Ionicons name="compass-outline" size={24} color={'#A3A3A3'} />,
