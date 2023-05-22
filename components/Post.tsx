@@ -45,8 +45,8 @@ function ListHeader(props: any) {
                     // paddingLeft: 12
                 }}>
                 <Pressable onPress={() => {
-                    props.setImageViewerIndex(0);
-                    props.setImageViewerIsVisible(true);
+                    props.setImageViewerIndex?.(0);
+                    props.setImageViewerIsVisible?.(true);
                 }}>
 
                     <Canvas style={{

@@ -9,7 +9,7 @@ import * as Sentry from 'sentry-expo';
 import { MemoBar } from './components/Bar';
 import Wall from './components/Wall';
 import { supabaseClient } from './supabaseClient';
-import { Mode, addCommentsToPost, constants, executeListeners, randomColor, scaleup, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
+import { Mode, addCommentsToPost, constants, executeListeners, randomColor, scaledown, scaleup, sharedAsyncState, theEmptyFunction, updateCommentsOfPost } from './utils';
 import { firebase } from '@react-native-firebase/analytics';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import { BlurView } from 'expo-blur';
@@ -289,15 +289,34 @@ function MyStack(props: any) {
             borderBottomColor: '#3C3D3F',
             borderBottomWidth: StyleSheet.hairlineWidth,
             backgroundColor: Platform.OS == 'android' ? '#151316' : undefined,
-            alignItems: 'center'
+
           }} >
-            <Text style={{
-              color: 'white',
-              fontSize: 16,
-              fontWeight: '800'
+            <View style={{
+              alignSelf: 'center',
+              flexDirection: 'row',
+              alignItems: 'flex-end'
             }}>
-              Latest
-            </Text>
+
+              <Text style={{
+                color: 'white',
+                fontSize: scaledown(16),
+                fontWeight: '800'
+              }}>
+                Latest<Text style={{
+                  color: '#FFF200',
+                  fontSize: 10
+                }}> ●</Text>
+                {/* <View>
+                  <View style={{
+                    height: 8,
+                    width: 8,
+                    borderRadius: 4,
+                    marginLeft: 2,
+                    backgroundColor: '#FFF200',
+                  }} />
+                </View> */}
+              </Text>
+            </View>
           </BlurView>
 
         },
@@ -313,7 +332,29 @@ function MyStack(props: any) {
       }} />
       <Tab.Screen name="Profile" component={TheSettings}
         options={{
-          headerShown: false,
+          header: () => {
+            const currentDate = new Date();
+            const options: any = { day: 'numeric', month: 'short' };
+            const formattedDate = currentDate.toLocaleDateString('en-US', options);
+
+            return <BlurView tint="dark" intensity={100} style={{
+              paddingTop: insets.top,
+              paddingBottom: 8,
+              borderBottomColor: '#3C3D3F',
+              borderBottomWidth: StyleSheet.hairlineWidth,
+              backgroundColor: Platform.OS == 'android' ? '#151316' : undefined,
+              alignItems: 'center'
+            }} >
+              {/* <Text style={{
+                color: 'white',
+                fontSize: 16,
+                fontWeight: '800'
+              }}>
+                Latest
+              </Text> */}
+            </BlurView>
+
+          },
           tabBarIcon: ({ focused }) => focused ?
             <Ionicons name="person" size={24} color={'white'} /> :
             <Ionicons name="person-outline" size={24} color={'#A3A3A3'} />,
@@ -404,6 +445,9 @@ function App() {
       }
       return;
     }
+
+    // TODO: Fix: user is an object so this is called multiple times
+
     // Cancel account deletion
     (async () => {
       const { error } = await supabaseClient.from('deletions').delete().eq('user_id', user.id)
@@ -411,14 +455,13 @@ function App() {
 
     (async () => {
       const { data, error } = await supabaseClient.rpc('get_bookmarked_articles');
-      console.log('debug bookmarks', data.map((r: any) => r.author_name), error);
       if (error) {
         console.warn('Cannot load bookmarks', error);
         return;
       }
-      data.forEach((post: any) => {
+      data.forEach((post: any, index: number) => {
         sharedAsyncState[`count/${post.id}`] = post.comment_count;
-        sharedAsyncState.bookmarks[post.id] = post;
+        sharedAsyncState.bookmarks[post.id] = { ...post, bookmark_index: index };
         executeListeners(`BookmarkChangelisteners/${post.id}`);
       })
       executeListeners(`BookmarksChanged`);

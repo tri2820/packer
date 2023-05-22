@@ -14,125 +14,6 @@ const theEmptyList: any[] = [];
 const theEmptyMode = 'normal';
 const theEmptyFunction = () => { };
 
-
-function WelcomePost(props: any) {
-    const translateY = useSharedValue(0);
-
-    const animatedStyles = useAnimatedStyle(() => {
-        return {
-            width: 140,
-            height: 140,
-            transform: [{ translateY: translateY.value }]
-        }
-    });
-
-    useEffect(() => {
-        translateY.value = withRepeat(
-            withTiming(-20, { duration: 500 }),
-            -1,
-            true
-        );
-    }, []);
-
-    return (
-        <View style={{
-            height: props.height,
-            width: '100%',
-            backgroundColor: '#151316',
-            alignItems: 'center'
-        }}>
-            <View style={{
-                marginTop: 'auto',
-                marginBottom: 100,
-                alignItems: 'center'
-            }}>
-
-                <Text style={{
-                    color: 'white',
-                    fontSize: scaledown(48),
-                    fontFamily: 'Rubik_900Black',
-                }}>CLUE</Text>
-                <Text style={{
-                    color: '#c2c2c2',
-                    fontSize: scaledown(26),
-                    marginLeft: 4,
-                    marginRight: 20
-                }}>
-                    Scroll this way
-                </Text>
-                <Ionicons name="arrow-down"
-                    size={26}
-                    color='#C2C2C2'
-                    style={{
-                        marginRight: props.mode == 'comment' ? 8 : 0,
-                    }} />
-
-                {/* <View style={{
-                    marginTop: 12,
-                    marginHorizontal: 16
-                }}>
-                    <View style={{
-                        alignSelf: 'center',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        marginVertical: 8,
-                    }}>
-                        <Ionicons name="bulb"
-                            size={26}
-                            color='#C2C2C2'
-                            style={{
-                                marginRight: props.mode == 'comment' ? 8 : 0,
-                            }} />
-                        <Text style={{
-                            color: '#c2c2c2',
-                            fontSize: scaledown(26),
-                            marginLeft: 4,
-                            marginRight: 20
-                        }}>
-                            Examples
-                        </Text>
-                    </View>
-                    <Text style={{
-                        marginVertical: 8,
-                        color: '#c2c2c2',
-                        fontSize: scaledown(20),
-                        // textAlign: 'center'
-                    }}>
-                        Who will be affected by the new tax reform?
-                    </Text>
-                    <Text style={{
-                        marginVertical: 8,
-                        color: '#c2c2c2',
-                        fontSize: scaledown(20),
-                        // textAlign: 'center'
-                    }}>How is Amazon's performance impacting the broader e-commerce industry?
-                    </Text>
-                    <Text style={{
-                        marginVertical: 8,
-                        color: '#c2c2c2',
-                        fontSize: scaledown(20),
-                        // textAlign: 'center'
-                    }}>
-                        How can my family clothing business in California pivot towards environmentally-friendly practices?
-                    </Text>
-                </View> */}
-            </View>
-            {/* <Animated.Image
-                style={animatedStyles}
-                resizeMode="contain"
-                source={require('../assets/Point_down.png')}
-            /> */}
-
-            <LinearGradient
-                colors={gradient}
-                style={styles.gradient}
-                pointerEvents='none'
-            />
-
-        </View>
-    )
-}
-const MemoWelcomePost = memo(WelcomePost);
 const analytics = async (user_id: any, post_id: any) => {
     if (__DEV__) return;
     console.log('debug send analytics', user_id, post_id);
@@ -156,9 +37,6 @@ function Wall(props: any) {
 
     // const getItemLayout = (data: any, index: number) => ({ length: props.height, offset: props.height * index, index })
     const renderItem = ({ index, item }: any) => {
-        if (item.type == 'welcomePost') {
-            return <MemoWelcomePost height={props.height} />
-        }
 
         // console.log('debug ', viewableMap)
         const scrolledOn = viewableMap[item.id]

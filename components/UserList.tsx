@@ -135,7 +135,7 @@ function UserList(props: any) {
                         <Text style={{
                             fontFamily: 'Rubik_800ExtraBold',
                             fontSize: 28,
-                            color: '#FFC542'
+                            color: '#FFF200'
                         }}>{props.user.user_metadata.full_name}
                         </Text>
 

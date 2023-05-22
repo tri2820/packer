@@ -43,14 +43,14 @@ export function getPastelColor(seed: string) {
 
 function getDarkBackground(type: string) {
     const darkBackgrounds: any = {
-        'B-MISC': '#FFC542',
-        'B-PER': '#FFC542',
-        'B-LOC': '#FFC542',
-        'B-ORG': '#FFC542'
+        'B-MISC': '#FFF200',
+        'B-PER': '#FFF200',
+        'B-LOC': '#FFF200',
+        'B-ORG': '#FFF200'
     }
     const returnedType = darkBackgrounds[type];
     if (!returnedType) console.warn(type, 'is not found in getDarkBackground')
-    return returnedType ?? '#FFC542'
+    return returnedType ?? '#FFF200'
 }
 
 function hashString(str: string): number {
@@ -863,7 +863,7 @@ export const toggleBookmark = async (post: any, user: any) => {
     const new_value = sharedAsyncState.bookmarks[post.id] ? undefined
         : {
             ...post,
-            created_at: (new Date()).toISOString()
+            bookmark_index: -Object.keys(sharedAsyncState.bookmarks).length
         };
     sharedAsyncState.bookmarks[post.id] = new_value;
 
@@ -973,7 +973,7 @@ export const mdstyles: MarkdownStyles = {
         marginTop: 0,
     },
     link: {
-        color: '#FFC542',
+        color: '#FFF200',
         marginTop: 0,
 
     },
@@ -1086,7 +1086,7 @@ export const mdKeytakeawaysStyle: MarkdownStyles = {
         marginTop: 0,
     },
     link: {
-        color: '#FFC542',
+        color: '#FFF200',
         marginTop: 0,
 
     },
@@ -1213,7 +1213,7 @@ const nerHighLight: MarkdownRule = {
                 openGoogle(node.term);
             }}
             style={{
-                color: '#FFC542',
+                color: '#FFF200',
                 fontWeight: '500',
                 // marginBottom: -2.5,
                 // marginTop: -2,

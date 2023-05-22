@@ -251,7 +251,7 @@ function ListHeader(props: any) {
                 <Ionicons
                     name={bookmarked ? "bookmark" : "bookmark-outline"}
                     size={20}
-                    color={bookmarked ? '#FFC542' : (activeSlideIndex > 0 ? 'white' : '#5c5c5c')}
+                    color={bookmarked ? '#FFF200' : (activeSlideIndex > 0 ? 'white' : '#5c5c5c')}
                 />
             </TouchableOpacity>
 

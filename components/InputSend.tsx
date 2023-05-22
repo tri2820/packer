@@ -107,9 +107,9 @@ function InputSend(props: any) {
                         }}
                         keyboardAppearance='dark'
                         {...(Platform.OS == 'ios' ? {
-                            selectionColor: '#FFC542'
+                            selectionColor: '#FFF200'
                         } : {
-                            cursorColor: '#FFC542'
+                            cursorColor: '#FFF200'
                         })
                         }
                     />
@@ -118,7 +118,7 @@ function InputSend(props: any) {
                         // backgroundColor: 'red',
                         alignSelf: 'baseline'
                     }}>
-                        <Ionicons name="send" size={24} color='#FFC542' />
+                        <Ionicons name="send" size={24} color='#FFF200' />
                     </TouchableOpacity>
                 </View> :
                 // <Text>154</Text>

@@ -9,9 +9,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signIn } from '../auth';
 import { constants, scaledown, scaleup } from '../utils';
 import { Image } from 'expo-image';
+import { Video, ResizeMode } from 'expo-av';
+
 
 function SignInSection(props: any) {
-    const insets = useSafeAreaInsets();
+    const [videoStatus, setVideoStatus] = React.useState({});
+
     const signInAndUpdateProfile = async (provider: 'apple' | 'google') => {
         const user = await signIn(provider);
         if (!user) return;
@@ -55,6 +58,8 @@ function SignInSection(props: any) {
     }
 
     // console.log('debug sign in section')
+    const video = React.useRef(null);
+
     return (
         <Animated.View
             style={[
@@ -63,56 +68,82 @@ function SignInSection(props: any) {
                     position: 'absolute',
                     height: '100%',
                     width: '100%',
-                    flex: 1
+                    flex: 1,
                 }]}
             exiting={FadeOut}
         >
 
             <ImageBackground style={styles.background}
-                source={require('../assets/loginBackground.jpg')}
+                source={require('../assets/loginBackground2.jpg')}
             >
-                <LinearGradient colors={['transparent', '#151316']} style={styles.linear}
+                <LinearGradient colors={['rgba(21,19,22,0)', 'rgba(21,19,22,0.9)', 'rgba(21,19,22,0.95)', 'rgba(21,19,22,1)']}
+                    style={styles.linear}
                     pointerEvents='none'
                 />
             </ImageBackground>
 
-
-            <Image
-                style={styles.icon}
-                source={require('../assets/icon.png')}
-            />
-
-            <Text style={styles.text}>Intelligence made simple.</Text>
-            <Text style={styles.text}>Meet Clue.</Text>
-
-            <View style={styles.loginButtons}>
-                <View style={styles.loginButton}>
-                    <Ionicons.Button name='logo-apple' style={styles.brandLogo}
-                        iconStyle={styles.brandIconApple}
-                        color='black'
-                        onPress={signInWithApple}>
-                        <Text style={styles.brandText}>
-                            Sign in with Apple
-                        </Text>
-                    </Ionicons.Button>
+            <View style={{
+                justifyContent: 'center',
+                height: '100%'
+            }}>
+                {/* <Image
+                    style={styles.icon}
+                    source={require('../assets/icon.png')}
+                /> */}
+                <View style={{
+                    flexDirection: 'row',
+                    alignItems: 'flex-end',
+                    alignSelf: 'center'
+                }}>
+                    <Text style={{
+                        color: 'white',
+                        fontSize: scaledown(72),
+                        // fontWeight: '700',
+                        alignSelf: 'center',
+                        textAlign: 'center',
+                        fontFamily: 'Domine_500Medium',
+                    }}>clue</Text>
+                    <View style={{
+                        backgroundColor: '#FFF200',
+                        width: scaledown(20),
+                        height: scaledown(20),
+                        borderRadius: scaledown(10),
+                        marginBottom: scaledown(16),
+                        marginLeft: scaledown(4)
+                    }} />
                 </View>
+                <Text style={styles.text}>Unveiling truth</Text>
+                {/* <Text style={styles.text}>Meet Clue.</Text> */}
 
-                <View style={styles.loginButton}>
-                    <Ionicons.Button name='logo-google' style={styles.brandLogo}
-                        iconStyle={styles.brandIcon}
-                        color='black'
-                        onPress={signInWithGoogle}>
-                        <Text style={styles.brandText}>
-                            Sign in with Google
-                        </Text>
-                    </Ionicons.Button>
+                <View style={styles.loginButtons}>
+                    <View style={styles.loginButton}>
+                        <Ionicons.Button name='logo-apple' style={styles.brandLogo}
+                            iconStyle={styles.brandIconApple}
+                            color='black'
+                            onPress={signInWithApple}>
+                            <Text style={styles.brandText}>
+                                Sign in with Apple
+                            </Text>
+                        </Ionicons.Button>
+                    </View>
+
+                    <View style={styles.loginButton}>
+                        <Ionicons.Button name='logo-google' style={styles.brandLogo}
+                            iconStyle={styles.brandIcon}
+                            color='black'
+                            onPress={signInWithGoogle}>
+                            <Text style={styles.brandText}>
+                                Sign in with Google
+                            </Text>
+                        </Ionicons.Button>
+                    </View>
                 </View>
+                <Text style={styles.docHeader}>By signing in, you agree with our
+                    <Text onPress={openEULA}> End-user license agreement</Text>,
+                    <Text onPress={openTermsAndConditions}> Terms & Conditions</Text>, and
+                    <Text onPress={openPrivacyPolicy}> Privacy Policy</Text>
+                </Text>
             </View>
-            <Text style={styles.docHeader}>By signing in, you agree with our
-                <Text onPress={openEULA}> End-user license agreement</Text>,
-                <Text onPress={openTermsAndConditions}> Terms & Conditions</Text>, and
-                <Text onPress={openPrivacyPolicy}> Privacy Policy</Text>
-            </Text>
 
         </Animated.View>
     );
@@ -129,15 +160,14 @@ const styles = StyleSheet.create({
     background: {
         position: 'absolute',
         width: '100%',
-        height: '100%'
+        height: '100%',
     },
     linear: {
         width: '100%',
         height: '100%'
     },
     icon: {
-        marginTop: scaledown(200),
-        marginBottom: scaledown(24),
+        marginBottom: scaledown(12),
         width: 80,
         height: 80,
         borderRadius: 4,
@@ -151,7 +181,7 @@ const styles = StyleSheet.create({
         // fontWeight: '700',
         alignSelf: 'center',
         textAlign: 'center',
-        fontFamily: 'Rubik_700Bold',
+        fontFamily: 'Domine_400Regular',
     },
     loginButtons: {
         marginTop: scaledown(24)
@@ -166,6 +196,8 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 2 },
         shadowRadius: 4,
         elevation: 3,
+        borderRadius: 40,
+        overflow: 'hidden',
     },
     brandLogo: {
         backgroundColor: "white",

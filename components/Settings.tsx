@@ -6,7 +6,7 @@ import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { signOut } from '../auth';
 import { supabaseClient } from '../supabaseClient';
-import { getSourceName, hookListener, isVideoPost, randomNickName, sharedAsyncState, sourceName, title, unhookListener } from '../utils';
+import { constants, getSourceName, hookListener, isVideoPost, randomNickName, sharedAsyncState, sourceName, title, unhookListener } from '../utils';
 import * as Haptics from 'expo-haptics';
 import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
@@ -14,6 +14,7 @@ import * as Application from 'expo-application';
 import { FlatList } from 'react-native-gesture-handler';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import SignInSection from './SignInSection';
+import { Canvas, Group, ImageSVG, fitbox, rect, useSVG } from '@shopify/react-native-skia';
 
 
 function Settings(props: any) {
@@ -22,11 +23,16 @@ function Settings(props: any) {
     const [stepper, setStepper] = useState(false)
     const insets = useSafeAreaInsets();
     const isFocused = useIsFocused();
+
+    const svg = useSVG(require("../assets/empty_drawing.svg"));
+    const size = constants.width / 3;
+    const src = rect(0, 0, 279, 242);
+    const dst = rect(0, 0, size, size);
     console.log('debug UserList isFocused', isFocused);
-    const bookmarked_posts: any[] = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => (new Date(b.created_at)).getTime() - (new Date(a.created_at)).getTime())
+
+    const bookmarked_posts: any[] = Object.values(sharedAsyncState.bookmarks).filter(x => x).sort((a: any, b: any) => a.bookmark_index - b.bookmark_index)
     // .slice(0, 3);
-    bookmarked_posts.length = Math.max(bookmarked_posts.length, 15);
-    const data = bookmarked_posts;
+    // console.log(bookmarked_posts?.map(b => b.bookmark_index))
     // console.log('debug data', data)
 
     useEffect(() => {
@@ -79,93 +85,71 @@ function Settings(props: any) {
                 marginVertical: 4
             }}
         >
-            {
-                item ?
-                    <View style={{
-                        height: 60,
-                        width: '100%',
-                        // backgroundColor: '#323233',
-                        borderRadius: 8,
-                        // marginVertical: 8,
-                        // borderStyle: 'dashed',
-                        // borderWidth: 2,
-                        borderColor: '#5D5F64',
-                        flexDirection: 'row',
-                        // paddingHorizontal: 8,
-                    }}>
-                        {item.image_url && <Image
-                            style={{
-                                alignSelf: 'center',
-                                width: 60,
-                                height: 60,
-                                borderRadius: 2,
-                                borderWidth: StyleSheet.hairlineWidth,
-                                borderColor: '#222324',
-                                marginRight: 12,
-                            }}
-                            source={{
-                                uri: item.image_url
-                            }}
-                            placeholder={require('../assets/empty.jpg')}
-                            placeholderContentFit='cover'
-                        />}
-                        <View style={{
-                            flex: 1,
-                            flexDirection: 'row',
-                            alignItems: 'center',
-                            // backgroundColor: 'red'
-                        }}>
-                            <View style={{
-                                flex: 1
-                            }}>
 
-                                <Text style={{
-                                    color: '#a3a3a3',
-                                    // marginLeft: 4,
-                                    fontWeight: '300',
-                                }}
-                                    numberOfLines={1}
-                                >
-                                    {
-                                        sourceName(item)
-                                    }
-                                </Text>
-                                <Text style={{
-                                    color: '#f1f1f1',
-                                    fontSize: 15,
-                                    fontFamily: 'Rubik_500Medium'
-                                }}
-                                    numberOfLines={1}
-                                >
-                                    {
-                                        title(item)
-                                    }
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-                    :
-                    <View style={{
+            <View style={{
+                height: 60,
+                width: '100%',
+                // backgroundColor: '#323233',
+                borderRadius: 8,
+                // marginVertical: 8,
+                // borderStyle: 'dashed',
+                // borderWidth: 2,
+                borderColor: '#5D5F64',
+                flexDirection: 'row',
+                // paddingHorizontal: 8,
+            }}>
+                {item.image_url && <Image
+                    style={{
+                        alignSelf: 'center',
+                        width: 60,
                         height: 60,
-                        flexDirection: 'row'
-                    }} >
-                        <View style={{
-                            height: 60,
-                            width: 60,
-                            borderStyle: 'dashed',
-                            borderWidth: 1,
-                            borderColor: '#5D5F64'
-                        }} />
-                        <View style={{
-                            marginLeft: 12,
-                            height: 60,
-                            flex: 1,
-                            borderStyle: 'dashed',
-                            borderWidth: 1,
-                            borderColor: '#5D5F64'
-                        }} />
+                        borderRadius: 2,
+                        borderWidth: StyleSheet.hairlineWidth,
+                        borderColor: '#222324',
+                        marginRight: 12,
+                    }}
+                    source={{
+                        uri: item.image_url
+                    }}
+                    placeholder={require('../assets/empty.jpg')}
+                    placeholderContentFit='cover'
+                />}
+                <View style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    // backgroundColor: 'red'
+                }}>
+                    <View style={{
+                        flex: 1
+                    }}>
+
+                        <Text style={{
+                            color: '#a3a3a3',
+                            // marginLeft: 4,
+                            fontWeight: '300',
+                        }}
+                            numberOfLines={1}
+                        >
+                            {
+                                sourceName(item)
+                            }
+                        </Text>
+                        <Text style={{
+                            color: '#f1f1f1',
+                            fontSize: 15,
+                            fontFamily: 'Rubik_500Medium'
+                        }}
+                            numberOfLines={1}
+                        >
+                            {
+                                title(item)
+                            }
+                        </Text>
                     </View>
-            }
+                </View>
+            </View>
+
         </TouchableOpacity>
 
 
@@ -173,14 +157,15 @@ function Settings(props: any) {
     return <View style={{
         width: '100%',
         height: '100%',
-        backgroundColor: '#151316'
+        backgroundColor: '#151316',
+        paddingTop: insets.top,
     }}>
         {props.user ?
 
             <Animated.View style={{
-                paddingTop: insets.top,
                 paddingHorizontal: 20,
-                flex: 1
+                flex: 1,
+                paddingTop: 16
             }}
                 entering={FadeIn}
             >
@@ -259,7 +244,7 @@ function Settings(props: any) {
                             {/* <Text style={{
                             fontFamily: 'Rubik_800ExtraBold',
                             fontSize: 28,
-                            color: '#FFC542'
+                            color: '#FFF200'
                         }}>{props.user.user_metadata.full_name}
                         </Text> */}
                             {/* 
@@ -279,36 +264,76 @@ function Settings(props: any) {
                                     // randomNickName()
                                 }</Text>
                         </View> */}
-
-                            <FlatList
-                                overScrollMode={'always'}
-                                horizontal={false}
-                                showsVerticalScrollIndicator={false}
-                                contentInset={{
-                                    bottom: useBottomTabBarHeight()
-                                }}
-                                // listKey='userList'
-                                style={{
-                                    // marginTop: 8,
-                                    // marginBottom: insets.bottom,
-                                    // backgroundColor: 'red'
-                                    // overflow: 'hidden'
-                                }}
-                                data={data}
-                                // keyExtractor={keyExtractor}
-                                renderItem={renderItem}
-                            />
+                            {
+                                bookmarked_posts.length == 0 ?
+                                    <View style={{
+                                        flex: 1,
+                                        // backgroundColor: 'red',
+                                        paddingBottom: 140,
+                                        justifyContent: 'center',
+                                        alignItems: 'center'
+                                    }}>
+                                        <Canvas style={{
+                                            width: size,
+                                            height: size,
+                                            // backgroundColor: 'red'
+                                        }}>
+                                            {svg && (
+                                                <Group transform={fitbox("contain", src, dst)}>
+                                                    <ImageSVG
+                                                        svg={svg}
+                                                        width={279}
+                                                        height={242}
+                                                    />
+                                                </Group>
+                                            )
+                                            }
+                                        </Canvas>
+                                        <Text style={{
+                                            color: 'white',
+                                            fontFamily: 'Rubik_700Bold',
+                                            fontSize: 20,
+                                            textAlign: 'center'
+                                        }}>
+                                            Your bookmarks are empty
+                                        </Text>
+                                        <Text style={{
+                                            marginTop: 4,
+                                            color: '#a3a3a3',
+                                            textAlign: 'center'
+                                        }}>
+                                            Find captivating reads in Discover tab
+                                        </Text>
+                                    </View> :
+                                    <FlatList
+                                        overScrollMode={'always'}
+                                        horizontal={false}
+                                        showsVerticalScrollIndicator={false}
+                                        contentInset={{
+                                            bottom: useBottomTabBarHeight()
+                                        }}
+                                        // listKey='userList'
+                                        style={{
+                                            // marginTop: 8,
+                                            // marginBottom: insets.bottom,
+                                            // backgroundColor: 'red'
+                                            // overflow: 'hidden'
+                                        }}
+                                        data={bookmarked_posts}
+                                        // keyExtractor={keyExtractor}
+                                        renderItem={renderItem}
+                                    />
+                            }
 
                         </View> :
                         <View
                         // entering={FadeIn}
                         // exiting={FadeOut}
                         >
-
                             <Text style={{
                                 fontFamily: 'Rubik_800ExtraBold',
                                 fontSize: 28,
-                                color: '#FFC542',
+                                color: '#FFF200',
                                 marginBottom: 4
                             }}>{props.user.user_metadata.full_name}
                             </Text>

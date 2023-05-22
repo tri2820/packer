@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
         marginVertical: 4,
         paddingTop: 4,
         paddingBottom: 4,
-        borderLeftColor: '#FFC542',
+        borderLeftColor: '#FFF200',
         borderLeftWidth: 2,
         paddingLeft: 16,
         marginLeft: 16,

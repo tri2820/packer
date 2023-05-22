@@ -109,10 +109,10 @@ function PostHeader(props: any) {
                                 <Ionicons
                                     name={bookmarked ? "bookmark" : "bookmark-outline"}
                                     size={18}
-                                    color={bookmarked ? '#FFC542' : '#5c5c5c'}
+                                    color={bookmarked ? '#FFF200' : '#5c5c5c'}
                                 />
                                 <Text style={{
-                                    color: bookmarked ? '#FFC542' : '#737373',
+                                    color: bookmarked ? '#FFF200' : '#737373',
                                     marginLeft: 4
                                 }}>{props.user ? (bookmarked ? 'Bookmarked' : 'Bookmark') : 'Sign in to bookmark'}</Text>
 

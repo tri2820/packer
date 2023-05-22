@@ -61,7 +61,6 @@ return mix(color, half4(0.0, 0.0, 0.0, color.a), dot);
 export default function Slide(props: any) {
 
     const image = 'https://imgur.com/QpDXQe5.png';
-    if (props.activeSlideIndex == 0) return <View style={{ width: constants.width }} />
     return <View style={{
         width: constants.width,
         // backgroundColor: randomColor(),
@@ -69,22 +68,25 @@ export default function Slide(props: any) {
         // height: '100%',
         // paddingBottom: 54
     }}>
-        <Pressable
-            onPress={() => {
-                props.showImageViewer(image)
-            }}>
-            <Animated.Image
-                style={{
-                    // backgroundColor: 'red',
-                    width: constants.width,
-                    height: props.height
-                }}
-                source={{
-                    uri: image
-                }}
-                resizeMode={props.height < constants.width ? 'contain' : 'cover'}
-            />
-        </Pressable>
+        {props.activeSlideIndex > 0 &&
+            <Pressable
+                onPress={() => {
+                    props.showImageViewer(image)
+                }}>
+
+                <Animated.Image
+                    style={{
+                        // backgroundColor: 'red',
+                        width: constants.width,
+                        height: props.height
+                    }}
+                    source={{
+                        uri: image
+                    }}
+                    resizeMode={props.height < constants.width ? 'contain' : 'cover'}
+                />
+            </Pressable>
+        }
 
         <View style={{
             position: 'absolute',
