@@ -109,7 +109,8 @@ export default function Slide(props: any) {
             <Text style={{
                 color: 'white',
             }}>
-                {props.slide.content}
+                Similar article
+                {/* {props.slide.content} */}
             </Text>
         </View>
 

@@ -129,7 +129,9 @@ export default function FirstSlide(props: any) {
                         </View>
 
 
-                        <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
+                        <MemoKeyTakeaways content={
+                            props.post.logic.jottings ?? props.post.maintext.slice(0, 80).replace('\n', ' ') + '...'
+                        } />
                         {/* <CategoryText authors={props.post.authors} /> */}
                     </View>
 

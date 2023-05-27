@@ -168,7 +168,9 @@ function Main(props: any) {
                 navProps={props.navProps}
                 isSinglePost
                 mode={mode}
-                height={isSinglePost ? safeHeight - minBarHeight : safeHeight}
+                height={isSinglePost ? safeHeight
+                  // - minBarHeight 
+                  : safeHeight}
                 post={props.navProps.route.params?.singlePost}
                 shouldActive={true}
                 scrolledOn={true}
@@ -194,7 +196,7 @@ function Main(props: any) {
               />
           }
         </View>
-        {
+        {/* {
           isSinglePost && <MemoBar
             isSinglePost={isSinglePost}
             navProps={props.navProps}
@@ -219,7 +221,7 @@ function Main(props: any) {
             safeHeight={safeHeight}
           // wallHeight={wallHeight}
           />
-        }
+        } */}
       </Animated.View>
       {/* </GestureDetector>
       </GestureHandlerRootView> */}

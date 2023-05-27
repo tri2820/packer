@@ -115,7 +115,9 @@ function ListHeader(props: any) {
             <View style={{
                 paddingVertical: 8
             }}>
-                <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
+                <MemoKeyTakeaways content={
+                    props.post.logic.jottings ?? props.post.maintext.slice(0, 80).replace('\n', ' ') + '...'
+                } />
             </View>
         </View>
         {

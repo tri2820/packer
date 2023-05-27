@@ -38,12 +38,14 @@ function KeyTakeaways(props: any) {
         // backgroundColor: 'red'
     }}>
         <Text style={{
-            color: '#b3b3b3',
+            color: '#8f8f8f',
             fontSize: scaledown(14),
             lineHeight: scaledown(18),
             fontFamily: 'Domine_500Medium'
         }}>
-            {props.content.slice(0, 80).replace('\n', ' ')}
+            {
+                props.content
+            }
             {/* Chichim Shrine is located in Gerudo Desert. Guide for location, puzzles, and rewards. Interactive map available. */}
         </Text>
         {/* <MarkdownView

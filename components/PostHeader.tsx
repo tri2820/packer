@@ -82,7 +82,7 @@ function PostHeader(props: any) {
 
                     <Text style={styles.title}>
                         {
-                            title(props.post)
+                            props.post.logic.title ?? props.post.title
                         }
                     </Text>
 
