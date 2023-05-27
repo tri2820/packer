@@ -64,7 +64,7 @@ export default function Slide(props: any) {
         .storage
         .from('public')
         .getPublicUrl(props.slide.image_id).data?.publicUrl
-    console.log('imageUrl', imageUrl)
+    // console.log('imageUrl', imageUrl)
 
 
 
