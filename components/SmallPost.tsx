@@ -1,42 +1,21 @@
 import * as React from 'react';
 
-import { Octicons } from '@expo/vector-icons';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, ImageBackground, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { RefreshControl } from 'react-native-gesture-handler';
+import { memo, useEffect, useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getPastelColor, isVideoPost, openLink, randomColor, requestComments, sharedAsyncState, sourceName, toUIList, toggleBookmark } from '../utils';
-import { MemoComment } from './Comment';
-import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
-import { MemoLoadCommentButton } from './LoadCommentButton';
-import PostHeader from './PostHeader';
-import VideoPlayer, { MemoVideoPlayer } from './VideoPlayer';
+import { constants, openLink, sharedAsyncState, toggleBookmark } from '../utils';
 // import { Image } from 'expo-image';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import * as Haptics from 'expo-haptics';
-import * as WebBrowser from 'expo-web-browser';
-import { WebBrowserPresentationStyle } from 'expo-web-browser';
-import Animated, { FadeIn, FadeOut, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import ImageView from "react-native-image-viewing";
+import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { hookListener, unhookListener } from '../utils';
 import AnonAvatar from './AnonAvatar';
-import WebView from 'react-native-webview';
 import Slide from './Slide';
-import ImageView from "react-native-image-viewing";
-import {
-    Canvas,
-    Rect,
-    LinearGradient,
-    Skia,
-    Shader,
-    vec
-} from "@shopify/react-native-skia";
 
 
-import moment from 'moment';
-import FirstSlide, { MemoFirstSlide } from './FirstSlide';
 import { supabaseClient } from '../supabaseClient';
+import { MemoFirstSlide } from './FirstSlide';
 
 
 function AnonAvatarList(props: any) {
@@ -260,7 +239,7 @@ function ListHeader(props: any) {
                 />
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => {
+            {/* <TouchableOpacity onPress={() => {
                 props.navProps.navigation.push('SinglePost', {
                     singlePost: props.post
                 })
@@ -269,14 +248,9 @@ function ListHeader(props: any) {
                 flexDirection: 'row',
                 alignItems: 'center'
             }}>
-                {/* <AnonAvatarList author_names={
-                    Array.from(
-                        props.comments.reduce((set: Set<any>, c: any) => set.add(c.author_name), new Set<string>())
-                    )
-                } /> */}
                 <Ionicons name="chatbox-outline" size={20} color={activeSlideIndex > 0 ? 'white' : '#5c5c5c'} />
                 <Text style={{ color: activeSlideIndex > 0 ? 'white' : '#5c5c5c', marginLeft: 4, fontWeight: '300' }}>{sharedAsyncState[`count/${props.post.id}`] ?? 0}</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
 
         {

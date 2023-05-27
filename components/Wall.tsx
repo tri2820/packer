@@ -29,8 +29,11 @@ const analytics = async (user_id: any, post_id: any) => {
 }
 import { useHeaderHeight } from '@react-navigation/elements';
 
+import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
+
 function Wall(props: any) {
     const headerHeight = useHeaderHeight();
+    const bottomHeight = useBottomTabBarHeight();
     const [viewableMap, setViewableMap] = useState<any>({})
     // const [scrolling, setScrolling] = useState<boolean>(false)
     // console.log('debug props', props.posts)
@@ -128,7 +131,8 @@ function Wall(props: any) {
                 onViewableItemsChanged={handleViewableItemsChanged}
                 viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
                 contentInset={{
-                    top: headerHeight
+                    top: headerHeight,
+                    bottom: bottomHeight
                 }}
                 // windowSize={2}
                 initialNumToRender={6}

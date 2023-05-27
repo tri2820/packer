@@ -64,6 +64,7 @@ export default function Slide(props: any) {
         .storage
         .from('public')
         .getPublicUrl(props.slide.image_id).data?.publicUrl
+    console.log('imageUrl', imageUrl)
 
 
 
@@ -81,7 +82,7 @@ export default function Slide(props: any) {
         }}
     >
 
-        {props.activeSlideIndex > 0 &&
+        {(props.activeSlideIndex > 0 || props.index == 1) &&
             <Animated.Image
                 style={{
                     // backgroundColor: 'red',
