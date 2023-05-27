@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { Platform, Pressable, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native';
 import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, getSourceName, hookListener, isVideoPost, normalizedHostname, sharedAsyncState, sourceName, title, toggleBookmark, unhookListener } from '../utils';
+import { constants, getSourceName, hookListener, isVideoPost, normalizedHostname, scaledown, sharedAsyncState, sourceName, title, toggleBookmark, unhookListener } from '../utils';
 import { MemoContentMenu } from './ReportMenu';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -179,9 +179,10 @@ const styles = StyleSheet.create({
     title: {
         color: 'white',
         // fontWeight: 'bold',
-        fontSize: 16,
+        fontSize: scaledown(20),
         // marginBottom: 4,
-        fontFamily: 'Domine_700Bold'
+        fontFamily: 'Rubik_700Bold',
+        // fontFamily: 'Domine_700Bold'
     },
     triggerOuterWrapper: {
         // backgroundColor: 'red',

@@ -106,52 +106,58 @@ export default function FirstSlide(props: any) {
                             }</Text>
                     </Text>
                 </View>
+
                 <View style={{
-                    // flex: 1,
                     // backgroundColor: 'blue'
-                    // flexDirection: 'row'
+                    flexDirection: 'row'
                 }}>
                     <View style={{
-                        paddingBottom: 8
+                        flex: 1
                     }}>
-                        <PostHeader
-                            // scrolling={props.scrolling}
-                            user={props.user}
-                            isSinglePost={props.isSinglePost}
-                            openLink={props.openLink}
-                            post={props.post}
-                            mode={props.mode}
-                            navProps={props.navProps}
-                        />
+                        <View style={{
+                            paddingBottom: 8,
+                        }}>
+                            <PostHeader
+                                // scrolling={props.scrolling}
+                                user={props.user}
+                                isSinglePost={props.isSinglePost}
+                                openLink={props.openLink}
+                                post={props.post}
+                                mode={props.mode}
+                                navProps={props.navProps}
+                            />
+                        </View>
+
+
+                        <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
+                        {/* <CategoryText authors={props.post.authors} /> */}
                     </View>
 
-                    <MemoKeyTakeaways ners={props.post.ners} content={props.post.maintext} />
-                    {/* <CategoryText authors={props.post.authors} /> */}
+                    {props.imageLoaded && <Pressable onPress={() => {
+                        props.setImageViewerIndex(0);
+                        props.setImageViewerIsVisible(true);
+                    }}
+                        style={{
+                            marginLeft: 6,
+                            paddingTop: 4
+                        }}>
+                        <Image
+                            style={{
+                                backgroundColor: '#f1f1f1',
+                                borderRadius: 2,
+                                borderWidth: StyleSheet.hairlineWidth,
+                                borderColor: '#222324',
+                                width: imageWidth,
+                                height: imageHeight
+                            }}
+                            source={{
+                                uri: props.post.image_url
+                            }}
+                        />
+                    </Pressable>}
                 </View>
 
             </View>
-
-            {props.imageLoaded && <Pressable onPress={() => {
-                props.setImageViewerIndex(0);
-                props.setImageViewerIsVisible(true);
-            }}
-                style={{
-                    marginLeft: 12,
-                }}>
-                <Image
-                    style={{
-                        backgroundColor: 'white',
-                        borderRadius: 2,
-                        borderWidth: StyleSheet.hairlineWidth,
-                        borderColor: '#222324',
-                        width: imageWidth,
-                        height: imageHeight
-                    }}
-                    source={{
-                        uri: props.post.image_url
-                    }}
-                />
-            </Pressable>}
 
         </View>
 

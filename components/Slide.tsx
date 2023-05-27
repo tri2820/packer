@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import * as React from 'react';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View, Pressable, Platform } from 'react-native';
 import Animated, { FadeIn, FadeOut, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -60,32 +60,39 @@ return mix(color, half4(0.0, 0.0, 0.0, color.a), dot);
 
 export default function Slide(props: any) {
 
-    const image = 'https://imgur.com/QpDXQe5.png';
-    return <View style={{
-        width: constants.width,
-        // backgroundColor: randomColor(),
-        flex: 1,
-        // height: '100%',
-        // paddingBottom: 54
-    }}>
-        {props.activeSlideIndex > 0 &&
-            <Pressable
-                onPress={() => {
-                    props.showImageViewer(image)
-                }}>
+    const imageUrl = supabaseClient
+        .storage
+        .from('public')
+        .getPublicUrl(props.slide.image_id).data?.publicUrl
 
-                <Animated.Image
-                    style={{
-                        // backgroundColor: 'red',
-                        width: constants.width,
-                        height: props.height
-                    }}
-                    source={{
-                        uri: image
-                    }}
-                    resizeMode={props.height < constants.width ? 'contain' : 'cover'}
-                />
-            </Pressable>
+
+
+    // const image = 'https://djhuyrpeqcbvqbhfnibz.supabase.co/storage/v1/object/public/public/a6f2299b-3aec-4ea0-bfc2-081a00210f78';
+    return <Pressable
+        onPress={() => {
+            props.showImageViewer(imageUrl)
+        }}
+        style={{
+            width: constants.width,
+            // backgroundColor: randomColor(),
+            flex: 1,
+            // height: '100%',
+            // paddingBottom: 54
+        }}
+    >
+
+        {props.activeSlideIndex > 0 &&
+            <Animated.Image
+                style={{
+                    // backgroundColor: 'red',
+                    width: constants.width,
+                    height: props.height
+                }}
+                source={{
+                    uri: imageUrl
+                }}
+                resizeMode={props.height < constants.width ? 'contain' : 'cover'}
+            />
         }
 
         <View style={{
@@ -101,10 +108,10 @@ export default function Slide(props: any) {
             <Text style={{
                 color: 'white',
             }}>
-                Since layoffs, Vox might have been focusing on its core business.
+                {props.slide.content}
             </Text>
         </View>
 
-    </View>
+    </Pressable>
 
 }

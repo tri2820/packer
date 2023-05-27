@@ -36,6 +36,7 @@ import {
 
 import moment from 'moment';
 import FirstSlide, { MemoFirstSlide } from './FirstSlide';
+import { supabaseClient } from '../supabaseClient';
 
 
 function AnonAvatarList(props: any) {
@@ -88,12 +89,20 @@ function ListHeader(props: any) {
 
     const imageSources: any[] = [];
     if (props.post.image_url) imageSources.push({ uri: props.post.image_url });
-    imageSources.push({ uri: 'https://imgur.com/QpDXQe5.png' });
+    if (props.post.slides) imageSources.push(...props.post.slides.map((s: any) => ({
+        uri:
+            supabaseClient
+                .storage
+                .from('public')
+                .getPublicUrl(s.image_id)
+                .data?.publicUrl
+    })))
+
 
     const renderItem = ({ item, index }: any) => {
         // return <></>
         // console.log('debug props.post.ners', props.post)
-        if (item.type == 'post_with_attachment')
+        if (item.type == 'post')
             return <MemoFirstSlide
                 imageLoaded={props.imageLoaded}
                 height={height}
@@ -110,6 +119,7 @@ function ListHeader(props: any) {
             />
 
         return <Slide
+            slide={item}
             height={height}
             index={index}
             activeSlideIndex={activeSlideIndex}
@@ -137,14 +147,8 @@ function ListHeader(props: any) {
         setActiveSlideIndex(Math.floor(offset / constants.width) + 1);
     }
 
-    const data = []
-    if (props.post.image_url != '' || isVideoPost(props.post.url)) {
-        data.push({ type: 'post_with_attachment' })
-        data.push({ type: 'keytakeaways' })
-    } else {
-        data.push({ type: 'post' })
-    }
-    // if (props.post.outlook != '') data.push({ type: 'outlook' })
+    const data = [{ type: 'post' }];
+    if (props.post.slides) data.push(...props.post.slides)
 
     const [height, setHeight] = useState(0);
 
@@ -184,6 +188,7 @@ function ListHeader(props: any) {
                 <Text style={{
                     color: 'white',
                     fontSize: 18,
+                    // fontFamily: 'Rubik_500Medium'
                     fontFamily: 'Domine_700Bold',
                     marginBottom: 8
                 }}>{props.post.title}</Text>}

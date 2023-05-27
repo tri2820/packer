@@ -233,7 +233,10 @@ const rp = async (sharedAsyncState: any, setData: any) => {
   const offset = sharedAsyncState['offset/main'] ?? 0;
   sharedAsyncState['offset/main'] = offset + 20;
 
-  const { data, error } = await supabaseClient.rpc('get_articles')
+  const { data, error } =
+    // await supabaseClient.from('posts').select()
+    await supabaseClient.rpc('get_posts');
+  console.log("get_posts", data, error)
   if (error) {
     console.error('error get post', error)
     return;
@@ -454,7 +457,7 @@ function App() {
     })();
 
     (async () => {
-      const { data, error } = await supabaseClient.rpc('get_bookmarked_articles');
+      const { data, error } = await supabaseClient.rpc('get_bookmarked_posts');
       if (error) {
         console.warn('Cannot load bookmarks', error);
         return;
