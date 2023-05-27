@@ -1,15 +1,12 @@
 import * as React from 'react';
 
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { memo, useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-// import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, openLink, sharedAsyncState, toggleBookmark } from '../utils';
-// import { Image } from 'expo-image';
-import Ionicons from '@expo/vector-icons/Ionicons';
 import ImageView from "react-native-image-viewing";
 import Animated from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { hookListener, unhookListener } from '../utils';
+import { constants, hookListener, openLink, sharedAsyncState, toggleBookmark, unhookListener } from '../utils';
 import AnonAvatar from './AnonAvatar';
 import Slide from './Slide';
 

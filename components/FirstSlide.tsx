@@ -1,15 +1,14 @@
 import * as React from 'react';
 
-import { memo, useEffect, useState } from 'react';
+import { memo } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
-// import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
-import { constants, sharedAsyncState, sourceName } from '../utils';
+import { constants, sourceName } from '../utils';
 import { MemoKeyTakeaways } from './KeyTakeaways';
 import PostHeader from './PostHeader';
-// import { Image } from 'expo-image';
 
 
-import { Canvas, Fill, ImageShader, Shader, Skia, useImage } from '@shopify/react-native-skia';
+
+import { Skia } from '@shopify/react-native-skia';
 import moment from 'moment';
 
 const source = Skia.RuntimeEffect.Make(`

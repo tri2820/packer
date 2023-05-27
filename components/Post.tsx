@@ -1,25 +1,22 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { FlatList, RefreshControl } from 'react-native-gesture-handler';
 // import Animated, { FadeIn, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { Canvas, Image, useImage } from '@shopify/react-native-skia';
+import * as Haptics from 'expo-haptics';
+import moment from 'moment';
+import Animated from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { constants, hookListener, noComment, openLink, requestComments, sharedAsyncState, sourceName, toUIList, unhookListener } from '../utils';
 import { MemoComment } from './Comment';
-import KeyTakeaways, { MemoKeyTakeaways } from './KeyTakeaways';
+import { MemoKeyTakeaways } from './KeyTakeaways';
 import { MemoLoadCommentButton } from './LoadCommentButton';
 import { MemoMoreDiscussionsButton } from './MoreDiscussionsButton';
 import PostHeader from './PostHeader';
 import VideoPlayer from './VideoPlayer';
-// import { Image } from 'expo-image';
-import Ionicons from '@expo/vector-icons/Ionicons';
-import * as Haptics from 'expo-haptics';
-import * as WebBrowser from 'expo-web-browser';
-import { WebBrowserPresentationStyle } from 'expo-web-browser';
-import Animated from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import moment from 'moment';
-import { Canvas, useImage, Image } from '@shopify/react-native-skia';
 
 
 

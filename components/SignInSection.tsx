@@ -3,13 +3,10 @@ import * as Haptics from 'expo-haptics';
 import { LinearGradient } from 'expo-linear-gradient';
 import * as React from 'react';
 import { memo } from 'react';
-import { StyleSheet, ImageBackground, Linking, Text, TouchableOpacity, View, Platform, Pressable } from 'react-native';
-import Animated, { FadeOut, useAnimatedStyle } from 'react-native-reanimated';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { ImageBackground, Linking, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeOut } from 'react-native-reanimated';
 import { signIn } from '../auth';
-import { constants, scaledown, scaleup } from '../utils';
-import { Image } from 'expo-image';
-import { Video, ResizeMode } from 'expo-av';
+import { scaledown } from '../utils';
 
 
 function SignInSection(props: any) {
