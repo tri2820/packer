@@ -9,12 +9,12 @@ import { supabaseClient } from '../supabaseClient';
 import { constants, getSourceName, hookListener, isVideoPost, randomNickName, sharedAsyncState, sourceName, title, unhookListener } from '../utils';
 import * as Haptics from 'expo-haptics';
 import { useIsFocused } from '@react-navigation/native';
-import { Image } from 'expo-image';
 import * as Application from 'expo-application';
 import { FlatList } from 'react-native-gesture-handler';
 import { useBottomTabBarHeight } from '@react-navigation/bottom-tabs';
 import SignInSection from './SignInSection';
 import { Canvas, Group, ImageSVG, fitbox, rect, useSVG } from '@shopify/react-native-skia';
+import ImageWithPlaceholder from './ImageWithPlaceholder';
 
 
 function Settings(props: any) {
@@ -75,6 +75,7 @@ function Settings(props: any) {
             },
         ]);
 
+
     const renderItem = ({ item }: any) =>
         <TouchableOpacity onPress={item ? () => {
             props.navProps.navigation.push('SinglePost', {
@@ -98,9 +99,10 @@ function Settings(props: any) {
                 flexDirection: 'row',
                 // paddingHorizontal: 8,
             }}>
-                {item.image_url && <Image
-                    style={{
-                        alignSelf: 'center',
+                {item.image_url && <ImageWithPlaceholder
+                    url={item.image_url}
+                    placeholder={require('../assets/empty.jpg')}
+                    imageStyle={{
                         width: 60,
                         height: 60,
                         borderRadius: 2,
@@ -108,12 +110,9 @@ function Settings(props: any) {
                         borderColor: '#222324',
                         marginRight: 12,
                     }}
-                    source={{
-                        uri: item.image_url
-                    }}
-                    placeholder={require('../assets/empty.jpg')}
-                    placeholderContentFit='cover'
-                />}
+                />
+
+                }
                 <View style={{
                     flex: 1,
                     flexDirection: 'row',
