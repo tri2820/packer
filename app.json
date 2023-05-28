@@ -3,7 +3,7 @@
     "name": "Clue",
     "slug": "packer",
     "scheme": "clue",
-    "version": "1.0.23",
+    "version": "1.0.24",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
